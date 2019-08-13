@@ -44,43 +44,45 @@ public class MySQLAnalyze extends Analyze {
      */
     public String getFieldType(String columnType, StringBuffer packageName) {
         columnType = columnType.toLowerCase();
-        if (columnType.equals("varchar") || columnType.equals("nvarchar")
-                || columnType.equals("char")
-                || columnType.equals("tinytext")
-                || columnType.equals("text")
-                || columnType.equals("mediumtext")
-                || columnType.equals("longtext")
-                ) {
-            return "String";
-        } else if (columnType.equals("tinyblob")
-                ||columnType.equals("blob")
-                ||columnType.equals("mediumblob")
-                ||columnType.equals("longblob")) {
-            return "byte[]";
-        } else if (columnType.equals("datetime")
-                ||columnType.equals("date")
-                ||columnType.equals("timestamp")
-                ||columnType.equals("time")
-                ||columnType.equals("year")) {
-            packageName.append("import java.util.Date;");
-            return "Date";
-        } else if (columnType.equals("bit")
-                ||columnType.equals("int")
-                ||columnType.equals("tinyint")
-                ||columnType.equals("smallint")
-                ||columnType.equals("bool")
-                ||columnType.equals("mediumint")
-                ||columnType.equals("bigint")
-                ) {
-            return "Integer";
-        } else if (columnType.equals("float")) {
-            return "Float";
-        } else if (columnType.equals("double")) {
-            return "Double";
-        } else if (columnType.equals("decimal")) {
-            packageName.append("import java.math.BigDecimal;");
-            return "BigDecimal";
+        switch (columnType){
+            case "varchar":
+            case "nvarchar":
+            case "char":
+            case "tinytext":
+            case "text":
+            case "mediumtext":
+            case "longtext":
+                return "String";
+            case "tinyblob":
+            case "blob":
+            case "mediumblob":
+            case "longblob":
+                return "byte[]";
+            case "datetime":
+            case "date":
+            case "timestamp":
+            case "time":
+            case "year":
+                packageName.append("import java.util.Date;");
+                return "Date";
+            case "bit":
+            case "int":
+            case "tinyint":
+            case "smallint":
+            case "bool":
+            case "mediumint":
+                return "Integer";
+            case "bigint":
+                return "Long";
+            case "float":
+                return "Float";
+            case "double":
+                return "Double";
+            case "decimal":
+                packageName.append("import java.math.BigDecimal;");
+                return "BigDecimal";
         }
+
         return "ErrorType";
     }
 }
