@@ -7,6 +7,9 @@ import me.qping.utils.database.crud.impl.MySQLDataBaseType;
 import me.qping.utils.database.crud.impl.OracleDataBaseType;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 /**
  * @ClassName DataBase
@@ -36,9 +39,15 @@ public class DataBaseBuilder {
     }
 
     public DataBaseBuilder oracle(String host, String port, String serviceName, String username, String password){
-        this.dataBaseType = new OracleDataBaseType(host, port, serviceName, username, password);
+        this.dataBaseType = new OracleDataBaseType(host, port, true, serviceName, username, password);
         return this;
     }
+
+    public DataBaseBuilder oracle(String host, String port, boolean useServiceName, String database, String username, String password){
+        this.dataBaseType = new OracleDataBaseType(host, port, useServiceName, database, username, password);
+        return this;
+    }
+
     public DataBaseBuilder mssql(String host, String port, String database, String username, String password){
         this.dataBaseType = new MSSQLDataBaseType(host, port, database, username, password);
         return this;
@@ -52,22 +61,18 @@ public class DataBaseBuilder {
         return this;
     }
 
-    public DataBaseBuilder initialSize(int initialSize){
+    /**
+     * 连接池设置
+     * @param initialSize
+     * @param minIdle
+     * @param maxActive
+     * @param maxWait
+     * @return
+     */
+    public DataBaseBuilder pool(int initialSize, int minIdle, int maxActive, int maxWait){
         this.initialSize = initialSize;
-        return this;
-    }
-
-    public DataBaseBuilder minIdle(int minIdle){
         this.minIdle = minIdle;
-        return this;
-    }
-
-    public DataBaseBuilder maxActive(int maxActive){
         this.maxActive = maxActive;
-        return this;
-    }
-
-    public DataBaseBuilder maxWait(int maxWait){
         this.maxWait = maxWait;
         return this;
     }
@@ -90,6 +95,11 @@ public class DataBaseBuilder {
         ds.setMaxPoolPreparedStatementPerConnectionSize(20);
         ds.setValidationQuery(dataBaseType.getValidQuery());
         return ds;
+    }
+
+    public Connection createConnection() throws SQLException {
+        Connection connection = DriverManager.getConnection(dataBaseType.getUrl(), dataBaseType.getUsername(), dataBaseType.getPassword());
+        return connection;
     }
 
     public DataBase build(){

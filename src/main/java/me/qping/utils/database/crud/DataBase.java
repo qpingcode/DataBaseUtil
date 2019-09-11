@@ -21,6 +21,11 @@ public class DataBase {
 
     DataSource dataSource;
 
+
+    public Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
+    }
+
     public static DataBaseBuilder builder() {
         DataBaseBuilder builder = new DataBaseBuilder();
         return builder;
@@ -44,7 +49,7 @@ public class DataBase {
     public Map<String, Object> queryOne(String sql, Object... paramters) throws Exception {
         Map<String, Object> result = new HashMap<>();
 
-        try(Connection connection = dataSource.getConnection()){
+        try(Connection connection = getConnection()){
             PreparedStatement ps = connection.prepareStatement(sql);
             prepareParameters(ps, paramters);
 
@@ -75,7 +80,7 @@ public class DataBase {
     public List<Map<String, Object>> queryList(String sql, Object... paramters) {
         List<Map<String, Object>> result = new ArrayList<>();
 
-        try(Connection connection = dataSource.getConnection()){
+        try(Connection connection = getConnection()){
             PreparedStatement ps = connection.prepareStatement(sql);
             prepareParameters(ps, paramters);
 
@@ -100,7 +105,7 @@ public class DataBase {
     }
 
     public int insert(String sql, Object...paramters){
-        try(Connection connection = dataSource.getConnection()){
+        try(Connection connection = getConnection()){
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             prepareParameters(ps, paramters);
             ps.executeUpdate();
@@ -117,7 +122,7 @@ public class DataBase {
     }
 
     public int update(String sql, Object... paramters) {
-        try(Connection connection = dataSource.getConnection()){
+        try(Connection connection = getConnection()){
             PreparedStatement ps = connection.prepareStatement(sql);
             prepareParameters(ps, paramters);
             return ps.executeUpdate();
@@ -128,7 +133,7 @@ public class DataBase {
     }
 
     public void updateBatch(String sql, List<Object[]> data) {
-        try(Connection connection = dataSource.getConnection()){
+        try(Connection connection = getConnection()){
             connection.setAutoCommit(false);
             PreparedStatement ps = connection.prepareStatement(sql);
 

@@ -2,10 +2,22 @@
 封装 jdbc 的的增删改查，以及获取表的元数据
 
 # CRUD (增删改查)
+第一步：在 pom.xml 中加入依赖
 
-第一步：初始化DataBase对象，配置数据库连接信息
+``` xml
+
+ <dependency>
+    <groupId>me.qping.utils</groupId>
+     <artifactId>DataBaseUtil</artifactId>
+     <version>1.0-SNAPSHOT</version>
+ </dependency>
+ 
+```
+
+第二步：初始化DataBase对象，配置数据库连接信息
 
 ``` java
+
 // mysql
 DataBase dataBase = DataBase
     .builder()
@@ -13,9 +25,14 @@ DataBase dataBase = DataBase
     .build();
     
 // oracle
- DataBase dataBase = DataBase
+DataBase dataBase = DataBase
     .builder()
     .oracle("locahost", "1521", "oracle_service_name", "username", "password")
+    .build();  
+    
+DataBase dataBase = DataBase
+    .builder()
+    .oracle("locahost", "1521", fasle, "oracle_sid", "username", "password")
     .build();  
     
 // sqlserver
@@ -25,7 +42,7 @@ DataBase dataBase = DataBase
     .build(); 
 ```
 
-第二步：调用增删改查
+第三步：调用增删改查
 
 查询：
 ``` java

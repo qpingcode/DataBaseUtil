@@ -21,15 +21,17 @@ public class OracleDataBaseType implements DataBaseConnectType {
 
     String host;
     String port;
-    String serviceName;
+    String database;
     String username;
     String password;
 
+    boolean useServiceName;
 
-    public OracleDataBaseType(String host, String port, String serviceName, String username, String password) {
+    public OracleDataBaseType(String host, String port, boolean useServiceName, String database, String username, String password) {
+        this.useServiceName = useServiceName;
         this.host = host;
         this.port = port == null ? "1521" : port;
-        this.serviceName = serviceName;
+        this.database = database;
         this.username = username;
         this.password = password;
     }
@@ -41,9 +43,17 @@ public class OracleDataBaseType implements DataBaseConnectType {
     }
 
     public String getUrl(){
-        return SERVICE_NAME_URL.replaceAll("\\$\\{host\\}", host)
-                .replaceAll("\\$\\{port\\}", port)
-                .replaceAll("\\$\\{serviceName\\}", serviceName);
+        if(useServiceName){
+            return SERVICE_NAME_URL.replaceAll("\\$\\{host\\}", host)
+                    .replaceAll("\\$\\{port\\}", port)
+                    .replaceAll("\\$\\{serviceName\\}", database);
+        }else{
+            return SID_URL.replaceAll("\\$\\{host\\}", host)
+                    .replaceAll("\\$\\{port\\}", port)
+                    .replaceAll("\\$\\{sid\\}", database);
+        }
+
+
     }
 
     @Override

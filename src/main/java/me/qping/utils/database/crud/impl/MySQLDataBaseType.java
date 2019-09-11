@@ -13,7 +13,7 @@ import me.qping.utils.database.crud.DataBaseConnectType;
 @Data
 public class MySQLDataBaseType implements DataBaseConnectType {
 
-    public static final String URL = "jdbc:mysql://${host}:${port}/${database}?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false&serverTimezone=Asia/Shanghai";;
+    public static final String URL = "jdbc:mysql://${host}:${port}/${database}?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true";;
     String driver = "com.mysql.cj.jdbc.Driver";
     String validQuery = "select 1 from dual";
 
