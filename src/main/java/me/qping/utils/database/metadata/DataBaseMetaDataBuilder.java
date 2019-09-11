@@ -34,7 +34,7 @@ public class DataBaseMetaDataBuilder extends DataBase {
     }
 
     public DataBaseMetaDataBuilder oracle(String host, String port, String serviceName, String username, String password){
-        this.dataBaseType = new OracleDataBaseType(host, port, serviceName, username, password);
+        this.dataBaseType = new OracleDataBaseType(host, port, true, serviceName, username, password);
         return this;
     }
     public DataBaseMetaDataBuilder mssql(String host, String port, String database, String username, String password){
