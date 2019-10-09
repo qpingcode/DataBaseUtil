@@ -42,7 +42,23 @@ public class DataBaseMetaDataBuilder extends DataBase {
         return this;
     }
 
+    public DataBaseMetaDataBuilder mssql(String host, String port, String database, String username, String password, String schema){
+        this.dataBaseType = new MSSQLDataBaseType(host, port, database, username, password, schema);
+        return this;
+    }
 
+    public DataBaseMetaDataBuilder smartInit(String url, String username, String password){
+        if(url.indexOf("sqlserver") > -1){
+            this.dataBaseType = new MSSQLDataBaseType(url, username, password);
+        }else if(url.indexOf("mysql") > -1){
+            this.dataBaseType = new MySQLDataBaseType(url, username, password);
+        }else if(url.indexOf("oracle") > -1){
+            this.dataBaseType = new OracleDataBaseType(url, username, password);
+        }else{
+            throw new RuntimeException("无法解析url");
+        }
+        return this;
+    }
 
     public DataBaseMetaData build(){
         DataBaseMetaData metaData = new DataBaseMetaData();

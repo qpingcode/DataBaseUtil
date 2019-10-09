@@ -8,7 +8,7 @@ package me.qping.utils.database.crud;
  * @Version 1.0
  **/
 public interface DataBaseConnectType {
-    public String getType();
+    public String getDataBaseType();
     public String getDriver();
     public String getUrl();
     public String getUsername();

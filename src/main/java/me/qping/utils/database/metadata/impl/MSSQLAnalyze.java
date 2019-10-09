@@ -13,12 +13,17 @@ import java.util.Properties;
  **/
 public class MSSQLAnalyze extends Analyze {
 
+
+    /**
+     * sqlserver拿不到注释
+     * @param connectType
+     * @return
+     */
     @Override
     public Properties getConnectionProperties(DataBaseConnectType connectType) {
         Properties props = new Properties();
         props.setProperty("user", connectType.getUsername());
         props.setProperty("password", connectType.getPassword());
-        props.setProperty("remarksReporting", "true");
         return props;
     }
 
@@ -79,6 +84,9 @@ public class MSSQLAnalyze extends Analyze {
             case "numeric":
                 packageName.append("import java.math.BigDecimal;");
                 return "BigDecimal";
+                
+            case "numeric() identity":
+                return "Integer";
 
             case "real":
                 return "Float";

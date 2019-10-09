@@ -23,7 +23,7 @@ public class DataBaseBuilder {
 
     DataBaseConnectType dataBaseType;
 
-    int initialSize = 5;
+    int initialSize = 1;
     int minIdle = 1;
     int maxActive = 20;
     int maxWait = 60000;
@@ -50,6 +50,24 @@ public class DataBaseBuilder {
 
     public DataBaseBuilder mssql(String host, String port, String database, String username, String password){
         this.dataBaseType = new MSSQLDataBaseType(host, port, database, username, password);
+        return this;
+    }
+
+    public DataBaseBuilder mssql(String host, String port, String database, String username, String password, String schema){
+        this.dataBaseType = new MSSQLDataBaseType(host, port, database, username, password, schema);
+        return this;
+    }
+
+    public DataBaseBuilder smartInit(String url, String username, String password){
+        if(url.indexOf("sqlserver") > -1){
+            this.dataBaseType = new MSSQLDataBaseType(url, username, password);
+        }else if(url.indexOf("mysql") > -1){
+            this.dataBaseType = new MySQLDataBaseType(url, username, password);
+        }else if(url.indexOf("oracle") > -1){
+            this.dataBaseType = new OracleDataBaseType(url, username, password);
+        }else{
+            throw new RuntimeException("无法解析url");
+        }
         return this;
     }
 

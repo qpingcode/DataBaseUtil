@@ -14,13 +14,14 @@ public abstract class Analyze {
 
     public abstract Properties getConnectionProperties(DataBaseConnectType connectType);
 
-
     // 数据库类型与 java 类型映射
     // https://blog.csdn.net/weixin_34195546/article/details/87611601
     public abstract String getFieldType(String columnType, StringBuffer javaPackage);
 
 
     public TableMeta analyze(DataBaseConnectType connectType, String catalog, String schema, String tableName) {
+
+        tableName = tableName.toUpperCase();
 
         try {
             Class.forName(connectType.getDriver());
@@ -49,7 +50,7 @@ public abstract class Analyze {
                         tableInfo.getString("TABLE_NAME"),
                         tableInfo.getString("TABLE_TYPE"),  // 表类型
                         tableInfo.getString("REMARKS"),     // 表注释
-                        connectType.getType()
+                        connectType.getDataBaseType()
                 );
             }
 
@@ -99,7 +100,7 @@ public abstract class Analyze {
         return null;
     }
 
-    public List<TableMeta> list(DataBaseConnectType connectType, String catalog, String schema, String type){
+    public List<TableMeta> list(DataBaseConnectType connectType, String catalog, String schema, String[] types){
         try {
             Class.forName(connectType.getDriver());
         } catch (ClassNotFoundException e) {
@@ -110,7 +111,6 @@ public abstract class Analyze {
 
 
             DatabaseMetaData metadata = connection.getMetaData();
-            String[] types = {type};
             ResultSet tableInfo = metadata.getTables(catalog, schema, "%", types);
             List<TableMeta> list = new ArrayList<>();
             while (tableInfo.next()){
@@ -120,7 +120,7 @@ public abstract class Analyze {
                         tableInfo.getString("TABLE_NAME"),
                         tableInfo.getString("TABLE_TYPE"),  // 表类型
                         tableInfo.getString("REMARKS"),     // 表注释
-                        connectType.getType()
+                        connectType.getDataBaseType()
                 );
 
                 list.add(tableMeta);
