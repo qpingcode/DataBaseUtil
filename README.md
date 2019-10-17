@@ -42,6 +42,16 @@ DataBase dataBase = DataBase
     .build(); 
 ```
 
+2019-10-17 新增通过连接串初始化的方式
+
+``` java
+//sqlserver 其他类似
+DataBase dataBase = DataBase
+    .builder()
+    .mssql("jdbc:sqlserver://localhost:1433;DatabaseName=MY_DB", "username", "password")
+    .build(); 
+```
+
 第三步：调用增删改查
 
 查询：
