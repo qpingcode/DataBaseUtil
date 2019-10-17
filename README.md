@@ -48,7 +48,7 @@ DataBase dataBase = DataBase
 //sqlserver 其他类似
 DataBase dataBase = DataBase
     .builder()
-    .mssql("jdbc:sqlserver://localhost:1433;DatabaseName=MY_DB", "username", "password")
+    .smartInit("jdbc:sqlserver://localhost:1433;DatabaseName=MY_DB", "username", "password")
     .build(); 
 ```
 
