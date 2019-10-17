@@ -3,6 +3,7 @@ package me.qping.utils.database.metadata.bean;
 import lombok.Data;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName TableMeta
@@ -12,12 +13,6 @@ import java.util.List;
  **/
 @Data
 public class TableMeta {
-
-    public static final String TYPE_MSSQL = "mssql";
-    public static final String TYPE_MYSQL = "mysql";
-    public static final String TYPE_ORACLE = "oracle";
-    public static final String TYPE_DB2 = "db2";
-    public static final String TYPE_SQLITE = "sqlite";
 
     String databaseType;
     String catalog;
@@ -43,5 +38,49 @@ public class TableMeta {
         tableMeta.setDatabaseType(databaseType);
         return tableMeta;
     }
+
+    public String createInsertSQL(){
+        return createInsertSQL(null);
+    }
+
+    public String createInsertSQL(List<String> excludeColumns){
+
+        if(excludeColumns != null){
+            excludeColumns = excludeColumns.stream().map(v -> v.toUpperCase()).collect(Collectors.toList());
+        }
+
+        StringBuffer firstPart = new StringBuffer();
+        StringBuffer secondPart = new StringBuffer();
+        for(ColumnMeta columnMeta : columns){
+
+            String columnName = columnMeta.getName().toUpperCase();
+            if(excludeColumns != null && excludeColumns.contains(columnName)){
+                continue;
+            }
+
+            firstPart.append(columnName + ",");
+            secondPart.append("?,");
+        }
+
+        if(firstPart.length() == 0){
+            throw new RuntimeException("TableMeta create sql error，column size is zero!");
+        }
+
+        StringBuffer sql = new StringBuffer();
+        sql.append("insert into ")
+                .append(name.toUpperCase())
+                .append(" ( ")
+                .append(firstPart.substring(0, firstPart.length() - 1))
+                .append(" ) ")
+                .append(" values ( ")
+                .append(secondPart.substring(0, secondPart.length() - 1))
+                .append(" ) ");
+
+        return sql.toString();
+
+    }
+
+
+
 
 }

@@ -27,6 +27,7 @@ public class DataBaseBuilder {
     int minIdle = 1;
     int maxActive = 20;
     int maxWait = 60000;
+    boolean usePool = false;
 
     public DataBaseBuilder databaseType(DataBaseConnectType dataBaseType){
         this.dataBaseType = dataBaseType;
@@ -71,14 +72,6 @@ public class DataBaseBuilder {
         return this;
     }
 
-    public DataBaseBuilder dev(){
-        this.initialSize = 1;
-        this.minIdle = 1;
-        this.maxActive = 5;
-        this.maxWait = 10000;
-        return this;
-    }
-
     /**
      * 连接池设置
      * @param initialSize
@@ -92,6 +85,7 @@ public class DataBaseBuilder {
         this.minIdle = minIdle;
         this.maxActive = maxActive;
         this.maxWait = maxWait;
+        this.usePool = true;
         return this;
     }
 
@@ -122,11 +116,17 @@ public class DataBaseBuilder {
 
     public DataBase build(){
         try {
-
             Class.forName(dataBaseType.getDriver());
+
             DataBase dataBase = new DataBase();
-            dataBase.setDataSource(createDataSource());
+            dataBase.setDataBaseConnectType(dataBaseType);
+
+            if(usePool){
+                dataBase.setDataSource(createDataSource());
+            }
+
             return dataBase;
+
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }

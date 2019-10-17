@@ -4,10 +4,7 @@ import lombok.Data;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @ClassName DataBase
@@ -19,11 +16,20 @@ import java.util.Map;
 @Data
 public class DataBase {
 
+    DataBaseConnectType dataBaseConnectType;
+
     DataSource dataSource;
 
 
     public Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+
+
+        if(dataSource != null){
+            return dataSource.getConnection();
+        }else{
+            Connection connection = DriverManager.getConnection(dataBaseConnectType.getUrl(), dataBaseConnectType.getUsername(), dataBaseConnectType.getPassword());
+            return connection;
+        }
     }
 
     public static DataBaseBuilder builder() {
@@ -34,19 +40,19 @@ public class DataBase {
     /**
      * 设置预处理参数的方法
      */
-    public void prepareParameters(PreparedStatement ps, Object... params) {
+    public void prepareParameters(PreparedStatement ps, Object... params) throws SQLException {
         if (params != null) {
             for (int i = 0; i < params.length; i++) {
                 try {
                     ps.setObject(i + 1, params[i]);
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    throw new SQLException("index: " + (i + 1) + " param: " + params[i] + " error: " + e.getMessage());
                 }
             }
         }
     }
 
-    public Map<String, Object> queryOne(String sql, Object... paramters) throws Exception {
+    public Map<String, Object> queryOne(String sql, Object... paramters) throws SQLException {
         Map<String, Object> result = new HashMap<>();
 
         try(Connection connection = getConnection()){
@@ -62,7 +68,7 @@ public class DataBase {
 
                 rows++;
                 if(rows > 1){
-                    throw new Exception("queryOne get rows more that 1!");
+                    throw new SQLException("queryOne get rows more that 1!");
                 }
 
                 for (int i = 0; i < columnCount; i++) {
@@ -71,13 +77,13 @@ public class DataBase {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
 
         return result;
     }
 
-    public List<Map<String, Object>> queryList(String sql, Object... paramters) {
+    public List<Map<String, Object>> queryList(String sql, Object... paramters) throws SQLException {
         List<Map<String, Object>> result = new ArrayList<>();
 
         try(Connection connection = getConnection()){
@@ -98,13 +104,13 @@ public class DataBase {
                 result.add(map);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
 
         return result;
     }
 
-    public int insert(String sql, Object...paramters){
+    public int insertReturnPrimaryKey(String sql, Object...paramters) throws SQLException {
         try(Connection connection = getConnection()){
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             prepareParameters(ps, paramters);
@@ -115,24 +121,34 @@ public class DataBase {
                 Integer generateKey = generatedKeys.getInt(1);
                 return generateKey;
             }
+            return -1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return 0;
     }
 
-    public int update(String sql, Object... paramters) {
+    public int insert(String sql, Object...paramters) throws SQLException {
+        try(Connection connection = getConnection()){
+            PreparedStatement ps = connection.prepareStatement(sql);
+            prepareParameters(ps, paramters);
+            ps.executeUpdate();
+            return 1;
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public int update(String sql, Object... paramters) throws SQLException {
         try(Connection connection = getConnection()){
             PreparedStatement ps = connection.prepareStatement(sql);
             prepareParameters(ps, paramters);
             return ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return 0;
     }
 
-    public void updateBatch(String sql, List<Object[]> data) {
+    public void updateBatch(String sql, List<Object[]> data) throws SQLException {
         try(Connection connection = getConnection()){
             connection.setAutoCommit(false);
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -146,7 +162,7 @@ public class DataBase {
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
     }
 

@@ -36,7 +36,7 @@ public class MSSQLAnalyze extends Analyze {
      *            封装包信息
      * @return
      */
-    public String getFieldType(String columnType, StringBuffer packageName) {
+    public String getFieldType(String columnType, StringBuffer packageName, Boolean[] isDate) {
         columnType = columnType.toLowerCase();
 
         switch (columnType) {
@@ -69,6 +69,7 @@ public class MSSQLAnalyze extends Analyze {
             case "datetime":
             case "datetime2":
             case "smalldatetime":
+                isDate[0] = true;
                 packageName.append("import java.sql.Timestamp;");
                 return "Timestamp";
 
@@ -78,13 +79,12 @@ public class MSSQLAnalyze extends Analyze {
             case "int":
                 return "Integer";
 
-
             case "money":
             case "smallmoney":
             case "numeric":
                 packageName.append("import java.math.BigDecimal;");
                 return "BigDecimal";
-                
+
             case "numeric() identity":
                 return "Integer";
 

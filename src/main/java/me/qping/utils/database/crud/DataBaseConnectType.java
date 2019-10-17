@@ -8,6 +8,14 @@ package me.qping.utils.database.crud;
  * @Version 1.0
  **/
 public interface DataBaseConnectType {
+
+    public static final String MSSQL = "mssql";
+    public static final String MYSQL = "mysql";
+    public static final String ORACLE = "oracle";
+    public static final String DB2 = "db2";
+    public static final String SQLITE = "sqlite";
+
+
     public String getDataBaseType();
     public String getDriver();
     public String getUrl();

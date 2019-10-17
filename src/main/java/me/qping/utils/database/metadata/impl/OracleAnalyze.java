@@ -35,7 +35,7 @@ public class OracleAnalyze extends Analyze {
      *            封装包信息
      * @return
      */
-    public String getFieldType(String columnType, StringBuffer packageName) {
+    public String getFieldType(String columnType, StringBuffer packageName, Boolean[] isDate) {
 
         // todo BLOB CLOB NCLOB
         columnType = columnType.toLowerCase();
@@ -60,6 +60,7 @@ public class OracleAnalyze extends Analyze {
             case "timestamp":
             case "timestamp with time zone":
             case "timestamp with local time zone":
+                isDate[0] = true;
                 packageName.append("import java.util.Date;");
                 return "Date";
 

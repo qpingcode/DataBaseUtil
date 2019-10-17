@@ -34,22 +34,26 @@ public class DataBaseMetaData {
         return analyze.list(connectType, connectType.getCatalog(), connectType.getSchema(), new String[]{TYPE_TABLE, TYPE_VIEW});
     }
 
-    public TableMeta analyze(String tableName){
+    public TableMeta analyze(String tableName, List<String> excludeColumns){
         Analyze analyze = getAnalyze(connectType.getDataBaseType());
-        return analyze.analyze(connectType, connectType.getCatalog(), connectType.getSchema(), tableName);
+        return analyze.analyze(connectType, connectType.getCatalog(), connectType.getSchema(), tableName, excludeColumns);
+    }
+
+    public TableMeta analyze(String tableName){
+        return analyze(tableName, null);
     }
 
     public Analyze getAnalyze(String type){
         Analyze analyze = null;
-        if(connectType.getDataBaseType().equals(TableMeta.TYPE_MYSQL)){
+        if(connectType.getDataBaseType().equals(DataBaseConnectType.MYSQL)){
             analyze = new MySQLAnalyze();
         }
 
-        if(connectType.getDataBaseType().equals(TableMeta.TYPE_ORACLE)){
+        if(connectType.getDataBaseType().equals(DataBaseConnectType.ORACLE)){
             analyze = new OracleAnalyze();
         }
 
-        if(connectType.getDataBaseType().equals(TableMeta.TYPE_MSSQL)){
+        if(connectType.getDataBaseType().equals(DataBaseConnectType.MSSQL)){
             analyze = new MSSQLAnalyze();
         }
         return analyze;

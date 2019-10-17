@@ -21,11 +21,12 @@ public class ColumnMeta {
     boolean nullable;
     boolean isPrimaryKey;
 
+    Boolean isDate;
     String javaType;
     String javaImport;
 
 
-    public static ColumnMeta of(String name, String type, String comment, int size, int digits, boolean nullable, boolean isPrimaryKey, String javaType, StringBuffer javaImport){
+    public static ColumnMeta of(String name, String type, String comment, int size, int digits, boolean nullable, boolean isPrimaryKey, String javaType, StringBuffer javaImport, Boolean isDate){
         ColumnMeta columnMeta = new ColumnMeta();
         columnMeta.setName(name);
         columnMeta.setType(type);
@@ -36,6 +37,7 @@ public class ColumnMeta {
         columnMeta.setPrimaryKey(isPrimaryKey);
         columnMeta.setJavaType(javaType);
         columnMeta.setJavaImport((javaImport == null || javaImport.toString().equals("")) ? null : javaImport.toString());
+        columnMeta.setIsDate(isDate);
         return columnMeta;
     }
 

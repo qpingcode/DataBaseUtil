@@ -42,7 +42,7 @@ public class MySQLAnalyze extends Analyze {
      *            封装包信息
      * @return
      */
-    public String getFieldType(String columnType, StringBuffer packageName) {
+    public String getFieldType(String columnType, StringBuffer packageName, Boolean[] isDate) {
         columnType = columnType.toLowerCase();
         switch (columnType){
             case "varchar":
@@ -53,16 +53,19 @@ public class MySQLAnalyze extends Analyze {
             case "mediumtext":
             case "longtext":
                 return "String";
+
             case "tinyblob":
             case "blob":
             case "mediumblob":
             case "longblob":
                 return "byte[]";
+
             case "datetime":
             case "date":
             case "timestamp":
             case "time":
             case "year":
+                isDate[0] = true;
                 packageName.append("import java.util.Date;");
                 return "Date";
             case "bit":

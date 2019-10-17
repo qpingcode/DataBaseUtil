@@ -7,6 +7,7 @@ import me.qping.utils.database.metadata.bean.TableMeta;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class Analyze {
 
@@ -16,13 +17,11 @@ public abstract class Analyze {
 
     // 数据库类型与 java 类型映射
     // https://blog.csdn.net/weixin_34195546/article/details/87611601
-    public abstract String getFieldType(String columnType, StringBuffer javaPackage);
+    public abstract String getFieldType(String columnType, StringBuffer javaPackage, Boolean[] isDate);
 
-
-    public TableMeta analyze(DataBaseConnectType connectType, String catalog, String schema, String tableName) {
+    public TableMeta analyze(DataBaseConnectType connectType, String catalog, String schema, String tableName, List<String> excludeColumns) {
 
         tableName = tableName.toUpperCase();
-
         try {
             Class.forName(connectType.getDriver());
         } catch (ClassNotFoundException e) {
@@ -64,16 +63,25 @@ public abstract class Analyze {
 
                 PrimaryKeyMeta primaryKeyMeta = PrimaryKeyMeta.of(primaryKeyColumnName, keySeq);
                 primaryKeyMetas.add(primaryKeyMeta);
-                primaryKeySet.add(primaryKeyColumnName);
+                primaryKeySet.add(primaryKeyColumnName.toUpperCase());
             }
 
             List<ColumnMeta> columnMetas = new ArrayList<>();
+            if(excludeColumns != null){
+                excludeColumns = excludeColumns.stream().map(v -> v.toUpperCase()).collect(Collectors.toList());
+            }
             ResultSet columnsInfo = metadata.getColumns(catalog, schema, tableName,"%");
             while(columnsInfo.next()){
 
                 String columnName = columnsInfo.getString("COLUMN_NAME");
                 String columnType = columnsInfo.getString("TYPE_NAME");
+
                 columnType = columnType.toLowerCase();
+                columnName = columnName.toUpperCase();
+
+                if(excludeColumns != null && excludeColumns.contains(columnName)){
+                    continue;
+                }
 
                 int size = columnsInfo.getInt("COLUMN_SIZE");
                 int digits = columnsInfo.getInt("DECIMAL_DIGITS");
@@ -81,12 +89,14 @@ public abstract class Analyze {
                 String remarks = columnsInfo.getString("REMARKS");
 
                 StringBuffer packageName = new StringBuffer();
-                String javaType = getFieldType(columnType, packageName);
+
+                Boolean[] isDateArr = new Boolean[1];
+                String javaType = getFieldType(columnType, packageName, isDateArr);
 
                 boolean isPrimaryKey = primaryKeySet.contains(columnName);
 
-                columnMetas.add(ColumnMeta.of(columnName, columnType, remarks, size, digits, nullable == 1,
-                        isPrimaryKey, javaType, packageName));
+                columnMetas.add(ColumnMeta.of(columnName.toUpperCase(), columnType, remarks, size, digits, nullable == 1,
+                        isPrimaryKey, javaType, packageName, isDateArr[0] != null));
             }
 
             tableMeta.setColumns(columnMetas);
