@@ -49,7 +49,7 @@ public class OracleDataBaseType implements DataBaseConnectType {
         this.password = password;
 
         this.catalog = null;
-        this.schema = username;
+        this.schema = username.toUpperCase();
     }
 
     public OracleDataBaseType(String url, String username, String password) {
@@ -58,7 +58,7 @@ public class OracleDataBaseType implements DataBaseConnectType {
         this.password = password;
 
         this.catalog = null;
-        this.schema = username;
+        this.schema = username.toUpperCase();
     }
 
 
