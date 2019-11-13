@@ -2,6 +2,7 @@ package me.qping.utils.database.metadata.impl;
 
 import me.qping.utils.database.crud.DataBaseConnectType;
 import me.qping.utils.database.metadata.Analyze;
+import me.qping.utils.database.metadata.FieldType;
 import me.qping.utils.database.metadata.bean.ColumnMeta;
 import me.qping.utils.database.metadata.bean.PrimaryKeyMeta;
 import me.qping.utils.database.metadata.bean.TableMeta;
@@ -29,57 +30,61 @@ public class OracleAnalyze extends Analyze {
     /**
      * 设置字段类型 Oracle 数据类型
      * 来源： https://docs.oracle.com/cd/E11882_01/java.112/e16548/datacc.htm#JJDBC28370
-     * @param columnType
+     * @param origin
      *            列类型字符串
-     * @param packageName
-     *            封装包信息
      * @return
      */
-    public String getFieldType(String columnType, StringBuffer packageName, Boolean[] isDate) {
+    public FieldType getFieldType(String origin) {
 
         // todo BLOB CLOB NCLOB
-        columnType = columnType.toLowerCase();
+        String columnType = origin.toLowerCase();
 
-        switch (columnType){
-            case "char":
-            case "varchar2":
-            case "nchar":
-            case "long":
-                return "String";
-
-            case "number":
-                // number 根据位数不同还可以转换为 boolean byte short int long float double
-                packageName.append("import java.math.BigDecimal;");
-                return "BigDecimal";
-
-            case "raw":
-            case "longraw":
-                return "byte[]";
-
-            case "date":
-            case "timestamp":
-            case "timestamp with time zone":
-            case "timestamp with local time zone":
-                isDate[0] = true;
-                packageName.append("import java.util.Date;");
-                return "Date";
-
-            case "binary_float":
-                return "Float";
-
-            case "binary_double":
-                return "Double";
-
-            case "blob":
-                packageName.append("import java.sql.Blob;");
-                return "Blob";
-
-            case "clob":
-                packageName.append("import java.sql.Clob;");
-                return "Clob";
-
+        if(columnType.startsWith("char")
+                || columnType.startsWith("varchar2")
+                || columnType.startsWith("nchar")
+                || columnType.startsWith("tinytext")
+                || columnType.startsWith("text")
+                || columnType.startsWith("mediumtext")
+                || columnType.startsWith("longtext")
+                ){
+            return FieldType.of(false, null, "String", JDBCType.VARCHAR, origin);
         }
 
-        return "ErrorType";
+
+        if(columnType.startsWith("long")){
+            return FieldType.of(false, null, "Long", JDBCType.INTEGER, origin);
+        }
+
+        if(columnType.startsWith("number")){
+            // number 根据位数不同还可以转换为 boolean byte short int long float double
+            return FieldType.of(false, "import java.math.BigDecimal;", "BigDecimal", JDBCType.DECIMAL, origin);
+        }
+
+        if(columnType.startsWith("raw")
+                || columnType.startsWith("longraw")
+                || columnType.startsWith("blob")
+                || columnType.startsWith("Clob")
+                ){
+            return FieldType.of(false, null, "byte[]", JDBCType.BINARY, origin);
+        }
+
+
+        if(columnType.startsWith("date")
+                || columnType.startsWith("timestamp")
+                || columnType.startsWith("timestamp with time zone")
+                || columnType.startsWith("timestamp with local time zon")
+                ){
+            return FieldType.of(true, "import java.util.Date;", "Date", JDBCType.DATE, origin);
+        }
+
+        if(columnType.startsWith("binary_float")){
+            return FieldType.of(false, null, "Float", JDBCType.FLOAT, origin);
+        }
+
+        if(columnType.startsWith("binary_double")){
+            return FieldType.of(false, null, "Double", JDBCType.DOUBLE, origin);
+        }
+
+        return FieldType.error(origin);
     }
 }

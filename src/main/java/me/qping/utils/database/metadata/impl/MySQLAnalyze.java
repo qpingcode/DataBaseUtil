@@ -3,10 +3,12 @@ package me.qping.utils.database.metadata.impl;
 import me.qping.utils.database.crud.DataBaseConnectType;
 import me.qping.utils.database.crud.impl.MySQLDataBaseType;
 import me.qping.utils.database.metadata.Analyze;
+import me.qping.utils.database.metadata.FieldType;
 import me.qping.utils.database.metadata.bean.ColumnMeta;
 import me.qping.utils.database.metadata.bean.PrimaryKeyMeta;
 import me.qping.utils.database.metadata.bean.TableMeta;
 
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
@@ -36,56 +38,72 @@ public class MySQLAnalyze extends Analyze {
     /**
      * 设置字段类型 MySql数据类型
      * 来源：https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-type-conversions.html
-     * @param columnType
+     * @param origin
      *            列类型字符串
-     * @param packageName
-     *            封装包信息
      * @return
      */
-    public String getFieldType(String columnType, StringBuffer packageName, Boolean[] isDate) {
-        columnType = columnType.toLowerCase();
-        switch (columnType){
-            case "varchar":
-            case "nvarchar":
-            case "char":
-            case "tinytext":
-            case "text":
-            case "mediumtext":
-            case "longtext":
-                return "String";
+    public FieldType getFieldType(String origin) {
+        String columnType = origin.toLowerCase();
 
-            case "tinyblob":
-            case "blob":
-            case "mediumblob":
-            case "longblob":
-                return "byte[]";
-
-            case "datetime":
-            case "date":
-            case "timestamp":
-            case "time":
-            case "year":
-                isDate[0] = true;
-                packageName.append("import java.util.Date;");
-                return "Date";
-            case "bit":
-            case "int":
-            case "tinyint":
-            case "smallint":
-            case "bool":
-            case "mediumint":
-                return "Integer";
-            case "bigint":
-                return "Long";
-            case "float":
-                return "Float";
-            case "double":
-                return "Double";
-            case "decimal":
-                packageName.append("import java.math.BigDecimal;");
-                return "BigDecimal";
+        if(columnType.startsWith("varchar")
+                || columnType.startsWith("nvarchar")
+                || columnType.startsWith("char")
+                || columnType.startsWith("tinytext")
+                || columnType.startsWith("text")
+                || columnType.startsWith("mediumtext")
+                || columnType.startsWith("longtext")
+                ){
+            return FieldType.of(false, null, "String", JDBCType.VARCHAR, origin);
         }
 
-        return "ErrorType";
+        if(columnType.startsWith("tinyblob")
+                || columnType.startsWith("blob")
+                || columnType.startsWith("mediumblob")
+                || columnType.startsWith("longblob")
+                ){
+            return FieldType.of(false, null, "byte[]", JDBCType.BINARY, origin);
+        }
+
+        if(columnType.startsWith("datetime")
+                || columnType.startsWith("date")
+                || columnType.startsWith("timestamp")
+                || columnType.startsWith("time")
+                || columnType.startsWith("year")
+                ){
+            return FieldType.of(true, "import java.util.Date;", "Date", JDBCType.DATE, origin);
+        }
+
+        if(columnType.startsWith("bit")
+                || columnType.startsWith("int")
+                || columnType.startsWith("tinyint")
+                || columnType.startsWith("smallint")
+                || columnType.startsWith("bool")
+                || columnType.startsWith("mediumint")
+                ){
+            return FieldType.of(false, null, "Integer", JDBCType.INTEGER, origin);
+        }
+
+        if(columnType.startsWith("bigint")){
+            return FieldType.of(false, null, "Long", JDBCType.INTEGER, origin);
+        }
+
+
+        if(columnType.startsWith("float")){
+            return FieldType.of(false, null, "Float", JDBCType.FLOAT, origin);
+        }
+
+        if(columnType.startsWith("double")){
+            return FieldType.of(false, null, "Double", JDBCType.DOUBLE, origin);
+        }
+
+        if(columnType.startsWith("decimal")){
+            return FieldType.of(false, "import java.math.BigDecimal;", "BigDecimal", JDBCType.DECIMAL, origin);
+        }
+
+        switch (columnType){
+        }
+
+
+        return FieldType.error(origin);
     }
 }

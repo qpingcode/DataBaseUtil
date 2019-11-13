@@ -2,6 +2,8 @@ package me.qping.utils.database.metadata.bean;
 
 import lombok.Data;
 
+import java.sql.SQLType;
+
 /**
  * @ClassName ColumnMeta
  * @Author qping
@@ -24,9 +26,10 @@ public class ColumnMeta {
     Boolean isDate;
     String javaType;
     String javaImport;
+    SQLType sqlType;
 
 
-    public static ColumnMeta of(String name, String type, String comment, int size, int digits, boolean nullable, boolean isPrimaryKey, String javaType, StringBuffer javaImport, Boolean isDate){
+    public static ColumnMeta of(String name, String type, String comment, int size, int digits, boolean nullable, boolean isPrimaryKey, String javaType, String javaImport, Boolean isDate, SQLType sqlType){
         ColumnMeta columnMeta = new ColumnMeta();
         columnMeta.setName(name);
         columnMeta.setType(type);
@@ -36,8 +39,9 @@ public class ColumnMeta {
         columnMeta.setNullable(nullable);
         columnMeta.setPrimaryKey(isPrimaryKey);
         columnMeta.setJavaType(javaType);
-        columnMeta.setJavaImport((javaImport == null || javaImport.toString().equals("")) ? null : javaImport.toString());
+        columnMeta.setJavaImport(javaImport);
         columnMeta.setIsDate(isDate);
+        columnMeta.setSqlType(sqlType);
         return columnMeta;
     }
 

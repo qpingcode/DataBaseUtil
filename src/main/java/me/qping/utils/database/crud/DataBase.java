@@ -127,6 +127,16 @@ public class DataBase {
         }
     }
 
+    public int insert(Connection connection, String sql, Object...paramters) throws SQLException {
+        try(PreparedStatement ps = connection.prepareStatement(sql)){
+            prepareParameters(ps, paramters);
+            ps.executeUpdate();
+            return 1;
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
     public int insert(String sql, Object...paramters) throws SQLException {
         try(Connection connection = getConnection()){
             PreparedStatement ps = connection.prepareStatement(sql);

@@ -2,7 +2,9 @@ package me.qping.utils.database.metadata.impl;
 
 import me.qping.utils.database.crud.DataBaseConnectType;
 import me.qping.utils.database.metadata.Analyze;
+import me.qping.utils.database.metadata.FieldType;
 
+import java.sql.JDBCType;
 import java.util.Properties;
 
 /**
@@ -28,78 +30,89 @@ public class MSSQLAnalyze extends Analyze {
     }
 
     /**
-     * 设置字段类型 Oracle 数据类型
+     * 设置字段类型 MSSQL 数据类型
      * 来源： https://docs.microsoft.com/zh-cn/sql/connect/jdbc/using-basic-data-types?view=sql-server-2017
-     * @param columnType
+     * @param origin
      *            列类型字符串
-     * @param packageName
-     *            封装包信息
      * @return
      */
-    public String getFieldType(String columnType, StringBuffer packageName, Boolean[] isDate) {
-        columnType = columnType.toLowerCase();
+    public FieldType getFieldType(String origin) {
+        String columnType = origin.toLowerCase();
 
-        switch (columnType) {
-            case "bigint":
-                return "Long";
+        FieldType fieldType = new FieldType();
 
-            case "binary":
-            case "image":
-            case "geometry":
-            case "geography":
-            case "varbinary":
-            case "udt":
-            case "timestamp":
-                return "byte[]";
-
-            case "bit":
-                return "Boolean";
-
-            case "char":
-            case "nchar":
-            case "ntext":
-            case "nvarchar":
-            case "varchar":
-            case "text":
-            case "xml":
-            case "uniqueidentifier":
-                return "String";
-
-            case "date":
-            case "datetime":
-            case "datetime2":
-            case "smalldatetime":
-                isDate[0] = true;
-                packageName.append("import java.sql.Timestamp;");
-                return "Timestamp";
-
-            case "float":
-                return "Double";
-
-            case "int":
-                return "Integer";
-
-            case "money":
-            case "smallmoney":
-            case "numeric":
-                packageName.append("import java.math.BigDecimal;");
-                return "BigDecimal";
-
-            case "numeric() identity":
-                return "Integer";
-
-            case "real":
-                return "Float";
-
-            case "smallint":
-            case "tinyint":
-                return "Short";
-
-            case "time":
-                packageName.append("import java.sql.Time;");
-                return "Time";
+        if(columnType.startsWith("bigint")){
+            return FieldType.of(false, null, "Long", JDBCType.BIGINT, origin);
         }
 
-        return "ErrorType";
+        if(columnType.startsWith("binary")
+                || columnType.startsWith("varbinary")
+                || columnType.startsWith("image")
+                || columnType.startsWith("geometry")
+                || columnType.startsWith("geography")
+                || columnType.startsWith("varbinary")
+                || columnType.startsWith("udt")
+                ){
+            return FieldType.of(false, null, "byte[]", JDBCType.LONGVARBINARY, origin);
+        }
+
+        if(columnType.startsWith("bit")){
+            return FieldType.of(false, null, "Boolean", JDBCType.BIT, origin);
+        }
+
+        if(columnType.startsWith("char")
+                || columnType.startsWith("nchar")
+                || columnType.startsWith("ntext")
+                || columnType.startsWith("nvarchar")
+                || columnType.startsWith("varchar")
+                || columnType.startsWith("text")
+                || columnType.startsWith("xml")
+                || columnType.startsWith("uniqueidentifier")
+                ){
+            return FieldType.of(false, null, "String", JDBCType.VARCHAR, origin);
+        }
+
+        if(columnType.startsWith("timestamp")
+                || columnType.startsWith("date")
+                || columnType.startsWith("datetime")
+                || columnType.startsWith("datetime2")
+                || columnType.startsWith("smalldatetime")
+                || columnType.startsWith("time")
+                ){
+            return FieldType.of(true, "import java.util.Date;", "Date", JDBCType.DATE, origin);
+        }
+
+        if(columnType.startsWith("real")){
+            return FieldType.of(false, null, "Float", JDBCType.REAL, origin);
+        }
+
+
+        if(columnType.startsWith("float")){
+            return FieldType.of(false, null, "Double", JDBCType.DOUBLE, origin);
+        }
+
+        if(columnType.startsWith("int")){
+            return FieldType.of(false, null, "Integer", JDBCType.INTEGER, origin);
+        }
+
+        if(columnType.startsWith("money")
+                || columnType.startsWith("smallmoney")
+                ){
+            return FieldType.of(false, "import java.math.BigDecimal;", "BigDecimal", JDBCType.DECIMAL, origin);
+        }
+
+        if(columnType.startsWith("numeric")
+                ){
+            return FieldType.of(false, "import java.math.BigDecimal;", "BigDecimal", JDBCType.NUMERIC, origin);
+        }
+
+
+        if(columnType.startsWith("smallint")
+                || columnType.startsWith("tinyint")
+                ){
+            return FieldType.of(false, null, "Short", JDBCType.SMALLINT, origin);
+        }
+
+        return FieldType.error(origin);
     }
 }

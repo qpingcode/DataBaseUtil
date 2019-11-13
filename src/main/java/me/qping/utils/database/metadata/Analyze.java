@@ -5,6 +5,7 @@ import me.qping.utils.database.metadata.bean.ColumnMeta;
 import me.qping.utils.database.metadata.bean.PrimaryKeyMeta;
 import me.qping.utils.database.metadata.bean.TableMeta;
 
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ public abstract class Analyze {
 
     // 数据库类型与 java 类型映射
     // https://blog.csdn.net/weixin_34195546/article/details/87611601
-    public abstract String getFieldType(String columnType, StringBuffer javaPackage, Boolean[] isDate);
+    public abstract FieldType getFieldType(String columnType);
 
     public TableMeta analyze(DataBaseConnectType connectType, String catalog, String schema, String tableName, List<String> excludeColumns) {
 
@@ -88,15 +89,12 @@ public abstract class Analyze {
                 int nullable = columnsInfo.getInt("NULLABLE");
                 String remarks = columnsInfo.getString("REMARKS");
 
-                StringBuffer packageName = new StringBuffer();
-
-                Boolean[] isDateArr = new Boolean[1];
-                String javaType = getFieldType(columnType, packageName, isDateArr);
+                FieldType fieldType = getFieldType(columnType);
 
                 boolean isPrimaryKey = primaryKeySet.contains(columnName);
 
                 columnMetas.add(ColumnMeta.of(columnName.toUpperCase(), columnType, remarks, size, digits, nullable == 1,
-                        isPrimaryKey, javaType, packageName, isDateArr[0] != null));
+                        isPrimaryKey, fieldType.getJavaType(), fieldType.getJavaPackage(), fieldType.isDate(), fieldType.getSqlType()));
             }
 
             tableMeta.setColumns(columnMetas);
