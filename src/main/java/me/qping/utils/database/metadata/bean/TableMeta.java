@@ -81,6 +81,34 @@ public class TableMeta {
     }
 
 
+    public String createInsertSelectAs(){
+
+        StringBuffer firstPart = new StringBuffer();
+        for(ColumnMeta columnMeta : columns){
+            String columnName = columnMeta.getName().toUpperCase();
+            firstPart.append(columnName + ",");
+        }
+
+        if(firstPart.length() == 0){
+            throw new RuntimeException("TableMeta create sql error，column size is zero!");
+        }
+
+
+        StringBuffer sql = new StringBuffer();
+        sql.append("insert into ")
+                .append(name.toUpperCase())
+                .append(" ( ")
+                .append(firstPart.substring(0, firstPart.length() - 1))
+                .append(" ) ")
+                .append(" select ")
+                .append(firstPart.substring(0, firstPart.length() - 1))
+                .append(" from QZJ_INTERFACE_V20.dbo." + name.toUpperCase());
+
+        return sql.toString();
+
+    }
+
+
 
 
 }

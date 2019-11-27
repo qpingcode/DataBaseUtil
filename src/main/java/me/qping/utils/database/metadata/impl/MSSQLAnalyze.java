@@ -41,6 +41,7 @@ public class MSSQLAnalyze extends Analyze {
 
         FieldType fieldType = new FieldType();
 
+        // 参见： mssql-jdbc-jre8.jar  ===>  JDBCType.class
         if(columnType.startsWith("bigint")){
             return FieldType.of(false, null, "Long", JDBCType.BIGINT, origin);
         }

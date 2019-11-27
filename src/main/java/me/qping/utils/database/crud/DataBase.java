@@ -159,9 +159,14 @@ public class DataBase {
     }
 
     public void updateBatch(String sql, List<Object[]> data) throws SQLException {
-        try(Connection connection = getConnection()){
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+        try{
+            connection = getConnection();
             connection.setAutoCommit(false);
-            PreparedStatement ps = connection.prepareStatement(sql);
+
+            ps = connection.prepareStatement(sql);
 
             for(Object[] d : data){
                 prepareParameters(ps, d);
@@ -171,8 +176,32 @@ public class DataBase {
             ps.executeBatch();
             connection.commit();
             connection.setAutoCommit(true);
-        } catch (SQLException e) {
+
+        } catch (SQLException | RuntimeException e) {
+
+            if(connection != null){
+                try{
+                    connection.rollback();
+                }catch (SQLException re){}
+            }
+
+            if(connection != null){
+                connection.setAutoCommit(true);
+            }
+
             throw e;
+        }finally {
+            if(ps != null){
+                try {
+                    ps.close();
+                }catch (Exception ex){ }
+            }
+
+            if(connection != null){
+                try {
+                    connection.close();
+                }catch (Exception ex){ }
+            }
         }
     }
 

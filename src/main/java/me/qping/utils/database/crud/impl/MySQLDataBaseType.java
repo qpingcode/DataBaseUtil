@@ -70,7 +70,7 @@ public class MySQLDataBaseType implements DataBaseConnectType {
 
     @Override
     public String getDataBaseType() {
-        return "mysql";
+        return MYSQL;
     }
 
     public String getUrl(){

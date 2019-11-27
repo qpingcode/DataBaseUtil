@@ -3,6 +3,7 @@ package me.qping.utils.database.metadata;
 import me.qping.utils.database.crud.DataBase;
 import me.qping.utils.database.crud.DataBaseBuilder;
 import me.qping.utils.database.crud.DataBaseConnectType;
+import me.qping.utils.database.crud.impl.JTDSDataBaseType;
 import me.qping.utils.database.crud.impl.MSSQLDataBaseType;
 import me.qping.utils.database.crud.impl.MySQLDataBaseType;
 import me.qping.utils.database.crud.impl.OracleDataBaseType;
@@ -48,7 +49,10 @@ public class DataBaseMetaDataBuilder extends DataBase {
     }
 
     public DataBaseMetaDataBuilder smartInit(String url, String username, String password){
-        if(url.indexOf("sqlserver") > -1){
+
+        if(url.indexOf("jtds:sqlserver") > -1){
+            this.dataBaseType = new JTDSDataBaseType(url, username, password);
+        }else if(url.indexOf("sqlserver") > -1){
             this.dataBaseType = new MSSQLDataBaseType(url, username, password);
         }else if(url.indexOf("mysql") > -1){
             this.dataBaseType = new MySQLDataBaseType(url, username, password);

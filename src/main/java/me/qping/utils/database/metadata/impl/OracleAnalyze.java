@@ -36,6 +36,7 @@ public class OracleAnalyze extends Analyze {
      */
     public FieldType getFieldType(String origin) {
 
+        // 参见： OracleType
         // todo BLOB CLOB NCLOB
         String columnType = origin.toLowerCase();
 

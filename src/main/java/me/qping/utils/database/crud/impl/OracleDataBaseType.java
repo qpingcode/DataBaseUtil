@@ -64,7 +64,7 @@ public class OracleDataBaseType implements DataBaseConnectType {
 
     @Override
     public String getDataBaseType() {
-        return "oracle";
+        return ORACLE;
     }
 
     public String getUrl(){
