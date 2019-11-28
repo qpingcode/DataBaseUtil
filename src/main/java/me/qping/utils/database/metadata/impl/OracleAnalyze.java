@@ -58,7 +58,7 @@ public class OracleAnalyze extends Analyze {
 
         if(columnType.startsWith("number")){
             // number 根据位数不同还可以转换为 boolean byte short int long float double
-            return FieldType.of(false, "import java.math.BigDecimal;", "BigDecimal", JDBCType.DECIMAL, origin);
+            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin);
         }
 
         if(columnType.startsWith("raw")
@@ -75,7 +75,7 @@ public class OracleAnalyze extends Analyze {
                 || columnType.startsWith("timestamp with time zone")
                 || columnType.startsWith("timestamp with local time zon")
                 ){
-            return FieldType.of(true, "import java.util.Date;", "Date", JDBCType.DATE, origin);
+            return FieldType.of(true, "java.util.Date", "Date", JDBCType.DATE, origin);
         }
 
         if(columnType.startsWith("binary_float")){

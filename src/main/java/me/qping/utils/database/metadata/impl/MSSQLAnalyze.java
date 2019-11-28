@@ -80,7 +80,7 @@ public class MSSQLAnalyze extends Analyze {
                 || columnType.startsWith("smalldatetime")
                 || columnType.startsWith("time")
                 ){
-            return FieldType.of(true, "import java.util.Date;", "Date", JDBCType.DATE, origin);
+            return FieldType.of(true, "java.util.Date", "Date", JDBCType.DATE, origin);
         }
 
         if(columnType.startsWith("real")){
@@ -99,12 +99,12 @@ public class MSSQLAnalyze extends Analyze {
         if(columnType.startsWith("money")
                 || columnType.startsWith("smallmoney")
                 ){
-            return FieldType.of(false, "import java.math.BigDecimal;", "BigDecimal", JDBCType.DECIMAL, origin);
+            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin);
         }
 
         if(columnType.startsWith("numeric")
                 ){
-            return FieldType.of(false, "import java.math.BigDecimal;", "BigDecimal", JDBCType.NUMERIC, origin);
+            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.NUMERIC, origin);
         }
 
 

@@ -25,11 +25,11 @@ public class ColumnMeta {
 
     Boolean isDate;
     String javaType;
-    String javaImport;
+    String javaPackage;
     SQLType sqlType;
 
 
-    public static ColumnMeta of(String name, String type, String comment, int size, int digits, boolean nullable, boolean isPrimaryKey, String javaType, String javaImport, Boolean isDate, SQLType sqlType){
+    public static ColumnMeta of(String name, String type, String comment, int size, int digits, boolean nullable, boolean isPrimaryKey, String javaType, String javaPackage, Boolean isDate, SQLType sqlType){
         ColumnMeta columnMeta = new ColumnMeta();
         columnMeta.setName(name);
         columnMeta.setType(type);
@@ -39,7 +39,7 @@ public class ColumnMeta {
         columnMeta.setNullable(nullable);
         columnMeta.setPrimaryKey(isPrimaryKey);
         columnMeta.setJavaType(javaType);
-        columnMeta.setJavaImport(javaImport);
+        columnMeta.setJavaPackage(javaPackage);
         columnMeta.setIsDate(isDate);
         columnMeta.setSqlType(sqlType);
         return columnMeta;

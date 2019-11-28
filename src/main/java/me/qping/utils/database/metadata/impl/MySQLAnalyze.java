@@ -70,7 +70,7 @@ public class MySQLAnalyze extends Analyze {
                 || columnType.startsWith("time")
                 || columnType.startsWith("year")
                 ){
-            return FieldType.of(true, "import java.util.Date;", "Date", JDBCType.DATE, origin);
+            return FieldType.of(true, "java.util.Date", "Date", JDBCType.DATE, origin);
         }
 
         if(columnType.startsWith("bit")
@@ -97,7 +97,7 @@ public class MySQLAnalyze extends Analyze {
         }
 
         if(columnType.startsWith("decimal")){
-            return FieldType.of(false, "import java.math.BigDecimal;", "BigDecimal", JDBCType.DECIMAL, origin);
+            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin);
         }
 
         switch (columnType){
