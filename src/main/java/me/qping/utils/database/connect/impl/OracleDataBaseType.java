@@ -1,7 +1,10 @@
-package me.qping.utils.database.crud.impl;
+package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
-import me.qping.utils.database.crud.DataBaseConnectType;
+import me.qping.utils.database.connect.DataBaseConnectPropertes;
+import me.qping.utils.database.connect.DataBaseConnectType;
+
+import static me.qping.utils.database.connect.DataBaseConnectType.ORACLE;
 
 /**
  * @ClassName OracleDataBaseType
@@ -11,7 +14,7 @@ import me.qping.utils.database.crud.DataBaseConnectType;
  * @Version 1.0
  **/
 @Data
-public class OracleDataBaseType implements DataBaseConnectType {
+public class OracleDataBaseType implements DataBaseConnectPropertes {
 
     public static final String SID_URL = "jdbc:oracle:thin:@${host}:${port}:${sid}";
     public static final String SERVICE_NAME_URL = "jdbc:oracle:thin:@//${host}:${port}/${serviceName}";
@@ -63,7 +66,7 @@ public class OracleDataBaseType implements DataBaseConnectType {
 
 
     @Override
-    public String getDataBaseType() {
+    public DataBaseConnectType getDataBaseType() {
         return ORACLE;
     }
 

@@ -1,20 +1,34 @@
 package me.qping.utils.database.metadata.impl;
 
-import me.qping.utils.database.crud.DataBaseConnectType;
-import me.qping.utils.database.metadata.Analyze;
-import me.qping.utils.database.metadata.FieldType;
+import me.qping.utils.database.connect.DataBaseConnectPropertes;
+import me.qping.utils.database.metadata.MetaDataUtil;
+import me.qping.utils.database.metadata.bean.FieldType;
 
 import java.sql.JDBCType;
 import java.util.Properties;
 
 /**
- * @ClassName MSSQLAnalyze
+ * @ClassName MSSQLMetaData
  * @Author qping
  * @Date 2019/8/3 22:07
  * @Version 1.0
  **/
-public class MSSQLAnalyze extends Analyze {
+public class MSSQLMetaData extends MetaDataUtil {
 
+
+
+    String catalogQuery = "select name from master.dbo.SysDatabases where name not in ('master', 'model', 'msdb', 'tempdb')";
+    String schemaQuery = "select name from sys.schemas where name not in ('INFORMATION_SCHEMA', 'db_owner', 'db_accessadmin', 'db_backupoperator', 'db_datareader', 'db_datawriter', 'db_ddladmin', 'db_denydatareader', 'db_denydatawriter', 'db_securityadmin', 'sys')";
+
+    @Override
+    public String getCatalogQuery() {
+        return catalogQuery;
+    }
+
+    @Override
+    public String getSchemaQuery(String catalog) {
+        return schemaQuery;
+    }
 
     /**
      * sqlserver拿不到注释
@@ -22,7 +36,7 @@ public class MSSQLAnalyze extends Analyze {
      * @return
      */
     @Override
-    public Properties getConnectionProperties(DataBaseConnectType connectType) {
+    public Properties getConnectionProperties(DataBaseConnectPropertes connectType) {
         Properties props = new Properties();
         props.setProperty("user", connectType.getUsername());
         props.setProperty("password", connectType.getPassword());
@@ -43,7 +57,7 @@ public class MSSQLAnalyze extends Analyze {
 
         // 参见： mssql-jdbc-jre8.jar  ===>  JDBCType.class
         if(columnType.startsWith("bigint")){
-            return FieldType.of(false, null, "Long", JDBCType.BIGINT, origin);
+            return FieldType.of(false, null, "Long", JDBCType.BIGINT, origin, null);
         }
 
         if(columnType.startsWith("binary")
@@ -54,11 +68,11 @@ public class MSSQLAnalyze extends Analyze {
                 || columnType.startsWith("varbinary")
                 || columnType.startsWith("udt")
                 ){
-            return FieldType.of(false, null, "byte[]", JDBCType.LONGVARBINARY, origin);
+            return FieldType.of(false, null, "byte[]", JDBCType.LONGVARBINARY, origin, null);
         }
 
         if(columnType.startsWith("bit")){
-            return FieldType.of(false, null, "Boolean", JDBCType.BIT, origin);
+            return FieldType.of(false, null, "Boolean", JDBCType.BIT, origin, null);
         }
 
         if(columnType.startsWith("char")
@@ -70,7 +84,7 @@ public class MSSQLAnalyze extends Analyze {
                 || columnType.startsWith("xml")
                 || columnType.startsWith("uniqueidentifier")
                 ){
-            return FieldType.of(false, null, "String", JDBCType.VARCHAR, origin);
+            return FieldType.of(false, null, "String", JDBCType.VARCHAR, origin, null);
         }
 
         if(columnType.startsWith("timestamp")
@@ -80,38 +94,38 @@ public class MSSQLAnalyze extends Analyze {
                 || columnType.startsWith("smalldatetime")
                 || columnType.startsWith("time")
                 ){
-            return FieldType.of(true, "java.util.Date", "Date", JDBCType.DATE, origin);
+            return FieldType.of(true, "java.util.Date", "Date", JDBCType.DATE, origin, null);
         }
 
         if(columnType.startsWith("real")){
-            return FieldType.of(false, null, "Float", JDBCType.REAL, origin);
+            return FieldType.of(false, null, "Float", JDBCType.REAL, origin, null);
         }
 
 
         if(columnType.startsWith("float")){
-            return FieldType.of(false, null, "Double", JDBCType.DOUBLE, origin);
+            return FieldType.of(false, null, "Double", JDBCType.DOUBLE, origin, null);
         }
 
         if(columnType.startsWith("int")){
-            return FieldType.of(false, null, "Integer", JDBCType.INTEGER, origin);
+            return FieldType.of(false, null, "Integer", JDBCType.INTEGER, origin, null);
         }
 
         if(columnType.startsWith("money")
                 || columnType.startsWith("smallmoney")
                 ){
-            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin);
+            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin, null);
         }
 
         if(columnType.startsWith("numeric")
                 ){
-            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.NUMERIC, origin);
+            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.NUMERIC, origin, null);
         }
 
 
         if(columnType.startsWith("smallint")
                 || columnType.startsWith("tinyint")
                 ){
-            return FieldType.of(false, null, "Short", JDBCType.SMALLINT, origin);
+            return FieldType.of(false, null, "Short", JDBCType.SMALLINT, origin, null);
         }
 
         return FieldType.error(origin);

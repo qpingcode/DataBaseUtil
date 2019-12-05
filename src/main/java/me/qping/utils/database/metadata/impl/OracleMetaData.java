@@ -1,25 +1,35 @@
 package me.qping.utils.database.metadata.impl;
 
-import me.qping.utils.database.crud.DataBaseConnectType;
-import me.qping.utils.database.metadata.Analyze;
-import me.qping.utils.database.metadata.FieldType;
-import me.qping.utils.database.metadata.bean.ColumnMeta;
-import me.qping.utils.database.metadata.bean.PrimaryKeyMeta;
-import me.qping.utils.database.metadata.bean.TableMeta;
+import me.qping.utils.database.connect.DataBaseConnectPropertes;
+import me.qping.utils.database.metadata.MetaDataUtil;
+import me.qping.utils.database.metadata.bean.FieldType;
 
 import java.sql.*;
 import java.util.*;
 
 /**
- * @ClassName OracleAnalyze
+ * @ClassName OracleMetaData
  * @Author qping
  * @Date 2019/8/3 22:07
  * @Version 1.0
  **/
-public class OracleAnalyze extends Analyze {
+public class OracleMetaData extends MetaDataUtil {
+
+    String catalogQuery = null;
+    String schemaQuery = "select username from all_users order by username";       // oracle schema 等同于 user
 
     @Override
-    public Properties getConnectionProperties(DataBaseConnectType connectType) {
+    public String getCatalogQuery() {
+        return catalogQuery;
+    }
+
+    @Override
+    public String getSchemaQuery(String catalog) {
+        return schemaQuery;
+    }
+
+    @Override
+    public Properties getConnectionProperties(DataBaseConnectPropertes connectType) {
         Properties props = new Properties();
         props.setProperty("user", connectType.getUsername());
         props.setProperty("password", connectType.getPassword());
@@ -48,17 +58,17 @@ public class OracleAnalyze extends Analyze {
                 || columnType.startsWith("mediumtext")
                 || columnType.startsWith("longtext")
                 ){
-            return FieldType.of(false, null, "String", JDBCType.VARCHAR, origin);
+            return FieldType.of(false, null, "String", JDBCType.VARCHAR, origin, null);
         }
 
 
         if(columnType.startsWith("long")){
-            return FieldType.of(false, null, "Long", JDBCType.INTEGER, origin);
+            return FieldType.of(false, null, "Long", JDBCType.INTEGER, origin, null);
         }
 
         if(columnType.startsWith("number")){
             // number 根据位数不同还可以转换为 boolean byte short int long float double
-            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin);
+            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin, null);
         }
 
         if(columnType.startsWith("raw")
@@ -66,7 +76,7 @@ public class OracleAnalyze extends Analyze {
                 || columnType.startsWith("blob")
                 || columnType.startsWith("Clob")
                 ){
-            return FieldType.of(false, null, "byte[]", JDBCType.BINARY, origin);
+            return FieldType.of(false, null, "byte[]", JDBCType.BINARY, origin, null);
         }
 
 
@@ -75,15 +85,15 @@ public class OracleAnalyze extends Analyze {
                 || columnType.startsWith("timestamp with time zone")
                 || columnType.startsWith("timestamp with local time zon")
                 ){
-            return FieldType.of(true, "java.util.Date", "Date", JDBCType.DATE, origin);
+            return FieldType.of(true, "java.util.Date", "Date", JDBCType.DATE, origin, null);
         }
 
         if(columnType.startsWith("binary_float")){
-            return FieldType.of(false, null, "Float", JDBCType.FLOAT, origin);
+            return FieldType.of(false, null, "Float", JDBCType.FLOAT, origin, null);
         }
 
         if(columnType.startsWith("binary_double")){
-            return FieldType.of(false, null, "Double", JDBCType.DOUBLE, origin);
+            return FieldType.of(false, null, "Double", JDBCType.DOUBLE, origin, null);
         }
 
         return FieldType.error(origin);

@@ -1,4 +1,4 @@
-package me.qping.utils.database.metadata;
+package me.qping.utils.database.metadata.bean;
 
 import lombok.Data;
 
@@ -15,18 +15,20 @@ import java.sql.SQLType;
 @Data
 public class FieldType {
     boolean isDate = false;
+    String columnDefinition;
     String javaPackage;
     String javaType;
     SQLType sqlType;
     String origin;
 
-    public static FieldType of(boolean isDate, String javaPackage, String javaType, SQLType sqlType, String origin){
+    public static FieldType of(boolean isDate, String javaPackage, String javaType, SQLType sqlType, String origin, String columnDefinition){
         FieldType t = new FieldType();
         t.setDate(isDate);
         t.setJavaPackage(javaPackage);
         t.setJavaType(javaType);
         t.setSqlType(sqlType);
         t.setOrigin(origin);
+        t.setColumnDefinition(columnDefinition);
         return t;
     }
 

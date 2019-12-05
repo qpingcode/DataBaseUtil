@@ -1,6 +1,7 @@
 package me.qping.utils.database.metadata.bean;
 
 import lombok.Data;
+import me.qping.utils.database.connect.DataBaseConnectType;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,10 +15,11 @@ import java.util.stream.Collectors;
 @Data
 public class TableMeta {
 
-    String databaseType;
+    DataBaseConnectType databaseType;
     String catalog;
     String schema;
     String name;
+    String nameLower;
     String alias;
     String type;
     String comment;
@@ -26,13 +28,14 @@ public class TableMeta {
     List<ColumnMeta> columns;
 
 
-    public static TableMeta of(String catalog, String schema, String name, String type, String comment, String databaseType){
+    public static TableMeta of(String catalog, String schema, String name, String nameLower, String type, String comment, DataBaseConnectType databaseType){
 
         TableMeta tableMeta = new TableMeta();
 
         tableMeta.setCatalog(catalog);
         tableMeta.setSchema(schema);
         tableMeta.setName(name);
+        tableMeta.setNameLower(nameLower);
         tableMeta.setType(type);
         tableMeta.setComment(comment);
         tableMeta.setDatabaseType(databaseType);

@@ -1,40 +1,56 @@
 package me.qping.utils.database.crud;
 
 import lombok.Data;
+import me.qping.utils.database.connect.DataBaseConnectPropertes;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * @ClassName DataBase
- * @Description jdbc 简单封装
+ * @ClassName CrudUtil
+ * @Description 增删该查
  * @Author qping
- * @Date 2019/6/14 15:51
+ * @Date 2019/12/5 17:00
  * @Version 1.0
  **/
 @Data
-public class DataBase {
+public class CrudUtil {
 
-    DataBaseConnectType dataBaseConnectType;
+    protected DataBaseConnectPropertes dataBaseConnectType;
 
-    DataSource dataSource;
+    protected DataSource dataSource;
 
 
-    public Connection getConnection() throws SQLException {
-
+    protected Connection getConnection() throws SQLException {
 
         if(dataSource != null){
             return dataSource.getConnection();
         }else{
-            Connection connection = DriverManager.getConnection(dataBaseConnectType.getUrl(), dataBaseConnectType.getUsername(), dataBaseConnectType.getPassword());
+            Connection connection = DriverManager.getConnection(
+                    dataBaseConnectType.getUrl(),
+                    dataBaseConnectType.getUsername(),
+                    dataBaseConnectType.getPassword()
+            );
             return connection;
         }
     }
 
-    public static DataBaseBuilder builder() {
-        DataBaseBuilder builder = new DataBaseBuilder();
-        return builder;
+    public boolean validate() throws SQLException {
+        try(Connection connection = getConnection()){
+
+            ResultSet resultSet = connection.prepareStatement(dataBaseConnectType.getValidQuery()).executeQuery();
+            if(resultSet.next()){
+                return true;
+            }
+            return false;
+
+        } catch (SQLException e) {
+            throw e;
+        }
     }
 
     /**
@@ -102,6 +118,31 @@ public class DataBase {
                     map.put(label, rs.getObject(label));
                 }
                 result.add(map);
+            }
+        } catch (SQLException e) {
+            throw e;
+        }
+
+        return result;
+    }
+
+    public List<Object[]> queryArray(String sql, Object... paramters) throws SQLException {
+        List<Object[]> result = new ArrayList<>();
+
+        try(Connection connection = getConnection()){
+            PreparedStatement ps = connection.prepareStatement(sql);
+            prepareParameters(ps, paramters);
+
+            ResultSet rs = ps.executeQuery();
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            while (rs.next()) {
+                Object[] values = new Object[columnCount];
+                for (int i = 0; i < columnCount; i++) {
+                    values[i] = rs.getObject(i);
+                }
+                result.add(values);
             }
         } catch (SQLException e) {
             throw e;
@@ -183,9 +224,7 @@ public class DataBase {
                 try{
                     connection.rollback();
                 }catch (SQLException re){}
-            }
 
-            if(connection != null){
                 connection.setAutoCommit(true);
             }
 

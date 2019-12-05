@@ -1,7 +1,10 @@
-package me.qping.utils.database.crud.impl;
+package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
-import me.qping.utils.database.crud.DataBaseConnectType;
+import me.qping.utils.database.connect.DataBaseConnectPropertes;
+import me.qping.utils.database.connect.DataBaseConnectType;
+
+import static me.qping.utils.database.connect.DataBaseConnectType.MSSQL;
 
 /**
  * @ClassName MySQLDataBaseType
@@ -11,10 +14,11 @@ import me.qping.utils.database.crud.DataBaseConnectType;
  * @Version 1.0
  **/
 @Data
-public class MSSQLDataBaseType implements DataBaseConnectType {
+public class JTDSDataBaseType implements DataBaseConnectPropertes {
 
-    public static final String URL = "jdbc:sqlserver://${host}:${port};DatabaseName=${database}";;
-    String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+    public static final String URL = "jdbc:jtds:sqlserver://${host}:${port}/${database}";;
+    String driver = "net.sourceforge.jtds.jdbc.Driver";
+
     String validQuery = "select 1";
 
     String host;
@@ -26,16 +30,7 @@ public class MSSQLDataBaseType implements DataBaseConnectType {
     String catalog;
     String url;
 
-
-    /**
-     * Catalog和Schema都属于抽象概念，主要用来解决命名冲突问题
-     * 数据库对象表的全限定名可表示为：Catalog.Schema.表名
-     | 供应商         | Catalog支持                      | Schema支持                             |
-     | ------------- | -------------------------------- | ------------------------------------- |
-     | MS SQL Server | 数据库名                          | 对象属主名，2005版开始有变，如dbo、sys等   |
-     * @return
-     */
-    public MSSQLDataBaseType(String host, String port, String database, String username, String password) {
+    public JTDSDataBaseType(String host, String port, String database, String username, String password) {
         this.host = host;
         this.port = port == null ? "1433" : port;
         this.database = database;
@@ -45,12 +40,12 @@ public class MSSQLDataBaseType implements DataBaseConnectType {
         this.catalog = database;
     }
 
-    public MSSQLDataBaseType(String host, String port, String database, String username, String password, String schema) {
+    public JTDSDataBaseType(String host, String port, String database, String username, String password, String schema) {
         this(host, port, database, username, password);
         this.schema = schema;
     }
 
-    public MSSQLDataBaseType(String url, String username, String password) {
+    public JTDSDataBaseType(String url, String username, String password) {
         this.url = url;
         this.username = username;
         this.password = password;
@@ -59,16 +54,19 @@ public class MSSQLDataBaseType implements DataBaseConnectType {
     }
 
     private static String getCatalogByUrl(String url) {
-        String markStr = "DatabaseName=";
-        int begin = url.indexOf(markStr);
-        if( begin > -1){
-            return url.substring(begin + markStr.length(), url.length());
+        String markStr = "/";
+        int begin = url.indexOf(markStr, "jdbc:jtds:sqlserver://".length());
+
+        if(begin > -1){
+            begin = url.indexOf("/", begin) + 1;
+            int end = url.indexOf("?", begin) > -1 ? url.indexOf("?", begin) : url.length();
+            return url.substring(begin, end);
         }
         return null;
     }
 
     @Override
-    public String getDataBaseType() {
+    public DataBaseConnectType getDataBaseType() {
         return MSSQL;
     }
 

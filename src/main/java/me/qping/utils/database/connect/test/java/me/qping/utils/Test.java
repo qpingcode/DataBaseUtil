@@ -1,17 +1,8 @@
 package me.qping.utils;
 
-import com.microsoft.sqlserver.jdbc.SQLServerBulkCopy;
-import com.microsoft.sqlserver.jdbc.SQLServerBulkCopyOptions;
-import com.sun.rowset.CachedRowSetImpl;
 import me.qping.utils.database.crud.DataBase;
-import me.qping.utils.database.metadata.DataBaseMetaData;
+import me.qping.utils.database.metadata.MetaDataUtil;
 import me.qping.utils.database.metadata.bean.TableMeta;
-
-import java.sql.JDBCType;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLType;
-import java.util.List;
 
 /**
  * @ClassName Test
@@ -29,7 +20,7 @@ public class Test {
         String username = "sa";
         String password = "123456";
 
-        DataBaseMetaData metaUtil = DataBaseMetaData.builder().smartInit(url, username, password).build();
+        MetaDataUtil metaUtil = MetaDataUtil.builder().smartInit(url, username, password).build();
 
 
         String tableName = "TB_MZ_SFMXB";

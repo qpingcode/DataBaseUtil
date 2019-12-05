@@ -1,15 +1,23 @@
-package me.qping.utils.database.crud;
+package me.qping.utils.database;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import lombok.Data;
-import me.qping.utils.database.crud.impl.MSSQLDataBaseType;
-import me.qping.utils.database.crud.impl.MySQLDataBaseType;
-import me.qping.utils.database.crud.impl.OracleDataBaseType;
+import me.qping.utils.database.connect.DataBaseConnectPropertes;
+import me.qping.utils.database.connect.impl.MSSQLDataBaseType;
+import me.qping.utils.database.connect.impl.MySQLDataBaseType;
+import me.qping.utils.database.connect.impl.OracleDataBaseType;
+import me.qping.utils.database.crud.CrudUtil;
+import me.qping.utils.database.metadata.MetaDataUtil;
+import me.qping.utils.database.metadata.impl.MSSQLMetaData;
+import me.qping.utils.database.metadata.impl.MySQLMetaData;
+import me.qping.utils.database.metadata.impl.OracleMetaData;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import static me.qping.utils.database.connect.DataBaseConnectType.*;
 
 /**
  * @ClassName DataBase
@@ -19,9 +27,9 @@ import java.sql.SQLException;
  * @Version 1.0
  **/
 @Data
-public class DataBaseBuilder {
+public class DataBaseUtilBuilder {
 
-    DataBaseConnectType dataBaseType;
+    DataBaseConnectPropertes dataBaseType;
 
     int initialSize = 1;
     int minIdle = 1;
@@ -29,37 +37,37 @@ public class DataBaseBuilder {
     int maxWait = 60000;
     boolean usePool = false;
 
-    public DataBaseBuilder databaseType(DataBaseConnectType dataBaseType){
+    public DataBaseUtilBuilder databaseType(DataBaseConnectPropertes dataBaseType){
         this.dataBaseType = dataBaseType;
         return this;
     }
 
-    public DataBaseBuilder mysql(String host, String port, String database, String username, String password){
+    public DataBaseUtilBuilder mysql(String host, String port, String database, String username, String password){
         this.dataBaseType = new MySQLDataBaseType(host, port, database, username, password);
         return this;
     }
 
-    public DataBaseBuilder oracle(String host, String port, String serviceName, String username, String password){
+    public DataBaseUtilBuilder oracle(String host, String port, String serviceName, String username, String password){
         this.dataBaseType = new OracleDataBaseType(host, port, true, serviceName, username, password);
         return this;
     }
 
-    public DataBaseBuilder oracle(String host, String port, boolean useServiceName, String database, String username, String password){
+    public DataBaseUtilBuilder oracle(String host, String port, boolean useServiceName, String database, String username, String password){
         this.dataBaseType = new OracleDataBaseType(host, port, useServiceName, database, username, password);
         return this;
     }
 
-    public DataBaseBuilder mssql(String host, String port, String database, String username, String password){
+    public DataBaseUtilBuilder mssql(String host, String port, String database, String username, String password){
         this.dataBaseType = new MSSQLDataBaseType(host, port, database, username, password);
         return this;
     }
 
-    public DataBaseBuilder mssql(String host, String port, String database, String username, String password, String schema){
+    public DataBaseUtilBuilder mssql(String host, String port, String database, String username, String password, String schema){
         this.dataBaseType = new MSSQLDataBaseType(host, port, database, username, password, schema);
         return this;
     }
 
-    public DataBaseBuilder smartInit(String url, String username, String password){
+    public DataBaseUtilBuilder smartInit(String url, String username, String password){
         if(url.indexOf("sqlserver") > -1){
             this.dataBaseType = new MSSQLDataBaseType(url, username, password);
         }else if(url.indexOf("mysql") > -1){
@@ -80,7 +88,7 @@ public class DataBaseBuilder {
      * @param maxWait
      * @return
      */
-    public DataBaseBuilder pool(int initialSize, int minIdle, int maxActive, int maxWait){
+    public DataBaseUtilBuilder pool(int initialSize, int minIdle, int maxActive, int maxWait){
         this.initialSize = initialSize;
         this.minIdle = minIdle;
         this.maxActive = maxActive;
@@ -114,22 +122,38 @@ public class DataBaseBuilder {
         return connection;
     }
 
-    public DataBase build(){
+    public CrudUtil buildCrudUtil(){
         try {
             Class.forName(dataBaseType.getDriver());
 
-            DataBase dataBase = new DataBase();
-            dataBase.setDataBaseConnectType(dataBaseType);
+            CrudUtil crud = new CrudUtil();
+            crud.setDataBaseConnectType(dataBaseType);
 
             if(usePool){
-                dataBase.setDataSource(createDataSource());
+                crud.setDataSource(createDataSource());
             }
 
-            return dataBase;
-
+            return crud;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public MetaDataUtil buildMetaDataUtil(){
+        MetaDataUtil analyze = null;
+        if(this.dataBaseType.getDataBaseType().equals(MYSQL)){
+            analyze = new MySQLMetaData();
+        }
+
+        if(this.dataBaseType.getDataBaseType().equals(ORACLE)){
+            analyze = new OracleMetaData();
+        }
+
+        if(this.dataBaseType.getDataBaseType().equals(MSSQL)){
+            analyze = new MSSQLMetaData();
+        }
+        return analyze;
+
     }
 }

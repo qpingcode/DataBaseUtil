@@ -1,7 +1,10 @@
-package me.qping.utils.database.crud.impl;
+package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
-import me.qping.utils.database.crud.DataBaseConnectType;
+import me.qping.utils.database.connect.DataBaseConnectPropertes;
+import me.qping.utils.database.connect.DataBaseConnectType;
+
+import static me.qping.utils.database.connect.DataBaseConnectType.MYSQL;
 
 /**
  * @ClassName MySQLDataBaseType
@@ -11,7 +14,7 @@ import me.qping.utils.database.crud.DataBaseConnectType;
  * @Version 1.0
  **/
 @Data
-public class MySQLDataBaseType implements DataBaseConnectType {
+public class MySQLDataBaseType implements DataBaseConnectPropertes {
 
     public static final String URL = "jdbc:mysql://${host}:${port}/${database}?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true";;
     String driver = "com.mysql.cj.jdbc.Driver";
@@ -38,7 +41,7 @@ public class MySQLDataBaseType implements DataBaseConnectType {
     public MySQLDataBaseType(String host, String port, String database, String username, String password) {
         this.host = host;
         this.port = port == null ? "3306" : port;
-        this.database = database;
+        this.database = database == null ? "" : database;
         this.username = username;
         this.password = password;
 
@@ -69,7 +72,7 @@ public class MySQLDataBaseType implements DataBaseConnectType {
     }
 
     @Override
-    public String getDataBaseType() {
+    public DataBaseConnectType getDataBaseType() {
         return MYSQL;
     }
 

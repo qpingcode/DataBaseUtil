@@ -1,22 +1,17 @@
-package me.qping.utils.database.crud;
+package me.qping.utils.database.connect;
+
+import java.sql.SQLException;
 
 /**
- * @ClassName DataBaseConnectType
+ * @ClassName DataBaseConnectPropertes
  * @Description 数据库连接串模版
  * @Author qping
  * @Date 2019/6/14 17:15
  * @Version 1.0
  **/
-public interface DataBaseConnectType {
+public interface DataBaseConnectPropertes {
 
-    public static final String MSSQL = "mssql";
-    public static final String MYSQL = "mysql";
-    public static final String ORACLE = "oracle";
-    public static final String DB2 = "db2";
-    public static final String SQLITE = "sqlite";
-
-
-    public String getDataBaseType();
+    public DataBaseConnectType getDataBaseType();
     public String getDriver();
     public String getUrl();
     public String getUsername();
