@@ -24,7 +24,7 @@ public class OracleMetaData extends MetaDataUtil {
     }
 
     @Override
-    public String getSchemaQuery(String catalog) {
+    public String getSchemaQuery() {
         return schemaQuery;
     }
 

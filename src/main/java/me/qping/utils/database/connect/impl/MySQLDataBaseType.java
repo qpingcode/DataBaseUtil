@@ -2,9 +2,9 @@ package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
-import me.qping.utils.database.connect.DataBaseConnectType;
+import me.qping.utils.database.connect.DataBaseType;
 
-import static me.qping.utils.database.connect.DataBaseConnectType.MYSQL;
+import static me.qping.utils.database.connect.DataBaseType.MYSQL;
 
 /**
  * @ClassName MySQLDataBaseType
@@ -41,7 +41,7 @@ public class MySQLDataBaseType implements DataBaseConnectPropertes {
     public MySQLDataBaseType(String host, String port, String database, String username, String password) {
         this.host = host;
         this.port = port == null ? "3306" : port;
-        this.database = database == null ? "" : database;
+        this.database = database;
         this.username = username;
         this.password = password;
 
@@ -54,8 +54,9 @@ public class MySQLDataBaseType implements DataBaseConnectPropertes {
         this.username = username;
         this.password = password;
 
-        this.catalog = getDatabaseByUrl(url);
+        this.catalog = this.database = getDatabaseByUrl(url);
         this.schema = null;
+        this.database = catalog;
 
     }
 
@@ -72,7 +73,7 @@ public class MySQLDataBaseType implements DataBaseConnectPropertes {
     }
 
     @Override
-    public DataBaseConnectType getDataBaseType() {
+    public DataBaseType getDataBaseType() {
         return MYSQL;
     }
 
@@ -84,7 +85,7 @@ public class MySQLDataBaseType implements DataBaseConnectPropertes {
 
         return URL.replaceAll("\\$\\{host\\}", host)
                 .replaceAll("\\$\\{port\\}", port)
-                .replaceAll("\\$\\{database\\}", database);
+                .replaceAll("\\$\\{database\\}", database == null ? "" : database);
     }
 
     @Override

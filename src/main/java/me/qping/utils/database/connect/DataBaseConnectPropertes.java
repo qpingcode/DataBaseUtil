@@ -1,7 +1,5 @@
 package me.qping.utils.database.connect;
 
-import java.sql.SQLException;
-
 /**
  * @ClassName DataBaseConnectPropertes
  * @Description 数据库连接串模版
@@ -11,7 +9,7 @@ import java.sql.SQLException;
  **/
 public interface DataBaseConnectPropertes {
 
-    public DataBaseConnectType getDataBaseType();
+    public DataBaseType getDataBaseType();
     public String getDriver();
     public String getUrl();
     public String getUsername();

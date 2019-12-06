@@ -2,9 +2,9 @@ package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
-import me.qping.utils.database.connect.DataBaseConnectType;
+import me.qping.utils.database.connect.DataBaseType;
 
-import static me.qping.utils.database.connect.DataBaseConnectType.MSSQL;
+import static me.qping.utils.database.connect.DataBaseType.MSSQL;
 
 /**
  * @ClassName MySQLDataBaseType
@@ -50,7 +50,7 @@ public class JTDSDataBaseType implements DataBaseConnectPropertes {
         this.username = username;
         this.password = password;
 
-        this.catalog = getCatalogByUrl(url);
+        this.catalog = this.database = getCatalogByUrl(url);
     }
 
     private static String getCatalogByUrl(String url) {
@@ -66,7 +66,7 @@ public class JTDSDataBaseType implements DataBaseConnectPropertes {
     }
 
     @Override
-    public DataBaseConnectType getDataBaseType() {
+    public DataBaseType getDataBaseType() {
         return MSSQL;
     }
 
@@ -78,7 +78,7 @@ public class JTDSDataBaseType implements DataBaseConnectPropertes {
 
         return URL.replaceAll("\\$\\{host\\}", host)
                 .replaceAll("\\$\\{port\\}", port)
-                .replaceAll("\\$\\{database\\}", database);
+                .replaceAll("\\$\\{database\\}", database == null ? "" : database);
     }
 
     @Override

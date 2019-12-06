@@ -2,9 +2,9 @@ package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
-import me.qping.utils.database.connect.DataBaseConnectType;
+import me.qping.utils.database.connect.DataBaseType;
 
-import static me.qping.utils.database.connect.DataBaseConnectType.ORACLE;
+import static me.qping.utils.database.connect.DataBaseType.ORACLE;
 
 /**
  * @ClassName OracleDataBaseType
@@ -24,13 +24,14 @@ public class OracleDataBaseType implements DataBaseConnectPropertes {
 
     String host;
     String port;
-    String database;
+    String serviceName;
     String username;
     String password;
     String url;
 
     boolean useServiceName;
 
+    String database;
     String schema;
     String catalog;
 
@@ -42,17 +43,17 @@ public class OracleDataBaseType implements DataBaseConnectPropertes {
      | Oracle        | 不支持                            | Oracle User ID            |
      * @return
      */
-    public OracleDataBaseType(String host, String port, boolean useServiceName, String database, String username, String password) {
+    public OracleDataBaseType(String host, String port, boolean useServiceName, String serviceName, String username, String password) {
 
         this.useServiceName = useServiceName;
         this.host = host;
         this.port = port == null ? "1521" : port;
-        this.database = database;
+        this.serviceName = serviceName;
         this.username = username;
         this.password = password;
 
         this.catalog = null;
-        this.schema = username.toUpperCase();
+        this.schema = this.database = username.toUpperCase();
     }
 
     public OracleDataBaseType(String url, String username, String password) {
@@ -61,12 +62,12 @@ public class OracleDataBaseType implements DataBaseConnectPropertes {
         this.password = password;
 
         this.catalog = null;
-        this.schema = username.toUpperCase();
+        this.schema = this.database = username.toUpperCase();
     }
 
 
     @Override
-    public DataBaseConnectType getDataBaseType() {
+    public DataBaseType getDataBaseType() {
         return ORACLE;
     }
 
@@ -79,11 +80,11 @@ public class OracleDataBaseType implements DataBaseConnectPropertes {
         if(useServiceName){
             return SERVICE_NAME_URL.replaceAll("\\$\\{host\\}", host)
                     .replaceAll("\\$\\{port\\}", port)
-                    .replaceAll("\\$\\{serviceName\\}", database);
+                    .replaceAll("\\$\\{serviceName\\}", serviceName);
         }else{
             return SID_URL.replaceAll("\\$\\{host\\}", host)
                     .replaceAll("\\$\\{port\\}", port)
-                    .replaceAll("\\$\\{sid\\}", database);
+                    .replaceAll("\\$\\{sid\\}", serviceName);
         }
 
 

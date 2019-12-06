@@ -23,10 +23,9 @@ public abstract class MetaDataUtil extends CrudUtil {
 
     public abstract String getCatalogQuery();
 
-    public abstract String getSchemaQuery(String catalog);
+    public abstract String getSchemaQuery();
 
     public abstract Properties getConnectionProperties(DataBaseConnectPropertes connectType);
-
 
     public List<String> getCatalogs() throws SQLException {
         String query = getCatalogQuery();
@@ -45,7 +44,7 @@ public abstract class MetaDataUtil extends CrudUtil {
     }
 
     public List<String> getSchemas(String catalog) throws SQLException {
-        String query = getSchemaQuery(catalog);
+        String query = getSchemaQuery();
         if(query == null){
             return null;
         }
@@ -101,11 +100,11 @@ public abstract class MetaDataUtil extends CrudUtil {
     }
 
     public List<TableMeta> getTables(){
-        return getObjects(dataBaseConnectType, dataBaseConnectType.getCatalog(), dataBaseConnectType.getSchema(), new String[]{TYPE_TABLE, TYPE_VIEW});
+        return getObjects(dataBaseConnectProperties, dataBaseConnectProperties.getCatalog(), dataBaseConnectProperties.getSchema(), new String[]{TYPE_TABLE, TYPE_VIEW});
     }
 
     public List<TableMeta> getTables(String catalog, String schema){
-        return getObjects(dataBaseConnectType, catalog, schema, new String[]{TYPE_TABLE, TYPE_VIEW});
+        return getObjects(dataBaseConnectProperties, catalog, schema, new String[]{TYPE_TABLE, TYPE_VIEW});
     }
 
     public TableMeta getTableInfo(String tableName){
@@ -113,19 +112,19 @@ public abstract class MetaDataUtil extends CrudUtil {
     }
 
     public TableMeta getTableInfo(String tableName, List<String> excludeColumns){
-        return getTableInfo(dataBaseConnectType.getCatalog(), dataBaseConnectType.getSchema(), tableName, excludeColumns);
+        return getTableInfo(dataBaseConnectProperties.getCatalog(), dataBaseConnectProperties.getSchema(), tableName, excludeColumns);
     }
 
     private TableMeta getTableInfo(String catalog, String schema, String tableName, List<String> excludeColumns) {
 
         tableName = tableName.toUpperCase();
         try {
-            Class.forName(dataBaseConnectType.getDriver());
+            Class.forName(dataBaseConnectProperties.getDriver());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 
-        try (Connection connection = DriverManager.getConnection(dataBaseConnectType.getUrl(), getConnectionProperties(dataBaseConnectType))){
+        try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), getConnectionProperties(dataBaseConnectProperties))){
             TableMeta tableMeta = new TableMeta();
 
             DatabaseMetaData metadata = connection.getMetaData();
@@ -148,7 +147,7 @@ public abstract class MetaDataUtil extends CrudUtil {
                         tableName.toLowerCase(),
                         tableInfo.getString("TABLE_TYPE"),  // 表类型
                         tableInfo.getString("REMARKS"),     // 表注释
-                        dataBaseConnectType.getDataBaseType()
+                        dataBaseConnectProperties.getDataBaseType()
                 );
             }
 

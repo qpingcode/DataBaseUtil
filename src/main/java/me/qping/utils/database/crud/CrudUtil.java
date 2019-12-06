@@ -2,6 +2,7 @@ package me.qping.utils.database.crud;
 
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
+import me.qping.utils.database.connect.DataBaseType;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -20,10 +21,9 @@ import java.util.Map;
 @Data
 public class CrudUtil {
 
-    protected DataBaseConnectPropertes dataBaseConnectType;
+    protected DataBaseConnectPropertes dataBaseConnectProperties;
 
     protected DataSource dataSource;
-
 
     protected Connection getConnection() throws SQLException {
 
@@ -31,18 +31,22 @@ public class CrudUtil {
             return dataSource.getConnection();
         }else{
             Connection connection = DriverManager.getConnection(
-                    dataBaseConnectType.getUrl(),
-                    dataBaseConnectType.getUsername(),
-                    dataBaseConnectType.getPassword()
+                    dataBaseConnectProperties.getUrl(),
+                    dataBaseConnectProperties.getUsername(),
+                    dataBaseConnectProperties.getPassword()
             );
             return connection;
         }
     }
 
+    public DataBaseType getDataBaseConnectType(){
+        return dataBaseConnectProperties.getDataBaseType();
+    }
+
     public boolean validate() throws SQLException {
         try(Connection connection = getConnection()){
 
-            ResultSet resultSet = connection.prepareStatement(dataBaseConnectType.getValidQuery()).executeQuery();
+            ResultSet resultSet = connection.prepareStatement(dataBaseConnectProperties.getValidQuery()).executeQuery();
             if(resultSet.next()){
                 return true;
             }
@@ -140,7 +144,7 @@ public class CrudUtil {
             while (rs.next()) {
                 Object[] values = new Object[columnCount];
                 for (int i = 0; i < columnCount; i++) {
-                    values[i] = rs.getObject(i);
+                    values[i] = rs.getObject(i + 1);
                 }
                 result.add(values);
             }

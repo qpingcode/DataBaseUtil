@@ -15,8 +15,6 @@ import java.util.Properties;
  **/
 public class MSSQLMetaData extends MetaDataUtil {
 
-
-
     String catalogQuery = "select name from master.dbo.SysDatabases where name not in ('master', 'model', 'msdb', 'tempdb')";
     String schemaQuery = "select name from sys.schemas where name not in ('INFORMATION_SCHEMA', 'db_owner', 'db_accessadmin', 'db_backupoperator', 'db_datareader', 'db_datawriter', 'db_ddladmin', 'db_denydatareader', 'db_denydatawriter', 'db_securityadmin', 'sys')";
 
@@ -26,7 +24,7 @@ public class MSSQLMetaData extends MetaDataUtil {
     }
 
     @Override
-    public String getSchemaQuery(String catalog) {
+    public String getSchemaQuery() {
         return schemaQuery;
     }
 
