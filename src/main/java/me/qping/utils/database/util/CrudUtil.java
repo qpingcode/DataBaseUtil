@@ -3,9 +3,7 @@ package me.qping.utils.database.util;
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
-import me.qping.utils.database.database.DataBaseDialect;
-import me.qping.utils.database.metadata.bean.ResultAndMeta;
-import me.qping.utils.database.metadata.bean.ResultSetColumnMeta;
+import me.qping.utils.database.dialect.DataBaseDialect;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -13,9 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static me.qping.utils.database.connect.DataBaseType.MSSQL;
-import static me.qping.utils.database.connect.DataBaseType.MYSQL;
 
 /**
  * @ClassName CrudUtil

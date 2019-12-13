@@ -1,4 +1,4 @@
-package me.qping.utils.database.database;
+package me.qping.utils.database.dialect;
 
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.metadata.bean.FieldType;

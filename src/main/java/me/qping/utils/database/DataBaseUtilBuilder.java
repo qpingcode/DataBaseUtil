@@ -7,12 +7,12 @@ import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.connect.impl.MSSQLDataBaseConnProp;
 import me.qping.utils.database.connect.impl.MySQLDataBaseConnProp;
 import me.qping.utils.database.connect.impl.OracleDataBaseConnProp;
-import me.qping.utils.database.database.DataBaseDialect;
+import me.qping.utils.database.dialect.DataBaseDialect;
 import me.qping.utils.database.util.CrudUtil;
-import me.qping.utils.database.database.impl.MSSQLDialect;
+import me.qping.utils.database.dialect.impl.MSSQLDialect;
 import me.qping.utils.database.util.MetaDataUtil;
-import me.qping.utils.database.database.impl.MySQLDialect;
-import me.qping.utils.database.database.impl.OracleDialect;
+import me.qping.utils.database.dialect.impl.MySQLDialect;
+import me.qping.utils.database.dialect.impl.OracleDialect;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

@@ -1,7 +1,7 @@
-package me.qping.utils.database.database.impl;
+package me.qping.utils.database.dialect.impl;
 
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
-import me.qping.utils.database.database.DataBaseDialect;
+import me.qping.utils.database.dialect.DataBaseDialect;
 import me.qping.utils.database.metadata.bean.FieldType;
 
 import java.sql.*;
