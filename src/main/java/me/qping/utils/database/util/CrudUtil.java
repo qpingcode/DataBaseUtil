@@ -81,155 +81,96 @@ public class CrudUtil {
     }
 
     public Map<String, Object> queryOne(String sql, Object... paramters) throws SQLException {
-        Map<String, Object> result = new HashMap<>();
-
         try(Connection connection = getConnection()){
-            PreparedStatement ps = connection.prepareStatement(sql);
-            prepareParameters(ps, paramters);
-
-            ResultSet rs = ps.executeQuery();
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            int rows = 0;
-            while (rs.next()) {
-
-                rows++;
-                if(rows > 1){
-                    throw new SQLException("queryOne get rows more that 1!");
-                }
-
-                for (int i = 0; i < columnCount; i++) {
-                    String label = metaData.getColumnLabel(i + 1);
-                    result.put(label, rs.getObject(label));
-                }
-            }
+            return queryOne(connection, sql, paramters);
         } catch (SQLException e) {
             throw e;
+        }
+    }
+
+    public Map<String, Object> queryOne(Connection connection, String sql, Object... paramters) throws SQLException {
+
+        PreparedStatement ps = connection.prepareStatement(sql);
+        prepareParameters(ps, paramters);
+
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
+        Map<String, Object> result = new HashMap<>();
+        int rows = 0;
+
+        while (rs.next()) {
+
+            rows++;
+            if(rows > 1){
+                throw new SQLException("queryOne get rows more that 1!");
+            }
+
+            for (int i = 0; i < columnCount; i++) {
+                String label = metaData.getColumnLabel(i + 1);
+                result.put(label, rs.getObject(label));
+            }
         }
 
         return result;
     }
 
     public List<Map<String, Object>> queryList(String sql, Object... paramters) throws SQLException {
-        List<Map<String, Object>> result = new ArrayList<>();
-
         try(Connection connection = getConnection()){
-            PreparedStatement ps = connection.prepareStatement(sql);
-            prepareParameters(ps, paramters);
-
-            ResultSet rs = ps.executeQuery();
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-
-            while (rs.next()) {
-                Map<String, Object> map = new HashMap<String, Object>();
-                for (int i = 0; i < columnCount; i++) {
-                    String label = metaData.getColumnLabel(i + 1);
-                    map.put(label, rs.getObject(label));
-                }
-                result.add(map);
-            }
+            return queryList(connection, sql, paramters);
         } catch (SQLException e) {
             throw e;
         }
+    }
 
+    public List<Map<String, Object>> queryList(Connection connection, String sql, Object... paramters) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        prepareParameters(ps, paramters);
+
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        while (rs.next()) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            for (int i = 0; i < columnCount; i++) {
+                String label = metaData.getColumnLabel(i + 1);
+                map.put(label, rs.getObject(label));
+            }
+            result.add(map);
+        }
         return result;
     }
 
-    public ResultAndMeta queryArrayAndMeta(String sql, Object... paramters) throws SQLException {
-        return queryArrayAndMeta(null, null, sql, paramters);
-    }
-
-    public ResultAndMeta queryArrayAndMeta(String catalogName, String schemaName, String sql, Object... paramters) throws SQLException {
-
+    public List<Object[]> queryArray(String sql, Object... paramters) throws SQLException {
         try(Connection connection = getConnection()){
-
-            if(catalogName != null || schemaName != null){
-                switchTo(connection, catalogName, schemaName);
-            }
-
-            List<Object[]> result = new ArrayList<>();
-
-            PreparedStatement ps = connection.prepareStatement(sql);
-            prepareParameters(ps, paramters);
-
-            ResultSet rs = ps.executeQuery();
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            List<ResultSetColumnMeta> columnMetaList = new ArrayList<>();
-            for(int i = 0; i < columnCount; i++){
-                String name = metaData.getColumnName(i + 1);
-                int type = metaData.getColumnType(i + 1);
-                String className = metaData.getColumnClassName(i + 1);
-                String label = metaData.getColumnLabel(i + 1);
-                String typeName = metaData.getColumnTypeName(i + 1);
-                int precision = metaData.getPrecision(i + 1);
-                int scale = metaData.getScale(i + 1);
-
-                // String name, int type, String typeName, int size, int digits, String className, String label
-                ResultSetColumnMeta columnMeta = ResultSetColumnMeta.of(name, typeName, scale, precision, className);
-                columnMetaList.add(columnMeta);
-            }
-
-            while (rs.next()) {
-                Object[] values = new Object[columnCount];
-                for (int i = 0; i < columnCount; i++) {
-                    values[i] = rs.getObject(i + 1);
-                }
-                result.add(values);
-            }
-
-            ResultAndMeta resultAndMeta = new ResultAndMeta();
-            resultAndMeta.setResult(result);
-            resultAndMeta.setColumnMetaList(columnMetaList);
-            return resultAndMeta;
-
+            return queryArray(connection, sql, paramters);
         } catch (SQLException e) {
             throw e;
         }
     }
 
-    private void switchTo(Connection connection, String catalogName, String schemaName) throws SQLException {
-        DataBaseType dataBaseType = getDataBaseConnectType();
-        switch (dataBaseType){
-            case MSSQL:
-                update(connection, "USE " + catalogName);
-                update(connection, "EXECUTE as USER ='" + schemaName + "'");
-                break;
-            case MYSQL:
-                update(connection, "USE " + catalogName);
-                break;
-            case ORACLE:
-                update(connection, "ALTER SESSION SET CURRENT_SCHEMA = '" + schemaName +"'");
-                break;
-        }
-    }
+    public List<Object[]> queryArray(Connection connection, String sql, Object... paramters) throws SQLException {
 
-    public List<Object[]> queryArray(String sql, Object... paramters) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        prepareParameters(ps, paramters);
+
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
         List<Object[]> result = new ArrayList<>();
 
-        try(Connection connection = getConnection()){
-            PreparedStatement ps = connection.prepareStatement(sql);
-            prepareParameters(ps, paramters);
-
-            ResultSet rs = ps.executeQuery();
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            while (rs.next()) {
-                Object[] values = new Object[columnCount];
-                for (int i = 0; i < columnCount; i++) {
-                    values[i] = rs.getObject(i + 1);
-                }
-                result.add(values);
+        while (rs.next()) {
+            Object[] values = new Object[columnCount];
+            for (int i = 0; i < columnCount; i++) {
+                values[i] = rs.getObject(i + 1);
             }
-        } catch (SQLException e) {
-            throw e;
+            result.add(values);
         }
-
         return result;
     }
 
@@ -250,6 +191,14 @@ public class CrudUtil {
         }
     }
 
+    public int insert(String sql, Object...paramters) throws SQLException {
+        try(Connection connection = getConnection()){
+            return insert(connection, sql, paramters);
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
     public int insert(Connection connection, String sql, Object...paramters) throws SQLException {
         try(PreparedStatement ps = connection.prepareStatement(sql)){
             prepareParameters(ps, paramters);
@@ -260,13 +209,6 @@ public class CrudUtil {
         }
     }
 
-    public int insert(String sql, Object...paramters) throws SQLException {
-        try(Connection connection = getConnection()){
-            return insert(connection, sql, paramters);
-        } catch (SQLException e) {
-            throw e;
-        }
-    }
     public int update(Connection connection, String sql, Object... paramters) throws SQLException {
         PreparedStatement ps = connection.prepareStatement(sql);
         prepareParameters(ps, paramters);

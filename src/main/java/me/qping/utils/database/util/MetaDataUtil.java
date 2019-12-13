@@ -1,11 +1,9 @@
 package me.qping.utils.database.util;
 
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
+import me.qping.utils.database.connect.DataBaseType;
+import me.qping.utils.database.metadata.bean.*;
 import me.qping.utils.database.util.CrudUtil;
-import me.qping.utils.database.metadata.bean.ColumnMeta;
-import me.qping.utils.database.metadata.bean.FieldType;
-import me.qping.utils.database.metadata.bean.PrimaryKeyMeta;
-import me.qping.utils.database.metadata.bean.TableMeta;
 
 import java.sql.*;
 import java.util.*;
@@ -57,8 +55,6 @@ public class MetaDataUtil extends CrudUtil {
         }
 
         try (Connection connection = DriverManager.getConnection(connectType.getUrl(), dataBaseDialect.getConnectionProperties(connectType))) {
-
-
             DatabaseMetaData metadata = connection.getMetaData();
             ResultSet tableInfo = metadata.getTables(catalog, schema, "%", types);
             List<TableMeta> list = new ArrayList<>();
@@ -74,19 +70,14 @@ public class MetaDataUtil extends CrudUtil {
                         tableInfo.getString("REMARKS"),     // 表注释
                         connectType.getDataBaseType()
                 );
-
                 list.add(tableMeta);
             }
-
             return list;
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return null;
-
-
     }
 
     public List<TableMeta> getTables(){
@@ -199,6 +190,75 @@ public class MetaDataUtil extends CrudUtil {
         }
 
         return null;
+    }
+
+    public ResultAndMeta queryArrayAndMeta(String sql, Object... paramters) throws SQLException {
+        return queryArrayAndMeta(null, null, sql, paramters);
+    }
+
+    public ResultAndMeta queryArrayAndMeta(String catalogName, String schemaName, String sql, Object... paramters) throws SQLException {
+
+        try(Connection connection = getConnection()){
+
+            if(catalogName != null || schemaName != null){
+                switchTo(connection, catalogName, schemaName);
+            }
+
+            List<Object[]> result = new ArrayList<>();
+
+            PreparedStatement ps = connection.prepareStatement(sql);
+            prepareParameters(ps, paramters);
+
+            ResultSet rs = ps.executeQuery();
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            List<ResultSetColumnMeta> columnMetaList = new ArrayList<>();
+            for(int i = 0; i < columnCount; i++){
+                String name = metaData.getColumnName(i + 1);
+                int type = metaData.getColumnType(i + 1);
+                String className = metaData.getColumnClassName(i + 1);
+                String label = metaData.getColumnLabel(i + 1);
+                String typeName = metaData.getColumnTypeName(i + 1);
+                int precision = metaData.getPrecision(i + 1);
+                int scale = metaData.getScale(i + 1);
+
+                ResultSetColumnMeta columnMeta = ResultSetColumnMeta.of(name, typeName, scale, precision, className);
+                columnMetaList.add(columnMeta);
+            }
+
+            while (rs.next()) {
+                Object[] values = new Object[columnCount];
+                for (int i = 0; i < columnCount; i++) {
+                    values[i] = rs.getObject(i + 1);
+                }
+                result.add(values);
+            }
+
+            ResultAndMeta resultAndMeta = new ResultAndMeta();
+            resultAndMeta.setResult(result);
+            resultAndMeta.setColumnMetaList(columnMetaList);
+            return resultAndMeta;
+
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    private void switchTo(Connection connection, String catalogName, String schemaName) throws SQLException {
+        DataBaseType dataBaseType = getDataBaseConnectType();
+        switch (dataBaseType){
+            case MSSQL:
+                update(connection, "USE " + catalogName);
+                update(connection, "EXECUTE as USER ='" + schemaName + "'");
+                break;
+            case MYSQL:
+                update(connection, "USE " + catalogName);
+                break;
+            case ORACLE:
+                update(connection, "ALTER SESSION SET CURRENT_SCHEMA = '" + schemaName +"'");
+                break;
+        }
     }
 
 
