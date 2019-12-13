@@ -1,31 +1,33 @@
-package me.qping.utils.database.metadata.impl;
+package me.qping.utils.database.database.impl;
 
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
-import me.qping.utils.database.metadata.MetaDataUtil;
+import me.qping.utils.database.database.DataBaseDialect;
 import me.qping.utils.database.metadata.bean.FieldType;
 
 import java.sql.*;
 import java.util.*;
 
 /**
- * @ClassName OracleMetaData
+ * @ClassName OracleDialect
  * @Author qping
  * @Date 2019/8/3 22:07
  * @Version 1.0
  **/
-public class OracleMetaData extends MetaDataUtil {
-
-    String catalogQuery = null;
-    String schemaQuery = "select username from all_users order by username";       // oracle schema 等同于 user
+public class OracleDialect implements DataBaseDialect {
 
     @Override
     public String getCatalogQuery() {
-        return catalogQuery;
+        return null;
     }
 
     @Override
     public String getSchemaQuery() {
-        return schemaQuery;
+        return "select username from all_users order by username";
+    } // oracle schema 等同于 user
+
+    @Override
+    public String getTopNSql(String tableName, int rowCount) {
+        return "select * from " + tableName + " where rownum < " + rowCount;
     }
 
     @Override

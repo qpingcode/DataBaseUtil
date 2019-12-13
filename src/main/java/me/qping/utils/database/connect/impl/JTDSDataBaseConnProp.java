@@ -7,14 +7,14 @@ import me.qping.utils.database.connect.DataBaseType;
 import static me.qping.utils.database.connect.DataBaseType.MSSQL;
 
 /**
- * @ClassName MySQLDataBaseType
+ * @ClassName MySQLDataBaseConnProp
  * @Description mysql连接
  * @Author qping
  * @Date 2019/7/4 16:25
  * @Version 1.0
  **/
 @Data
-public class JTDSDataBaseType implements DataBaseConnectPropertes {
+public class JTDSDataBaseConnProp implements DataBaseConnectPropertes {
 
     public static final String URL = "jdbc:jtds:sqlserver://${host}:${port}/${database}";;
     String driver = "net.sourceforge.jtds.jdbc.Driver";
@@ -30,7 +30,7 @@ public class JTDSDataBaseType implements DataBaseConnectPropertes {
     String catalog;
     String url;
 
-    public JTDSDataBaseType(String host, String port, String database, String username, String password) {
+    public JTDSDataBaseConnProp(String host, String port, String database, String username, String password) {
         this.host = host;
         this.port = port == null ? "1433" : port;
         this.database = database;
@@ -40,12 +40,12 @@ public class JTDSDataBaseType implements DataBaseConnectPropertes {
         this.catalog = database;
     }
 
-    public JTDSDataBaseType(String host, String port, String database, String username, String password, String schema) {
+    public JTDSDataBaseConnProp(String host, String port, String database, String username, String password, String schema) {
         this(host, port, database, username, password);
         this.schema = schema;
     }
 
-    public JTDSDataBaseType(String url, String username, String password) {
+    public JTDSDataBaseConnProp(String url, String username, String password) {
         this.url = url;
         this.username = username;
         this.password = password;

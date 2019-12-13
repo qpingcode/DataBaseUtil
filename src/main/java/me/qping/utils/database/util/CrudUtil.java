@@ -1,8 +1,11 @@
-package me.qping.utils.database.crud;
+package me.qping.utils.database.util;
 
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
+import me.qping.utils.database.database.DataBaseDialect;
+import me.qping.utils.database.metadata.bean.ResultAndMeta;
+import me.qping.utils.database.metadata.bean.ResultSetColumnMeta;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -10,6 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static me.qping.utils.database.connect.DataBaseType.MSSQL;
+import static me.qping.utils.database.connect.DataBaseType.MYSQL;
 
 /**
  * @ClassName CrudUtil
@@ -20,6 +26,8 @@ import java.util.Map;
  **/
 @Data
 public class CrudUtil {
+
+    protected DataBaseDialect dataBaseDialect;
 
     protected DataBaseConnectPropertes dataBaseConnectProperties;
 
@@ -130,6 +138,76 @@ public class CrudUtil {
         return result;
     }
 
+    public ResultAndMeta queryArrayAndMeta(String sql, Object... paramters) throws SQLException {
+        return queryArrayAndMeta(null, null, sql, paramters);
+    }
+
+    public ResultAndMeta queryArrayAndMeta(String catalogName, String schemaName, String sql, Object... paramters) throws SQLException {
+
+        try(Connection connection = getConnection()){
+
+            if(catalogName != null || schemaName != null){
+                switchTo(connection, catalogName, schemaName);
+            }
+
+            List<Object[]> result = new ArrayList<>();
+
+            PreparedStatement ps = connection.prepareStatement(sql);
+            prepareParameters(ps, paramters);
+
+            ResultSet rs = ps.executeQuery();
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            List<ResultSetColumnMeta> columnMetaList = new ArrayList<>();
+            for(int i = 0; i < columnCount; i++){
+                String name = metaData.getColumnName(i + 1);
+                int type = metaData.getColumnType(i + 1);
+                String className = metaData.getColumnClassName(i + 1);
+                String label = metaData.getColumnLabel(i + 1);
+                String typeName = metaData.getColumnTypeName(i + 1);
+                int precision = metaData.getPrecision(i + 1);
+                int scale = metaData.getScale(i + 1);
+
+                // String name, int type, String typeName, int size, int digits, String className, String label
+                ResultSetColumnMeta columnMeta = ResultSetColumnMeta.of(name, typeName, scale, precision, className);
+                columnMetaList.add(columnMeta);
+            }
+
+            while (rs.next()) {
+                Object[] values = new Object[columnCount];
+                for (int i = 0; i < columnCount; i++) {
+                    values[i] = rs.getObject(i + 1);
+                }
+                result.add(values);
+            }
+
+            ResultAndMeta resultAndMeta = new ResultAndMeta();
+            resultAndMeta.setResult(result);
+            resultAndMeta.setColumnMetaList(columnMetaList);
+            return resultAndMeta;
+
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    private void switchTo(Connection connection, String catalogName, String schemaName) throws SQLException {
+        DataBaseType dataBaseType = getDataBaseConnectType();
+        switch (dataBaseType){
+            case MSSQL:
+                update(connection, "USE " + catalogName);
+                update(connection, "EXECUTE as USER ='" + schemaName + "'");
+                break;
+            case MYSQL:
+                update(connection, "USE " + catalogName);
+                break;
+            case ORACLE:
+                update(connection, "ALTER SESSION SET CURRENT_SCHEMA = '" + schemaName +"'");
+                break;
+        }
+    }
+
     public List<Object[]> queryArray(String sql, Object... paramters) throws SQLException {
         List<Object[]> result = new ArrayList<>();
 
@@ -184,20 +262,20 @@ public class CrudUtil {
 
     public int insert(String sql, Object...paramters) throws SQLException {
         try(Connection connection = getConnection()){
-            PreparedStatement ps = connection.prepareStatement(sql);
-            prepareParameters(ps, paramters);
-            ps.executeUpdate();
-            return 1;
+            return insert(connection, sql, paramters);
         } catch (SQLException e) {
             throw e;
         }
     }
+    public int update(Connection connection, String sql, Object... paramters) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        prepareParameters(ps, paramters);
+        return ps.executeUpdate();
+    }
 
     public int update(String sql, Object... paramters) throws SQLException {
         try(Connection connection = getConnection()){
-            PreparedStatement ps = connection.prepareStatement(sql);
-            prepareParameters(ps, paramters);
-            return ps.executeUpdate();
+            return update(connection, sql, paramters);
         } catch (SQLException e) {
             throw e;
         }

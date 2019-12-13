@@ -1,31 +1,35 @@
-package me.qping.utils.database.metadata.impl;
+package me.qping.utils.database.database.impl;
 
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
-import me.qping.utils.database.metadata.MetaDataUtil;
+import me.qping.utils.database.database.DataBaseDialect;
 import me.qping.utils.database.metadata.bean.FieldType;
 
 import java.sql.JDBCType;
 import java.util.Properties;
 
 /**
- * @ClassName MSSQLMetaData
+ * @ClassName MSSQLDialect
  * @Author qping
  * @Date 2019/8/3 22:07
  * @Version 1.0
  **/
-public class MSSQLMetaData extends MetaDataUtil {
+public class MSSQLDialect implements DataBaseDialect {
 
-    String catalogQuery = "select name from master.dbo.SysDatabases where name not in ('master', 'model', 'msdb', 'tempdb')";
-    String schemaQuery = "select name from sys.schemas where name not in ('INFORMATION_SCHEMA', 'db_owner', 'db_accessadmin', 'db_backupoperator', 'db_datareader', 'db_datawriter', 'db_ddladmin', 'db_denydatareader', 'db_denydatawriter', 'db_securityadmin', 'sys')";
 
     @Override
     public String getCatalogQuery() {
-        return catalogQuery;
+        return "select name from master.dbo.SysDatabases where name not in ('master', 'model', 'msdb', 'tempdb')";
     }
 
     @Override
     public String getSchemaQuery() {
-        return schemaQuery;
+        return "select name from sys.schemas " +
+                " where name not in ('INFORMATION_SCHEMA', 'db_owner', 'db_accessadmin', 'db_backupoperator', 'db_datareader', 'db_datawriter', 'db_ddladmin', 'db_denydatareader', 'db_denydatawriter', 'db_securityadmin', 'sys')";
+    }
+
+    @Override
+    public String getTopNSql(String tableName, int rowCount) {
+        return "select top " + rowCount +" * from " + tableName;
     }
 
     /**

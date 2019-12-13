@@ -1,19 +1,19 @@
-package me.qping.utils.database.metadata.impl;
+package me.qping.utils.database.database.impl;
 
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
-import me.qping.utils.database.metadata.MetaDataUtil;
+import me.qping.utils.database.database.DataBaseDialect;
 import me.qping.utils.database.metadata.bean.FieldType;
 
 import java.sql.*;
 import java.util.*;
 
 /**
- * @ClassName MySQLMetaData
+ * @ClassName MySQLDialect
  * @Author qping
  * @Date 2019/8/3 22:07
  * @Version 1.0
  **/
-public class MySQLMetaData extends MetaDataUtil {
+public class MySQLDialect implements DataBaseDialect {
 
     @Override
     public String getCatalogQuery() {
@@ -23,6 +23,11 @@ public class MySQLMetaData extends MetaDataUtil {
     @Override
     public String getSchemaQuery() {
         return null;
+    }
+
+    @Override
+    public String getTopNSql(String tableName, int rowCount) {
+        return "select * from " + tableName + " limit " + rowCount;
     }
 
     @Override
@@ -70,6 +75,10 @@ public class MySQLMetaData extends MetaDataUtil {
             return FieldType.of(false, null, "byte[]", JDBCType.BINARY, origin, null);
         }
 
+        if(columnType.startsWith("bit")){
+            return FieldType.of(false, null, "Boolean", JDBCType.BIT, origin, null);
+        }
+
         if(columnType.equals("datetime")
                 || columnType.equals("date")
                 || columnType.equals("timestamp")
@@ -79,8 +88,7 @@ public class MySQLMetaData extends MetaDataUtil {
             return FieldType.of(true, "java.util.Date", "Date", JDBCType.DATE, origin, null);
         }
 
-        if(columnType.equals("bit")
-                || columnType.equals("int")
+        if(columnType.equals("int")
                 || columnType.equals("tinyint")
                 || columnType.equals("smallint")
                 || columnType.equals("bool")

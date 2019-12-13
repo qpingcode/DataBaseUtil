@@ -1,7 +1,7 @@
-package me.qping.utils.database.metadata;
+package me.qping.utils.database.util;
 
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
-import me.qping.utils.database.crud.CrudUtil;
+import me.qping.utils.database.util.CrudUtil;
 import me.qping.utils.database.metadata.bean.ColumnMeta;
 import me.qping.utils.database.metadata.bean.FieldType;
 import me.qping.utils.database.metadata.bean.PrimaryKeyMeta;
@@ -11,24 +11,14 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class MetaDataUtil extends CrudUtil {
+public class MetaDataUtil extends CrudUtil {
 
 
     public static final String TYPE_TABLE = "TABLE";
     public static final String TYPE_VIEW = "VIEW";
 
-    // 数据库类型与 java 类型映射
-    // https://blog.csdn.net/weixin_34195546/article/details/87611601
-    public abstract FieldType getFieldType(String columnType);
-
-    public abstract String getCatalogQuery();
-
-    public abstract String getSchemaQuery();
-
-    public abstract Properties getConnectionProperties(DataBaseConnectPropertes connectType);
-
     public List<String> getCatalogs() throws SQLException {
-        String query = getCatalogQuery();
+        String query = dataBaseDialect.getCatalogQuery();
         if(query == null){
             return null;
         }
@@ -44,7 +34,7 @@ public abstract class MetaDataUtil extends CrudUtil {
     }
 
     public List<String> getSchemas(String catalog) throws SQLException {
-        String query = getSchemaQuery();
+        String query = dataBaseDialect.getSchemaQuery();
         if(query == null){
             return null;
         }
@@ -66,7 +56,7 @@ public abstract class MetaDataUtil extends CrudUtil {
             e.printStackTrace();
         }
 
-        try (Connection connection = DriverManager.getConnection(connectType.getUrl(), getConnectionProperties(connectType))) {
+        try (Connection connection = DriverManager.getConnection(connectType.getUrl(), dataBaseDialect.getConnectionProperties(connectType))) {
 
 
             DatabaseMetaData metadata = connection.getMetaData();
@@ -100,11 +90,15 @@ public abstract class MetaDataUtil extends CrudUtil {
     }
 
     public List<TableMeta> getTables(){
-        return getObjects(dataBaseConnectProperties, dataBaseConnectProperties.getCatalog(), dataBaseConnectProperties.getSchema(), new String[]{TYPE_TABLE, TYPE_VIEW});
+        return getObjects(dataBaseConnectProperties, dataBaseConnectProperties.getCatalog(), dataBaseConnectProperties.getSchema(), new String[]{TYPE_TABLE});
+    }
+
+    public List<TableMeta> getViews(){
+        return getObjects(dataBaseConnectProperties, dataBaseConnectProperties.getCatalog(), dataBaseConnectProperties.getSchema(), new String[]{TYPE_VIEW});
     }
 
     public List<TableMeta> getTables(String catalog, String schema){
-        return getObjects(dataBaseConnectProperties, catalog, schema, new String[]{TYPE_TABLE, TYPE_VIEW});
+        return getObjects(dataBaseConnectProperties, catalog, schema, new String[]{TYPE_TABLE});
     }
 
     public TableMeta getTableInfo(String tableName){
@@ -115,7 +109,7 @@ public abstract class MetaDataUtil extends CrudUtil {
         return getTableInfo(dataBaseConnectProperties.getCatalog(), dataBaseConnectProperties.getSchema(), tableName, excludeColumns);
     }
 
-    private TableMeta getTableInfo(String catalog, String schema, String tableName, List<String> excludeColumns) {
+    public TableMeta getTableInfo(String catalog, String schema, String tableName, List<String> excludeColumns) {
 
         tableName = tableName.toUpperCase();
         try {
@@ -124,7 +118,7 @@ public abstract class MetaDataUtil extends CrudUtil {
             e.printStackTrace();
         }
 
-        try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), getConnectionProperties(dataBaseConnectProperties))){
+        try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), dataBaseDialect.getConnectionProperties(dataBaseConnectProperties))){
             TableMeta tableMeta = new TableMeta();
 
             DatabaseMetaData metadata = connection.getMetaData();
@@ -169,6 +163,7 @@ public abstract class MetaDataUtil extends CrudUtil {
                 excludeColumns = excludeColumns.stream().map(v -> v.toUpperCase()).collect(Collectors.toList());
             }
             ResultSet columnsInfo = metadata.getColumns(catalog, schema, tableName,"%");
+
             while(columnsInfo.next()){
 
                 String columnName = columnsInfo.getString("COLUMN_NAME");
@@ -181,12 +176,13 @@ public abstract class MetaDataUtil extends CrudUtil {
                     continue;
                 }
 
+
                 int size = columnsInfo.getInt("COLUMN_SIZE");
                 int digits = columnsInfo.getInt("DECIMAL_DIGITS");
                 int nullable = columnsInfo.getInt("NULLABLE");
                 String remarks = columnsInfo.getString("REMARKS");
 
-                FieldType fieldType = getFieldType(columnType);
+                FieldType fieldType = dataBaseDialect.getFieldType(columnType);
 
                 boolean isPrimaryKey = primaryKeySet.contains(columnName);
 

@@ -4,14 +4,15 @@ import com.alibaba.druid.pool.DruidDataSource;
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
-import me.qping.utils.database.connect.impl.MSSQLDataBaseType;
-import me.qping.utils.database.connect.impl.MySQLDataBaseType;
-import me.qping.utils.database.connect.impl.OracleDataBaseType;
-import me.qping.utils.database.crud.CrudUtil;
-import me.qping.utils.database.metadata.MetaDataUtil;
-import me.qping.utils.database.metadata.impl.MSSQLMetaData;
-import me.qping.utils.database.metadata.impl.MySQLMetaData;
-import me.qping.utils.database.metadata.impl.OracleMetaData;
+import me.qping.utils.database.connect.impl.MSSQLDataBaseConnProp;
+import me.qping.utils.database.connect.impl.MySQLDataBaseConnProp;
+import me.qping.utils.database.connect.impl.OracleDataBaseConnProp;
+import me.qping.utils.database.database.DataBaseDialect;
+import me.qping.utils.database.util.CrudUtil;
+import me.qping.utils.database.database.impl.MSSQLDialect;
+import me.qping.utils.database.util.MetaDataUtil;
+import me.qping.utils.database.database.impl.MySQLDialect;
+import me.qping.utils.database.database.impl.OracleDialect;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -21,7 +22,7 @@ import java.sql.SQLException;
 import static me.qping.utils.database.connect.DataBaseType.*;
 
 /**
- * @ClassName DataBase
+ * @ClassName DataBaseDialect
  * @Description jdbc 简单封装
  * @Author qping
  * @Date 2019/6/14 15:51
@@ -48,39 +49,39 @@ public class DataBaseUtilBuilder {
     }
 
     public static DataBaseUtilBuilder mysql(String host, String port, String database, String username, String password){
-        MySQLDataBaseType dataBaseProperties = new MySQLDataBaseType(host, port, database, username, password);
+        MySQLDataBaseConnProp dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
         return create().databaseType(dataBaseProperties);
     }
 
     public static DataBaseUtilBuilder oracle(String host, String port, String serviceName, String username, String password){
-        OracleDataBaseType dataBaseProperties = new OracleDataBaseType(host, port, true, serviceName, username, password);
+        OracleDataBaseConnProp dataBaseProperties = new OracleDataBaseConnProp(host, port, true, serviceName, username, password);
         return create().databaseType(dataBaseProperties);
     }
 
     public static DataBaseUtilBuilder oracle(String host, String port, boolean useServiceName, String database, String username, String password){
-        OracleDataBaseType dataBaseProperties = new OracleDataBaseType(host, port, useServiceName, database, username, password);
+        OracleDataBaseConnProp dataBaseProperties = new OracleDataBaseConnProp(host, port, useServiceName, database, username, password);
         return create().databaseType(dataBaseProperties);
     }
 
     public static DataBaseUtilBuilder mssql(String host, String port, String database, String username, String password){
-        MSSQLDataBaseType dataBaseProperties = new MSSQLDataBaseType(host, port, database, username, password);
+        MSSQLDataBaseConnProp dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password);
         return create().databaseType(dataBaseProperties);
     }
 
     public static DataBaseUtilBuilder mssql(String host, String port, String database, String username, String password, String schema){
-        MSSQLDataBaseType dataBaseProperties = new MSSQLDataBaseType(host, port, database, username, password, schema);
+        MSSQLDataBaseConnProp dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password, schema);
         return create().databaseType(dataBaseProperties);
     }
 
     public static DataBaseUtilBuilder init(DataBaseType dataBaseType, String host, String port, String database, String username, String password, boolean isOracleServiceId){
         if(dataBaseType.equals(MYSQL)){
-            MySQLDataBaseType dataBaseProperties = new MySQLDataBaseType(host, port, database, username, password);
+            MySQLDataBaseConnProp dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
             return create().databaseType(dataBaseProperties);
         }else if(dataBaseType.equals(MSSQL)){
-            MSSQLDataBaseType dataBaseProperties = new MSSQLDataBaseType(host, port, database, username, password);
+            MSSQLDataBaseConnProp dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password);
             return create().databaseType(dataBaseProperties);
         }else if(dataBaseType.equals(ORACLE)){
-            OracleDataBaseType dataBaseProperties = new OracleDataBaseType(host, port, !isOracleServiceId, database, username, password);
+            OracleDataBaseConnProp dataBaseProperties = new OracleDataBaseConnProp(host, port, !isOracleServiceId, database, username, password);
             return create().databaseType(dataBaseProperties);
         }
         return null;
@@ -89,11 +90,11 @@ public class DataBaseUtilBuilder {
     public static DataBaseUtilBuilder init(String url, String username, String password){
         DataBaseConnectPropertes dataBaseProperties;
         if(url.indexOf("sqlserver") > -1){
-            dataBaseProperties = new MSSQLDataBaseType(url, username, password);
+            dataBaseProperties = new MSSQLDataBaseConnProp(url, username, password);
         }else if(url.indexOf("mysql") > -1){
-            dataBaseProperties = new MySQLDataBaseType(url, username, password);
+            dataBaseProperties = new MySQLDataBaseConnProp(url, username, password);
         }else if(url.indexOf("oracle") > -1){
-            dataBaseProperties = new OracleDataBaseType(url, username, password);
+            dataBaseProperties = new OracleDataBaseConnProp(url, username, password);
         }else{
             throw new RuntimeException("无法解析url");
         }
@@ -160,24 +161,32 @@ public class DataBaseUtilBuilder {
         return null;
     }
 
-    public MetaDataUtil buildMetaDataUtil(){
-        MetaDataUtil analyze = null;
-        if(this.dataBaseProperties.getDataBaseType().equals(MYSQL)){
-            analyze = new MySQLMetaData();
+    public MetaDataUtil build(){
+
+        try {
+            Class.forName(dataBaseProperties.getDriver());
+
+            DataBaseDialect dataBaseDialect = null;
+            if(this.dataBaseProperties.getDataBaseType().equals(MYSQL)){
+                dataBaseDialect = new MySQLDialect();
+            } else if(this.dataBaseProperties.getDataBaseType().equals(ORACLE)){
+                dataBaseDialect = new OracleDialect();
+            } else if(this.dataBaseProperties.getDataBaseType().equals(MSSQL)){
+                dataBaseDialect = new MSSQLDialect();
+            }
+
+            MetaDataUtil metaDataUtil = new MetaDataUtil();
+            metaDataUtil.setDataBaseConnectProperties(dataBaseProperties);
+            if(usePool){
+                metaDataUtil.setDataSource(createDataSource());
+            }
+            metaDataUtil.setDataBaseDialect(dataBaseDialect);
+            return metaDataUtil;
+
+        }catch (ClassNotFoundException e){
+            e.printStackTrace();
         }
 
-        if(this.dataBaseProperties.getDataBaseType().equals(ORACLE)){
-            analyze = new OracleMetaData();
-        }
-
-        if(this.dataBaseProperties.getDataBaseType().equals(MSSQL)){
-            analyze = new MSSQLMetaData();
-        }
-
-        if(analyze != null){
-            analyze.setDataBaseConnectProperties(dataBaseProperties);
-        }
-        return analyze;
-
+        return null;
     }
 }

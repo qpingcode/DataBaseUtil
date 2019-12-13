@@ -7,14 +7,14 @@ import me.qping.utils.database.connect.DataBaseType;
 import static me.qping.utils.database.connect.DataBaseType.ORACLE;
 
 /**
- * @ClassName OracleDataBaseType
+ * @ClassName OracleDataBaseConnProp
  * @Description oracle连接串的生成
  * @Author qping
  * @Date 2019/7/4 15:59
  * @Version 1.0
  **/
 @Data
-public class OracleDataBaseType implements DataBaseConnectPropertes {
+public class OracleDataBaseConnProp implements DataBaseConnectPropertes {
 
     public static final String SID_URL = "jdbc:oracle:thin:@${host}:${port}:${sid}";
     public static final String SERVICE_NAME_URL = "jdbc:oracle:thin:@//${host}:${port}/${serviceName}";
@@ -43,7 +43,7 @@ public class OracleDataBaseType implements DataBaseConnectPropertes {
      | Oracle        | 不支持                            | Oracle User ID            |
      * @return
      */
-    public OracleDataBaseType(String host, String port, boolean useServiceName, String serviceName, String username, String password) {
+    public OracleDataBaseConnProp(String host, String port, boolean useServiceName, String serviceName, String username, String password) {
 
         this.useServiceName = useServiceName;
         this.host = host;
@@ -56,7 +56,7 @@ public class OracleDataBaseType implements DataBaseConnectPropertes {
         this.schema = this.database = username.toUpperCase();
     }
 
-    public OracleDataBaseType(String url, String username, String password) {
+    public OracleDataBaseConnProp(String url, String username, String password) {
         this.url = url;
         this.username = username;
         this.password = password;

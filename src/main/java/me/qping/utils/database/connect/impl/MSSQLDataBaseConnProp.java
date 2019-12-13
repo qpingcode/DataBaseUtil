@@ -7,14 +7,14 @@ import me.qping.utils.database.connect.DataBaseType;
 import static me.qping.utils.database.connect.DataBaseType.MSSQL;
 
 /**
- * @ClassName MySQLDataBaseType
+ * @ClassName MySQLDataBaseConnProp
  * @Description mysql连接
  * @Author qping
  * @Date 2019/7/4 16:25
  * @Version 1.0
  **/
 @Data
-public class MSSQLDataBaseType implements DataBaseConnectPropertes {
+public class MSSQLDataBaseConnProp implements DataBaseConnectPropertes {
 
     public static final String URL = "jdbc:sqlserver://${host}:${port};DatabaseName=${database}";;
     String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
@@ -38,7 +38,7 @@ public class MSSQLDataBaseType implements DataBaseConnectPropertes {
      | MS SQL Server | 数据库名                          | 对象属主名，2005版开始有变，如dbo、sys等   |
      * @return
      */
-    public MSSQLDataBaseType(String host, String port, String database, String username, String password) {
+    public MSSQLDataBaseConnProp(String host, String port, String database, String username, String password) {
         this.host = host;
         this.port = port == null ? "1433" : port;
         this.database = database;
@@ -48,12 +48,12 @@ public class MSSQLDataBaseType implements DataBaseConnectPropertes {
         this.catalog = database;
     }
 
-    public MSSQLDataBaseType(String host, String port, String database, String username, String password, String schema) {
+    public MSSQLDataBaseConnProp(String host, String port, String database, String username, String password, String schema) {
         this(host, port, database, username, password);
         this.schema = schema;
     }
 
-    public MSSQLDataBaseType(String url, String username, String password) {
+    public MSSQLDataBaseConnProp(String url, String username, String password) {
         this.url = url;
         this.username = username;
         this.password = password;

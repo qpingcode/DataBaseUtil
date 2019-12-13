@@ -29,7 +29,6 @@ public class ColumnMeta {
     String columnDefinition;
     SQLType sqlType;
 
-
     public static ColumnMeta of(String name, String type, String comment, int size, int digits, boolean nullable, boolean isPrimaryKey, String javaType, String javaPackage, Boolean isDate, SQLType sqlType, String columnDefinition){
         ColumnMeta columnMeta = new ColumnMeta();
         columnMeta.setName(name);

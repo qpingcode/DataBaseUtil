@@ -7,14 +7,14 @@ import me.qping.utils.database.connect.DataBaseType;
 import static me.qping.utils.database.connect.DataBaseType.MYSQL;
 
 /**
- * @ClassName MySQLDataBaseType
+ * @ClassName MySQLDataBaseConnProp
  * @Description mysql连接
  * @Author qping
  * @Date 2019/7/4 16:25
  * @Version 1.0
  **/
 @Data
-public class MySQLDataBaseType implements DataBaseConnectPropertes {
+public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
 
     public static final String URL = "jdbc:mysql://${host}:${port}/${database}?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true";;
     String driver = "com.mysql.cj.jdbc.Driver";
@@ -38,7 +38,7 @@ public class MySQLDataBaseType implements DataBaseConnectPropertes {
      | MySQL         | 数据库名                          | 不支持                     |
      * @return
      */
-    public MySQLDataBaseType(String host, String port, String database, String username, String password) {
+    public MySQLDataBaseConnProp(String host, String port, String database, String username, String password) {
         this.host = host;
         this.port = port == null ? "3306" : port;
         this.database = database;
@@ -49,7 +49,7 @@ public class MySQLDataBaseType implements DataBaseConnectPropertes {
         this.schema = null;
     }
 
-    public MySQLDataBaseType(String url, String username, String password) {
+    public MySQLDataBaseConnProp(String url, String username, String password) {
         this.url = url;
         this.username = username;
         this.password = password;
