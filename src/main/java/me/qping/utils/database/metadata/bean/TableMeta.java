@@ -48,6 +48,10 @@ public class TableMeta {
 
     public String createInsertSQL(List<String> excludeColumns){
 
+        if(columns == null){
+            return null;
+        }
+
         if(excludeColumns != null){
             excludeColumns = excludeColumns.stream().map(v -> v.toUpperCase()).collect(Collectors.toList());
         }
@@ -56,8 +60,8 @@ public class TableMeta {
         StringBuffer secondPart = new StringBuffer();
         for(ColumnMeta columnMeta : columns){
 
-            String columnName = columnMeta.getName().toUpperCase();
-            if(excludeColumns != null && excludeColumns.contains(columnName)){
+            String columnName = columnMeta.getName();
+            if(excludeColumns != null && excludeColumns.contains(columnName.toUpperCase())){
                 continue;
             }
 
@@ -71,7 +75,7 @@ public class TableMeta {
 
         StringBuffer sql = new StringBuffer();
         sql.append("insert into ")
-                .append(name.toUpperCase())
+                .append(name)
                 .append(" ( ")
                 .append(firstPart.substring(0, firstPart.length() - 1))
                 .append(" ) ")
@@ -80,38 +84,32 @@ public class TableMeta {
                 .append(" ) ");
 
         return sql.toString();
-
     }
 
+    public String createQuerySQL(){
 
-    public String createInsertSelectAs(){
+        if(columns == null){
+            return null;
+        }
 
         StringBuffer firstPart = new StringBuffer();
         for(ColumnMeta columnMeta : columns){
-            String columnName = columnMeta.getName().toUpperCase();
+            String columnName = columnMeta.getName();
             firstPart.append(columnName + ",");
         }
 
-        if(firstPart.length() == 0){
-            throw new RuntimeException("TableMeta create sql error，column size is zero!");
+        String tableName = name;
+        if(databaseType.equals(DataBaseType.MSSQL) && schema != null){
+            tableName = schema + "." + name;
         }
 
-
         StringBuffer sql = new StringBuffer();
-        sql.append("insert into ")
-                .append(name.toUpperCase())
-                .append(" ( ")
+        sql.append("select ")
                 .append(firstPart.substring(0, firstPart.length() - 1))
-                .append(" ) ")
-                .append(" select ")
-                .append(firstPart.substring(0, firstPart.length() - 1))
-                .append(" from QZJ_INTERFACE_V20.dbo." + name.toUpperCase());
+                .append(" from ")
+                .append(tableName);
 
         return sql.toString();
-
     }
-
-
-
 
 }

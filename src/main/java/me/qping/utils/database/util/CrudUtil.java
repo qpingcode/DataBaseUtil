@@ -1,16 +1,22 @@
 package me.qping.utils.database.util;
 
 import lombok.Data;
+import me.qping.utils.database.DataBaseUtilBuilder;
+import me.qping.utils.database.bean.BeanConversion;
+import me.qping.utils.database.bean.BeanField;
+import me.qping.utils.database.bean.DatabaseColumn;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.dialect.DataBaseDialect;
+import me.qping.utils.database.exception.OrmException;
 
 import javax.sql.DataSource;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @ClassName CrudUtil
@@ -28,7 +34,7 @@ public class CrudUtil {
 
     protected DataSource dataSource;
 
-    protected Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
 
         if(dataSource != null){
             return dataSource.getConnection();
@@ -40,6 +46,10 @@ public class CrudUtil {
             );
             return connection;
         }
+    }
+
+    public DataBaseDialect getDataBaseDialect(){
+        return dataBaseDialect;
     }
 
     public DataBaseType getDataBaseConnectType(){
@@ -75,18 +85,59 @@ public class CrudUtil {
         }
     }
 
-    public Map<String, Object> queryOne(String sql, Object... paramters) throws SQLException {
+    public boolean test(){
+        try{
+            queryList(getConnection(), dataBaseConnectProperties.getValidQuery());
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public <T> T queryOne(Class<T> clazz, String sql, Object... parameters) throws SQLException, IllegalAccessException, InstantiationException, OrmException {
         try(Connection connection = getConnection()){
-            return queryOne(connection, sql, paramters);
+            return queryOne(clazz, connection, sql, parameters);
+        } catch (SQLException e) {
+            throw e;
+        } catch (OrmException e) {
+            throw e;
+        }
+    }
+
+
+    public <T> T queryOne(Class<T> clazz, Connection connection, String sql, Object... parameters) throws SQLException, IllegalAccessException, InstantiationException, OrmException {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        prepareParameters(ps, parameters);
+
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        int rows = 0;
+        T t = null;
+        while (rs.next()) {
+
+            rows++;
+            if(rows > 1){
+                throw new SQLException("queryOne get rows more that 1!");
+            }
+            t = BeanConversion.convert(clazz, metaData, rs);
+        }
+        return t;
+    }
+
+
+    public Map<String, Object> queryOne(String sql, Object... parameters) throws SQLException {
+        try(Connection connection = getConnection()){
+            return queryOne(connection, sql, parameters);
         } catch (SQLException e) {
             throw e;
         }
     }
 
-    public Map<String, Object> queryOne(Connection connection, String sql, Object... paramters) throws SQLException {
+    public Map<String, Object> queryOne(Connection connection, String sql, Object... parameters) throws SQLException {
 
         PreparedStatement ps = connection.prepareStatement(sql);
-        prepareParameters(ps, paramters);
+        prepareParameters(ps, parameters);
 
         ResultSet rs = ps.executeQuery();
         ResultSetMetaData metaData = rs.getMetaData();
@@ -111,17 +162,42 @@ public class CrudUtil {
         return result;
     }
 
-    public List<Map<String, Object>> queryList(String sql, Object... paramters) throws SQLException {
+    public <T> List<T> queryList(Class<T> clazz,String sql, Object... parameters) throws SQLException, IllegalAccessException, OrmException, InstantiationException {
         try(Connection connection = getConnection()){
-            return queryList(connection, sql, paramters);
+            return queryList(clazz, connection, sql, parameters);
         } catch (SQLException e) {
             throw e;
         }
     }
 
-    public List<Map<String, Object>> queryList(Connection connection, String sql, Object... paramters) throws SQLException {
+    public <T> List<T> queryList(Class<T> clazz, Connection connection, String sql, Object... parameters) throws SQLException, IllegalAccessException, InstantiationException, OrmException {
         PreparedStatement ps = connection.prepareStatement(sql);
-        prepareParameters(ps, paramters);
+        prepareParameters(ps, parameters);
+
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        int rows = 0;
+        List<T> list = new ArrayList<>();
+        while (rs.next()) {
+            rows++;
+            T t = BeanConversion.convert(clazz, metaData, rs);
+            list.add(t);
+        }
+        return list;
+    }
+
+    public List<Map<String, Object>> queryList(String sql, Object... parameters) throws SQLException {
+        try(Connection connection = getConnection()){
+            return queryList(connection, sql, parameters);
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public List<Map<String, Object>> queryList(Connection connection, String sql, Object... parameters) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        prepareParameters(ps, parameters);
 
         ResultSet rs = ps.executeQuery();
         ResultSetMetaData metaData = rs.getMetaData();
@@ -140,18 +216,18 @@ public class CrudUtil {
         return result;
     }
 
-    public List<Object[]> queryArray(String sql, Object... paramters) throws SQLException {
+    public List<Object[]> queryArray(String sql, Object... parameters) throws SQLException {
         try(Connection connection = getConnection()){
-            return queryArray(connection, sql, paramters);
+            return queryArray(connection, sql, parameters);
         } catch (SQLException e) {
             throw e;
         }
     }
 
-    public List<Object[]> queryArray(Connection connection, String sql, Object... paramters) throws SQLException {
+    public List<Object[]> queryArray(Connection connection, String sql, Object... parameters) throws SQLException {
 
         PreparedStatement ps = connection.prepareStatement(sql);
-        prepareParameters(ps, paramters);
+        prepareParameters(ps, parameters);
 
         ResultSet rs = ps.executeQuery();
         ResultSetMetaData metaData = rs.getMetaData();
@@ -169,10 +245,10 @@ public class CrudUtil {
         return result;
     }
 
-    public int insertReturnPrimaryKey(String sql, Object...paramters) throws SQLException {
+    public int insertReturnPrimaryKey(String sql, Object...parameters) throws SQLException {
         try(Connection connection = getConnection()){
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            prepareParameters(ps, paramters);
+            prepareParameters(ps, parameters);
             ps.executeUpdate();
 
             ResultSet generatedKeys = ps.getGeneratedKeys();
@@ -186,17 +262,17 @@ public class CrudUtil {
         }
     }
 
-    public int insert(String sql, Object...paramters) throws SQLException {
+    public int insert(String sql, Object...parameters) throws SQLException {
         try(Connection connection = getConnection()){
-            return insert(connection, sql, paramters);
+            return insert(connection, sql, parameters);
         } catch (SQLException e) {
             throw e;
         }
     }
 
-    public int insert(Connection connection, String sql, Object...paramters) throws SQLException {
+    public int insert(Connection connection, String sql, Object...parameters) throws SQLException {
         try(PreparedStatement ps = connection.prepareStatement(sql)){
-            prepareParameters(ps, paramters);
+            prepareParameters(ps, parameters);
             ps.executeUpdate();
             return 1;
         } catch (SQLException e) {
@@ -204,15 +280,15 @@ public class CrudUtil {
         }
     }
 
-    public int update(Connection connection, String sql, Object... paramters) throws SQLException {
+    public int update(Connection connection, String sql, Object... parameters) throws SQLException {
         PreparedStatement ps = connection.prepareStatement(sql);
-        prepareParameters(ps, paramters);
+        prepareParameters(ps, parameters);
         return ps.executeUpdate();
     }
 
-    public int update(String sql, Object... paramters) throws SQLException {
+    public int update(String sql, Object... parameters) throws SQLException {
         try(Connection connection = getConnection()){
-            return update(connection, sql, paramters);
+            return update(connection, sql, parameters);
         } catch (SQLException e) {
             throw e;
         }

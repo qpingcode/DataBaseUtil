@@ -73,15 +73,15 @@ public class DataBaseUtilBuilder {
         return create().databaseType(dataBaseProperties);
     }
 
-    public static DataBaseUtilBuilder init(DataBaseType dataBaseType, String host, String port, String database, String username, String password, boolean isOracleServiceId){
+    public static DataBaseUtilBuilder init(DataBaseType dataBaseType, String host, String port, String database, String username, String password, boolean useServiceName, String schema){
         if(dataBaseType.equals(MYSQL)){
             MySQLDataBaseConnProp dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
             return create().databaseType(dataBaseProperties);
         }else if(dataBaseType.equals(MSSQL)){
-            MSSQLDataBaseConnProp dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password);
+            MSSQLDataBaseConnProp dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password, schema);
             return create().databaseType(dataBaseProperties);
         }else if(dataBaseType.equals(ORACLE)){
-            OracleDataBaseConnProp dataBaseProperties = new OracleDataBaseConnProp(host, port, !isOracleServiceId, database, username, password);
+            OracleDataBaseConnProp dataBaseProperties = new OracleDataBaseConnProp(host, port, useServiceName, database, username, password);
             return create().databaseType(dataBaseProperties);
         }
         return null;
@@ -143,50 +143,38 @@ public class DataBaseUtilBuilder {
         return connection;
     }
 
-    public CrudUtil buildCrudUtil(){
-        try {
-            Class.forName(dataBaseProperties.getDriver());
+    public CrudUtil buildCrudUtil() throws ClassNotFoundException {
+        Class.forName(dataBaseProperties.getDriver());
 
-            CrudUtil crud = new CrudUtil();
-            crud.setDataBaseConnectProperties(dataBaseProperties);
+        CrudUtil crud = new CrudUtil();
+        crud.setDataBaseConnectProperties(dataBaseProperties);
 
-            if(usePool){
-                crud.setDataSource(createDataSource());
-            }
-
-            return crud;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        if(usePool){
+            crud.setDataSource(createDataSource());
         }
-        return null;
+
+        return crud;
     }
 
-    public MetaDataUtil build(){
+    public MetaDataUtil build() throws ClassNotFoundException {
 
-        try {
-            Class.forName(dataBaseProperties.getDriver());
+        Class.forName(dataBaseProperties.getDriver());
 
-            DataBaseDialect dataBaseDialect = null;
-            if(this.dataBaseProperties.getDataBaseType().equals(MYSQL)){
-                dataBaseDialect = new MySQLDialect();
-            } else if(this.dataBaseProperties.getDataBaseType().equals(ORACLE)){
-                dataBaseDialect = new OracleDialect();
-            } else if(this.dataBaseProperties.getDataBaseType().equals(MSSQL)){
-                dataBaseDialect = new MSSQLDialect();
-            }
-
-            MetaDataUtil metaDataUtil = new MetaDataUtil();
-            metaDataUtil.setDataBaseConnectProperties(dataBaseProperties);
-            if(usePool){
-                metaDataUtil.setDataSource(createDataSource());
-            }
-            metaDataUtil.setDataBaseDialect(dataBaseDialect);
-            return metaDataUtil;
-
-        }catch (ClassNotFoundException e){
-            e.printStackTrace();
+        DataBaseDialect dataBaseDialect = null;
+        if(this.dataBaseProperties.getDataBaseType().equals(MYSQL)){
+            dataBaseDialect = new MySQLDialect();
+        } else if(this.dataBaseProperties.getDataBaseType().equals(ORACLE)){
+            dataBaseDialect = new OracleDialect();
+        } else if(this.dataBaseProperties.getDataBaseType().equals(MSSQL)){
+            dataBaseDialect = new MSSQLDialect();
         }
 
-        return null;
+        MetaDataUtil metaDataUtil = new MetaDataUtil();
+        metaDataUtil.setDataBaseConnectProperties(dataBaseProperties);
+        if(usePool){
+            metaDataUtil.setDataSource(createDataSource());
+        }
+        metaDataUtil.setDataBaseDialect(dataBaseDialect);
+        return metaDataUtil;
     }
 }

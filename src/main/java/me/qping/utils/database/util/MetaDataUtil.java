@@ -1,13 +1,10 @@
 package me.qping.utils.database.util;
 
-import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.metadata.bean.*;
-import me.qping.utils.database.util.CrudUtil;
 
 import java.sql.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MetaDataUtil extends CrudUtil {
 
@@ -47,14 +44,32 @@ public class MetaDataUtil extends CrudUtil {
         return names;
     };
 
-    public List<TableMeta> getObjects(DataBaseConnectPropertes connectType, String catalog, String schema, String[] types){
-        try {
-            Class.forName(connectType.getDriver());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+    /**
+     *
+     * @param types 典型的类型是 "TABLE"、"VIEW"、"SYSTEM TABLE"、"GLOBAL TEMPORARY"、"LOCAL TEMPORARY"、"ALIAS" 和 "SYNONYM"。
+     * @return
+     * @throws SQLException
+     */
+    public List<TableMeta> getObjects(String[] types) throws SQLException {
+        return getObjects(null, null, types);
+    }
+
+    /**
+     *
+     * @param catalog
+     * @param schema
+     * @param types 典型的类型是 "TABLE"、"VIEW"、"SYSTEM TABLE"、"GLOBAL TEMPORARY"、"LOCAL TEMPORARY"、"ALIAS" 和 "SYNONYM"。
+     * @return
+     * @throws SQLException
+     */
+    public List<TableMeta> getObjects(String catalog, String schema, String[] types) throws SQLException {
+
+        if(catalog == null && schema == null){
+            catalog = dataBaseConnectProperties.getCatalog();
+            schema = dataBaseConnectProperties.getSchema();
         }
 
-        try (Connection connection = DriverManager.getConnection(connectType.getUrl(), dataBaseDialect.getConnectionProperties(connectType))) {
+        try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), dataBaseDialect.getConnectionProperties(dataBaseConnectProperties))) {
             DatabaseMetaData metadata = connection.getMetaData();
             ResultSet tableInfo = metadata.getTables(catalog, schema, "%", types);
             List<TableMeta> list = new ArrayList<>();
@@ -64,51 +79,44 @@ public class MetaDataUtil extends CrudUtil {
                 TableMeta tableMeta = TableMeta.of(
                         tableInfo.getString("TABLE_CAT"),
                         tableInfo.getString("TABLE_SCHEM"),
-                        tableName.toUpperCase(),
+                        tableName,
                         tableName.toLowerCase(),
                         tableInfo.getString("TABLE_TYPE"),  // 表类型
                         tableInfo.getString("REMARKS"),     // 表注释
-                        connectType.getDataBaseType()
+                        dataBaseConnectProperties.getDataBaseType()
                 );
                 list.add(tableMeta);
             }
             return list;
 
         } catch (SQLException e) {
-            e.printStackTrace();
+           throw e;
         }
-        return null;
     }
 
-    public List<TableMeta> getTables(){
-        return getObjects(dataBaseConnectProperties, dataBaseConnectProperties.getCatalog(), dataBaseConnectProperties.getSchema(), new String[]{TYPE_TABLE});
+
+    public List<TableMeta> getTables() throws SQLException {
+        return getObjects(new String[]{TYPE_TABLE});
     }
 
-    public List<TableMeta> getViews(){
-        return getObjects(dataBaseConnectProperties, dataBaseConnectProperties.getCatalog(), dataBaseConnectProperties.getSchema(), new String[]{TYPE_VIEW});
+    public List<TableMeta> getViews() throws SQLException {
+        return getObjects(new String[]{TYPE_VIEW});
     }
 
-    public List<TableMeta> getTables(String catalog, String schema){
-        return getObjects(dataBaseConnectProperties, catalog, schema, new String[]{TYPE_TABLE});
+    public List<TableMeta> getViews(String catalog, String schema) throws SQLException {
+        return getObjects(catalog, schema, new String[]{TYPE_VIEW});
     }
 
-    public TableMeta getTableInfo(String tableName){
-        return getTableInfo(tableName, null);
+    public List<TableMeta> getTables(String catalog, String schema) throws SQLException {
+        return getObjects(catalog, schema, new String[]{TYPE_TABLE});
     }
 
-    public TableMeta getTableInfo(String tableName, List<String> excludeColumns){
-        return getTableInfo(dataBaseConnectProperties.getCatalog(), dataBaseConnectProperties.getSchema(), tableName, excludeColumns);
+    public TableMeta getTableInfo(String tableName) throws SQLException {
+        return getTableInfo(null, null, tableName);
     }
 
-    public TableMeta getTableInfo(String catalog, String schema, String tableName, List<String> excludeColumns) {
-
-        tableName = tableName.toUpperCase();
-        try {
-            Class.forName(dataBaseConnectProperties.getDriver());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
+    public TableMeta getTableInfo(String catalog, String schema, String tableName) throws SQLException {
+//        tableName = tableName.toUpperCase();
         try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), dataBaseDialect.getConnectionProperties(dataBaseConnectProperties))){
             TableMeta tableMeta = new TableMeta();
 
@@ -128,7 +136,7 @@ public class MetaDataUtil extends CrudUtil {
                 tableMeta = TableMeta.of(
                         tableInfo.getString("TABLE_CAT"),
                         tableInfo.getString("TABLE_SCHEM"),
-                        tableName.toUpperCase(),
+                        tableName,
                         tableName.toLowerCase(),
                         tableInfo.getString("TABLE_TYPE"),  // 表类型
                         tableInfo.getString("REMARKS"),     // 表注释
@@ -146,13 +154,10 @@ public class MetaDataUtil extends CrudUtil {
 
                 PrimaryKeyMeta primaryKeyMeta = PrimaryKeyMeta.of(primaryKeyColumnName, keySeq);
                 primaryKeyMetas.add(primaryKeyMeta);
-                primaryKeySet.add(primaryKeyColumnName.toUpperCase());
+                primaryKeySet.add(primaryKeyColumnName);
             }
 
             List<ColumnMeta> columnMetas = new ArrayList<>();
-            if(excludeColumns != null){
-                excludeColumns = excludeColumns.stream().map(v -> v.toUpperCase()).collect(Collectors.toList());
-            }
             ResultSet columnsInfo = metadata.getColumns(catalog, schema, tableName,"%");
 
             while(columnsInfo.next()){
@@ -161,12 +166,6 @@ public class MetaDataUtil extends CrudUtil {
                 String columnType = columnsInfo.getString("TYPE_NAME");
 
                 columnType = columnType.toLowerCase();
-                columnName = columnName.toUpperCase();
-
-                if(excludeColumns != null && excludeColumns.contains(columnName)){
-                    continue;
-                }
-
 
                 int size = columnsInfo.getInt("COLUMN_SIZE");
                 int digits = columnsInfo.getInt("DECIMAL_DIGITS");
@@ -177,34 +176,35 @@ public class MetaDataUtil extends CrudUtil {
 
                 boolean isPrimaryKey = primaryKeySet.contains(columnName);
 
-                columnMetas.add(ColumnMeta.of(columnName.toUpperCase(), columnType, remarks, size, digits, nullable == 1,
+                columnMetas.add(ColumnMeta.of(columnName, columnType, remarks, size, digits, nullable == 1,
                         isPrimaryKey, fieldType.getJavaType(), fieldType.getJavaPackage(), fieldType.isDate(), fieldType.getSqlType(), fieldType.getColumnDefinition()));
             }
+
+//            ResultSet foreignKeys = metadata.getImportedKeys(catalog, schema, tableName);
+//            while(foreignKeys.next()){
+//
+//            }
 
             tableMeta.setColumns(columnMetas);
             tableMeta.setPrimaryKeys(primaryKeyMetas);
 
             return tableMeta;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return null;
     }
 
-    public ResultAndMeta queryArrayAndMeta(String sql, Object... paramters) throws SQLException {
-        return queryArrayAndMeta(null, null, sql, paramters);
+    public Map<String, Object> queryListAndMeta(String sql, Object... paramters) throws SQLException {
+        return queryListAndMeta(null, null, sql, paramters);
     }
 
-    public ResultAndMeta queryArrayAndMeta(String catalogName, String schemaName, String sql, Object... paramters) throws SQLException {
+    public Map<String, Object> queryListAndMeta(String catalogName, String schemaName, String sql, Object... paramters) throws SQLException {
 
         try(Connection connection = getConnection()){
 
             if(catalogName != null || schemaName != null){
                 switchTo(connection, catalogName, schemaName);
             }
-
-            List<Object[]> result = new ArrayList<>();
 
             PreparedStatement ps = connection.prepareStatement(sql);
             prepareParameters(ps, paramters);
@@ -223,22 +223,25 @@ public class MetaDataUtil extends CrudUtil {
                 int precision = metaData.getPrecision(i + 1);
                 int scale = metaData.getScale(i + 1);
 
-                ResultSetColumnMeta columnMeta = ResultSetColumnMeta.of(name, typeName, scale, precision, className);
+                ResultSetColumnMeta columnMeta = ResultSetColumnMeta.of(name, typeName, precision, scale, className);
                 columnMetaList.add(columnMeta);
             }
 
+
+            List<Map<String, Object>> resultData = new ArrayList<>();
             while (rs.next()) {
-                Object[] values = new Object[columnCount];
+                Map<String, Object> map = new HashMap<String, Object>();
                 for (int i = 0; i < columnCount; i++) {
-                    values[i] = rs.getObject(i + 1);
+                    String label = metaData.getColumnLabel(i + 1);
+                    map.put(label, rs.getObject(label));
                 }
-                result.add(values);
+                resultData.add(map);
             }
 
-            ResultAndMeta resultAndMeta = new ResultAndMeta();
-            resultAndMeta.setResult(result);
-            resultAndMeta.setColumnMetaList(columnMetaList);
-            return resultAndMeta;
+            Map<String, Object> res = new HashMap<>();
+            res.put("columnMetaList", columnMetaList);
+            res.put("result", resultData);
+            return res;
 
         } catch (SQLException e) {
             throw e;
