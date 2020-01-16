@@ -20,9 +20,9 @@ public class TestQueryOne {
     public void testQueryOne() throws ClassNotFoundException, IllegalAccessException, SQLException, InstantiationException, OrmException {
 
         CrudUtil crud = DataBaseUtilBuilder.init(
-                "jdbc:mysql://192.168.80.20:30306/disease_report?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false",
-                "root",
-                "rxthinkingmysql"
+                "jdbc:mysql://127.0.0.1:3306/?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false",
+                "",
+                ""
         ).buildCrudUtil();
 
 
