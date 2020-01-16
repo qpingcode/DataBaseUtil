@@ -58,6 +58,7 @@ Map<String, Object> row = crud.queryOne("select * from student where id = ?", 1)
 List<Map<String, Object>> rows = crud.queryList("select * from student where age > ?", 12);
 
 // 查询单挑记录并转换为bean
+// 在类中使用 @DatabaseColumn 注解标注转换关系
 T row = crud.queryOne(T.class, "select * from student where id = 1");
 
 // 查询并转换为bean的列表
