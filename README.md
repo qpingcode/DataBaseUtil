@@ -19,37 +19,32 @@
 ``` java
 
 // mysql
-DataBase dataBase = DataBase
-    .builder()
+CrudUtil crud = DataBaseUtilBuilder
     .mysql("locahost", "3306", "database", "username", "password")
-    .build();
+    .buildCrudUtil();
     
 // oracle
-DataBase dataBase = DataBase
-    .builder()
+CrudUtil crud = DataBaseUtilBuilder
     .oracle("locahost", "1521", "oracle_service_name", "username", "password")
-    .build();  
+    .buildCrudUtil();  
     
-DataBase dataBase = DataBase
-    .builder()
+CrudUtil crud = DataBaseUtilBuilder
     .oracle("locahost", "1521", fasle, "oracle_sid", "username", "password")
-    .build();  
+    .buildCrudUtil();  
     
 // sqlserver
-DataBase dataBase = DataBase
-    .builder()
+CrudUtil crud = DataBaseUtilBuilder
     .mssql("locahost", "1433", "database", "username", "password")
-    .build(); 
+    .buildCrudUtil(); 
 ```
 
 2019-10-17 新增通过连接串初始化的方式
 
 ``` java
 //sqlserver 其他类似
-DataBase dataBase = DataBase
-    .builder()
-    .smartInit("jdbc:sqlserver://localhost:1433;DatabaseName=MY_DB", "username", "password")
-    .build(); 
+CrudUtil crud = DataBaseUtilBuilder
+    .init("jdbc:sqlserver://localhost:1433;DatabaseName=MY_DB", "username", "password")
+    .buildCrudUtil(); 
 ```
 
 第三步：调用增删改查
@@ -57,10 +52,10 @@ DataBase dataBase = DataBase
 查询：
 ``` java
 // 查询单条记录
-Map<String, Object> row = dataBase.queryOne("select * from student where id = ?", 1);
+Map<String, Object> row = crud.queryOne("select * from student where id = ?", 1);
 
 // 查询多条记录
-List<Map<String, Object>> rows = dataBase.queryList("select * from student where age > ?", 12);
+List<Map<String, Object>> rows = crud.queryList("select * from student where age > ?", 12);
         
 ```
 
@@ -68,7 +63,7 @@ List<Map<String, Object>> rows = dataBase.queryList("select * from student where
 ``` java
 
 // 插入一条
-dataBase.update("insert into student(id,age,name) values(?,?,?)", 1, 12, "小明");
+crud.update("insert into student(id,age,name) values(?,?,?)", 1, 12, "小明");
 
 
 // 插入多条
@@ -78,13 +73,13 @@ params.add(new Object[]{1, 12, "小明"});
 params.add(new Object[]{2, 14, "小红"});
 params.add(new Object[]{3, 7, "小张"});
 
-dataBase.updateBatch("insert into student(id,age,name) values(?,?,?)", params);
+crud.updateBatch("insert into student(id,age,name) values(?,?,?)", params);
 
 // 修改
-dataBase.update("update student set name = '小明1' where id = 1");
+crud.update("update student set name = '小明1' where id = 1");
 
 // 删除
-dataBase.update("delete from student where id = 1");
+crud.update("delete from student where id = 1");
 
 ```
 
@@ -93,24 +88,39 @@ dataBase.update("delete from student where id = 1");
 
 首先构造元数据工具对象 DataBaseMetaData， 以下是 mysql 的例子（oracle、sqlserver与之类似）
 ``` java
-DataBaseMetaData metadata = DataBaseMetaData
-    .builder()
+MetaDataUtil metadata = DataBaseUtilBuilder
     .mysql("localhost", "3306", "test", "root", "root")
     .build();
 
 ```
 
+获取所有的catalog
+``` java
+List<String> tables = metadata.getCatalogs();
+```
+
+获取某个catalog下所有的schema
+``` java
+List<String> tables = metadata.getSchemas("schemaName");
+```
+
+
 获取所有表的列表
 ``` java
 // 获取所有表
-List<TableMeta> tables = metadata.listTable(DataBaseMetaData.TYPE_TABLE);
+List<TableMeta> tables = metadata.getTables();
+
 // 获取所有视图
-List<TableMeta> views = metadata.listTable(DataBaseMetaData.TYPE_VIEW);
+List<TableMeta> views = metadata.getViews();
+
+// 获取某个catalog、schema下所有的表信息
+List<TableMeta> tables = metadata.getTables("catalogName", "schemName");
 ```
 
 获取表的详细信息，包含列的信息等
 ``` java
-TableMeta table = metadata.analyze( "table_name");
+TableMeta table = metadata.getTableInfo( "catalogName", "schemName", table_name");
+TableMeta table = metadata.getTableInfo( "table_name");
 System.out.println(table.getColumns().size());
 ```
 
