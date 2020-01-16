@@ -248,6 +248,47 @@ public class MetaDataUtil extends CrudUtil {
         }
     }
 
+    public void queryListAndMeta(Callback callback, String sql, Object... paramters) throws SQLException {
+
+        try(Connection connection = getConnection()){
+
+            PreparedStatement ps = connection.prepareStatement(sql);
+            prepareParameters(ps, paramters);
+
+            ResultSet rs = ps.executeQuery();
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            List<ResultSetColumnMeta> columnMetaList = new ArrayList<>();
+            for(int i = 0; i < columnCount; i++){
+                String name = metaData.getColumnName(i + 1);
+                int type = metaData.getColumnType(i + 1);
+                String className = metaData.getColumnClassName(i + 1);
+                String label = metaData.getColumnLabel(i + 1);
+                String typeName = metaData.getColumnTypeName(i + 1);
+                int precision = metaData.getPrecision(i + 1);
+                int scale = metaData.getScale(i + 1);
+
+                ResultSetColumnMeta columnMeta = ResultSetColumnMeta.of(name, typeName, precision, scale, className);
+                columnMetaList.add(columnMeta);
+            }
+
+            while (rs.next()) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                for (int i = 0; i < columnCount; i++) {
+                    String label = metaData.getColumnLabel(i + 1);
+                    map.put(label, rs.getObject(label));
+                }
+                callback.next(map, columnMetaList);
+            }
+
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
+
+
     private void switchTo(Connection connection, String catalogName, String schemaName) throws SQLException {
         DataBaseType dataBaseType = getDataBaseConnectType();
         switch (dataBaseType){

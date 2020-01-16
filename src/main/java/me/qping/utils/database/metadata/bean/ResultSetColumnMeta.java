@@ -19,7 +19,6 @@ public class ResultSetColumnMeta {
     int digits;
     String javaPackage;
 
-
     public static ResultSetColumnMeta of(String name, String type, int size, int digits, String javaPackage){
         ResultSetColumnMeta columnMeta = new ResultSetColumnMeta();
         columnMeta.setName(name);
