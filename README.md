@@ -56,6 +56,12 @@ Map<String, Object> row = crud.queryOne("select * from student where id = ?", 1)
 
 // 查询多条记录
 List<Map<String, Object>> rows = crud.queryList("select * from student where age > ?", 12);
+
+// 查询单挑记录并转换为bean
+T row = crud.queryOne(T.class, "select * from student where id = 1");
+
+// 查询并转换为bean的列表
+List<T> rows = crud.queryList(T.class, "select * from student");
         
 ```
 
