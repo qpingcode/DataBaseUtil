@@ -273,14 +273,18 @@ public class MetaDataUtil extends CrudUtil {
                 columnMetaList.add(columnMeta);
             }
 
+            int total = 0;
             while (rs.next()) {
                 Map<String, Object> map = new HashMap<String, Object>();
                 for (int i = 0; i < columnCount; i++) {
                     String label = metaData.getColumnLabel(i + 1);
                     map.put(label, rs.getObject(label));
                 }
-                callback.next(map, columnMetaList);
+                callback.next(map, columnMetaList, total);
+                total++;
             }
+
+            callback.finish(total);
 
         } catch (SQLException e) {
             throw e;

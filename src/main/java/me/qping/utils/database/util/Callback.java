@@ -13,5 +13,6 @@ import java.util.Map;
  * @Version 1.0
  **/
 public interface Callback {
-    void next(Map<String, Object> map, List<ResultSetColumnMeta> columnMetaList);
+    void next(Map<String, Object> map, List<ResultSetColumnMeta> columnMetaList, int index);
+    void finish(int total);
 }
