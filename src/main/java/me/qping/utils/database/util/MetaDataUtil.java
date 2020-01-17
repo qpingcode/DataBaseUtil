@@ -213,20 +213,7 @@ public class MetaDataUtil extends CrudUtil {
             ResultSetMetaData metaData = rs.getMetaData();
             int columnCount = metaData.getColumnCount();
 
-            List<ResultSetColumnMeta> columnMetaList = new ArrayList<>();
-            for(int i = 0; i < columnCount; i++){
-                String name = metaData.getColumnName(i + 1);
-                int type = metaData.getColumnType(i + 1);
-                String className = metaData.getColumnClassName(i + 1);
-                String label = metaData.getColumnLabel(i + 1);
-                String typeName = metaData.getColumnTypeName(i + 1);
-                int precision = metaData.getPrecision(i + 1);
-                int scale = metaData.getScale(i + 1);
-
-                ResultSetColumnMeta columnMeta = ResultSetColumnMeta.of(name, typeName, precision, scale, className);
-                columnMetaList.add(columnMeta);
-            }
-
+            List<ResultSetColumnMeta> columnMetaList = getResultColumnMeta(metaData);
 
             List<Map<String, Object>> resultData = new ArrayList<>();
             while (rs.next()) {
@@ -248,7 +235,7 @@ public class MetaDataUtil extends CrudUtil {
         }
     }
 
-    public void queryListAndMeta(Callback callback, String sql, Object... paramters) throws SQLException {
+    public void queryListAndMeta(CallbackList callback, String sql, Object... paramters) throws SQLException {
 
         try(Connection connection = getConnection()){
 
@@ -259,19 +246,7 @@ public class MetaDataUtil extends CrudUtil {
             ResultSetMetaData metaData = rs.getMetaData();
             int columnCount = metaData.getColumnCount();
 
-            List<ResultSetColumnMeta> columnMetaList = new ArrayList<>();
-            for(int i = 0; i < columnCount; i++){
-                String name = metaData.getColumnName(i + 1);
-                int type = metaData.getColumnType(i + 1);
-                String className = metaData.getColumnClassName(i + 1);
-                String label = metaData.getColumnLabel(i + 1);
-                String typeName = metaData.getColumnTypeName(i + 1);
-                int precision = metaData.getPrecision(i + 1);
-                int scale = metaData.getScale(i + 1);
-
-                ResultSetColumnMeta columnMeta = ResultSetColumnMeta.of(name, typeName, precision, scale, className);
-                columnMetaList.add(columnMeta);
-            }
+            List<ResultSetColumnMeta> columnMetaList = getResultColumnMeta(metaData);
 
             int total = 0;
             while (rs.next()) {
@@ -290,6 +265,55 @@ public class MetaDataUtil extends CrudUtil {
             throw e;
         }
     }
+
+    private List<ResultSetColumnMeta> getResultColumnMeta(ResultSetMetaData metaData) throws SQLException {
+        List<ResultSetColumnMeta> columnMetaList = new ArrayList<>();
+        for(int i = 0; i < metaData.getColumnCount(); i++){
+            String name = metaData.getColumnName(i + 1);
+            int type = metaData.getColumnType(i + 1);
+            String className = metaData.getColumnClassName(i + 1);
+            String label = metaData.getColumnLabel(i + 1);
+            String typeName = metaData.getColumnTypeName(i + 1);
+            int precision = metaData.getPrecision(i + 1);
+            int scale = metaData.getScale(i + 1);
+
+            ResultSetColumnMeta columnMeta = ResultSetColumnMeta.of(name, typeName, precision, scale, className);
+            columnMetaList.add(columnMeta);
+        }
+        return columnMetaList;
+    }
+    
+    public void queryArrayAndMeta(CallbackArray callback, String sql, Object... paramters) throws SQLException {
+
+        try(Connection connection = getConnection()){
+            PreparedStatement ps = connection.prepareStatement(sql);
+            prepareParameters(ps, paramters);
+
+            ResultSet rs = ps.executeQuery();
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            List<ResultSetColumnMeta> columnMetaList = getResultColumnMeta(metaData);
+
+            int total = 0;
+            while (rs.next()) {
+                Object[] objects = new Object[columnCount];
+
+                for (int i = 0; i < columnCount; i++) {
+                    String label = metaData.getColumnLabel(i + 1);
+                    objects[i] = rs.getObject(label);
+                }
+                callback.next(objects, columnMetaList, total);
+                total++;
+            }
+
+            callback.finish(total);
+
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
 
 
 
