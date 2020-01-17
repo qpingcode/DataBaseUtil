@@ -282,7 +282,7 @@ public class MetaDataUtil extends CrudUtil {
         }
         return columnMetaList;
     }
-    
+
     public void queryArrayAndMeta(CallbackArray callback, String sql, Object... paramters) throws SQLException {
 
         try(Connection connection = getConnection()){
