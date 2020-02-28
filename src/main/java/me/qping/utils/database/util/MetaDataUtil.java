@@ -112,7 +112,10 @@ public class MetaDataUtil extends CrudUtil {
     }
 
     public TableMeta getTableInfo(String tableName) throws SQLException {
-        return getTableInfo(null, null, tableName);
+
+        String catalog = getDataBaseConnectProperties().getCatalog();
+        String schema = getDataBaseConnectProperties().getSchema();
+        return getTableInfo(catalog, schema, tableName);
     }
 
     public TableMeta getTableInfo(String catalog, String schema, String tableName) throws SQLException {
@@ -130,7 +133,7 @@ public class MetaDataUtil extends CrudUtil {
              */
             String[] types = {"TABLE", "VIEW"};
 
-            ResultSet tableInfo = metadata.getTables(catalog, schema, tableName, types);
+            ResultSet tableInfo = metadata.getTables(catalog, schema, tableName.toUpperCase(), types);
             if(tableInfo.next()){
 
                 tableMeta = TableMeta.of(
@@ -146,7 +149,8 @@ public class MetaDataUtil extends CrudUtil {
 
             List<PrimaryKeyMeta> primaryKeyMetas = new ArrayList<>();
             Set<String> primaryKeySet = new HashSet<>();
-            ResultSet primaryKeyResultSet = metadata.getPrimaryKeys(catalog, schema, tableName);
+            //tableName.toUpperCase() 解决oracle下小写表名无法查询的bug
+            ResultSet primaryKeyResultSet = metadata.getPrimaryKeys(catalog, schema, tableName.toUpperCase());
             while(primaryKeyResultSet.next()){
                 String primaryKeyColumnName = primaryKeyResultSet.getString("COLUMN_NAME");
                 String pkName = primaryKeyResultSet.getString("PK_NAME");
@@ -158,7 +162,7 @@ public class MetaDataUtil extends CrudUtil {
             }
 
             List<ColumnMeta> columnMetas = new ArrayList<>();
-            ResultSet columnsInfo = metadata.getColumns(catalog, schema, tableName,"%");
+            ResultSet columnsInfo = metadata.getColumns(catalog, schema, tableName.toUpperCase(),"%");
 
             while(columnsInfo.next()){
 
@@ -180,7 +184,7 @@ public class MetaDataUtil extends CrudUtil {
                         isPrimaryKey, fieldType.getJavaType(), fieldType.getJavaPackage(), fieldType.isDate(), fieldType.getSqlType(), fieldType.getColumnDefinition()));
             }
 
-//            ResultSet foreignKeys = metadata.getImportedKeys(catalog, schema, tableName);
+//            ResultSet foreignKeys = metadata.getImportedKeys(catalog, schema, tableName.toUpperCase());
 //            while(foreignKeys.next()){
 //
 //            }
