@@ -120,6 +120,18 @@ public class MetaDataUtil extends CrudUtil {
 
     public TableMeta getTableInfo(String catalog, String schema, String tableName) throws SQLException {
 //        tableName = tableName.toUpperCase();
+
+        /*
+            oracle：默认不区分大小写
+            mysql： windows下不区分大小写，linux下数据库名、表名、表别名、变量名区分大小写，列名不区分
+            sqlserver：默认不区分大小写， 可以通过修改排序规则改变： 右击数据库>属性>选项>排序规则： Chinese_PRC_CS_AS 区分大小写、 Chinese_PRC_CI_AS 不区分大小写
+         */
+
+        // oracle下小写表名无法查询的bug，只有oracle的驱动会出现这种问题
+        if(dataBaseConnectProperties.getDataBaseType().equals(DataBaseType.ORACLE)){
+            tableName = tableName.toUpperCase();
+        }
+
         try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), dataBaseDialect.getConnectionProperties(dataBaseConnectProperties))){
             TableMeta tableMeta = new TableMeta();
 
@@ -133,7 +145,7 @@ public class MetaDataUtil extends CrudUtil {
              */
             String[] types = {"TABLE", "VIEW"};
 
-            ResultSet tableInfo = metadata.getTables(catalog, schema, tableName.toUpperCase(), types);
+            ResultSet tableInfo = metadata.getTables(catalog, schema, tableName, types);
             if(tableInfo.next()){
 
                 tableMeta = TableMeta.of(
@@ -149,8 +161,8 @@ public class MetaDataUtil extends CrudUtil {
 
             List<PrimaryKeyMeta> primaryKeyMetas = new ArrayList<>();
             Set<String> primaryKeySet = new HashSet<>();
-            //tableName.toUpperCase() 解决oracle下小写表名无法查询的bug
-            ResultSet primaryKeyResultSet = metadata.getPrimaryKeys(catalog, schema, tableName.toUpperCase());
+
+            ResultSet primaryKeyResultSet = metadata.getPrimaryKeys(catalog, schema, tableName);
             while(primaryKeyResultSet.next()){
                 String primaryKeyColumnName = primaryKeyResultSet.getString("COLUMN_NAME");
                 String pkName = primaryKeyResultSet.getString("PK_NAME");
@@ -162,7 +174,7 @@ public class MetaDataUtil extends CrudUtil {
             }
 
             List<ColumnMeta> columnMetas = new ArrayList<>();
-            ResultSet columnsInfo = metadata.getColumns(catalog, schema, tableName.toUpperCase(),"%");
+            ResultSet columnsInfo = metadata.getColumns(catalog, schema, tableName,"%");
 
             while(columnsInfo.next()){
 
@@ -196,6 +208,49 @@ public class MetaDataUtil extends CrudUtil {
         } catch (SQLException e) {
             throw e;
         }
+    }
+
+    public List<ResultSetColumnMeta> queryColumnMeta(String catalogName, String schemaName, String sql, Object... paramters)throws SQLException {
+        try(Connection connection = getConnection()){
+
+            if(catalogName != null || schemaName != null){
+                switchTo(connection, catalogName, schemaName);
+            }
+
+            sql = wrapperSQL(sql, getDataBaseConnectType());
+
+            PreparedStatement ps = connection.prepareStatement(sql);
+            prepareParameters(ps, paramters);
+
+
+            ResultSet rs = ps.executeQuery();
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            List<ResultSetColumnMeta> columnMetaList = getResultColumnMeta(metaData);
+            return columnMetaList;
+
+        }catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    private String wrapperSQL(String sql, DataBaseType dbtype) throws SQLException {
+        switch (dbtype ){
+            case MYSQL:
+                sql = "select * from (" + sql + ") _temp limit 0";
+                break;
+            case MSSQL:
+                sql = "select top 0 * from (" + sql + ") _temp ";
+                break;
+            case ORACLE:
+                sql = "select * from (" + sql + ") _temp where _temp.rownum < 0";
+                break;
+            default:
+                throw new SQLException(dbtype.toString() + " must implement function wrapperSQL(sql, dbtype)");
+        }
+
+        return sql;
     }
 
     public Map<String, Object> queryListAndMeta(String sql, Object... paramters) throws SQLException {

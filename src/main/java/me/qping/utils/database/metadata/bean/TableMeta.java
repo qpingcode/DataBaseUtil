@@ -1,8 +1,11 @@
 package me.qping.utils.database.metadata.bean;
 
+import com.alibaba.druid.util.StringUtils;
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseType;
 
+import java.sql.SQLType;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +31,31 @@ public class TableMeta {
     List<ColumnMeta> columns;
 
 
+    public void addColumn(String name, String type, String comment, int size, int digits, boolean nullable, boolean isPrimaryKey){
+        if(columns == null){
+            columns = new ArrayList<>();
+        }
+
+        List<ColumnMeta> list = columns.stream().filter(v -> v.getName().equals(name)).collect(Collectors.toList());
+
+        if(list.size() > 0){
+            System.out.println("cannt duplicate add column ： " + name);
+            return;
+        }
+
+        ColumnMeta col = new ColumnMeta();
+        col.setName(name);
+        col.setType(type);
+        col.setComment(comment);
+        col.setSize(size);
+        col.setDigits(digits);
+        col.setNullable(nullable);
+        col.setPrimaryKey(isPrimaryKey);
+
+        columns.add(col);
+    }
+
+
     public static TableMeta of(String catalog, String schema, String name, String nameLower, String type, String comment, DataBaseType databaseType){
 
         TableMeta tableMeta = new TableMeta();
@@ -42,6 +70,33 @@ public class TableMeta {
         return tableMeta;
     }
 
+    public String createCreateSQL(){
+
+        StringBuffer sql = new StringBuffer();
+
+        sql.append("CREATE TABLE ").append(name);
+        sql.append(" ( ");
+
+        for(ColumnMeta col: columns){
+            sql.append(col.getName()).append(" ").append(col.getType());
+
+            if(col.getSize() > 0){
+                sql.append(" (")
+                .append(col.getDigits() > 0 ? col.getSize() + "," + col.getDigits() : col.getSize())
+                .append(")");
+            }
+
+            sql.append(col.isNullable() ? " DEFAULT NULL" : " NOT NULL")
+                .append(StringUtils.isEmpty(col.getComment()) ? "" : " COMMENT '" + col.getComment() + "'")
+                .append(",");
+        }
+
+        sql.deleteCharAt(sql.length() - 1);
+        sql.append(" ) ");
+
+        return sql.toString();
+
+    }
     public String createInsertSQL(){
         return createInsertSQL(null);
     }
