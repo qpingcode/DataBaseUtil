@@ -16,7 +16,7 @@ public class BeanField {
 
     boolean userDefineIndex = false;
 
-    public BeanField(Field field, DatabaseColumn column) {
+    public BeanField(Field field, DataBaseColumn column) {
         this.name = column.value();
         this.field = field;
     }

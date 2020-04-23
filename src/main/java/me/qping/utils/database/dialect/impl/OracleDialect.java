@@ -60,17 +60,17 @@ public class OracleDialect implements DataBaseDialect {
                 || columnType.startsWith("mediumtext")
                 || columnType.startsWith("longtext")
                 ){
-            return FieldType.of(false, null, "String", JDBCType.VARCHAR, origin, null);
+            return FieldType.of(false, "java.lang.String", null, "String", JDBCType.VARCHAR, origin, null);
         }
 
 
         if(columnType.startsWith("long")){
-            return FieldType.of(false, null, "Long", JDBCType.INTEGER, origin, null);
+            return FieldType.of(false, "java.lang.Long", null, "Long", JDBCType.INTEGER, origin, null);
         }
 
         if(columnType.startsWith("number")){
             // number 根据位数不同还可以转换为 boolean byte short int long float double
-            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin, null);
+            return FieldType.of(false, "java.math.BigDecimal", "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin, null);
         }
 
         if(columnType.startsWith("raw")
@@ -78,7 +78,7 @@ public class OracleDialect implements DataBaseDialect {
                 || columnType.startsWith("blob")
                 || columnType.startsWith("Clob")
                 ){
-            return FieldType.of(false, null, "byte[]", JDBCType.BINARY, origin, null);
+            return FieldType.of(false, "byte", null, "byte[]", JDBCType.BINARY, origin, null);
         }
 
 
@@ -87,15 +87,15 @@ public class OracleDialect implements DataBaseDialect {
                 || columnType.startsWith("timestamp with time zone")
                 || columnType.startsWith("timestamp with local time zon")
                 ){
-            return FieldType.of(true, "java.util.Date", "Date", JDBCType.DATE, origin, null);
+            return FieldType.of(true, "java.util.Date", "java.util.Date", "Date", JDBCType.DATE, origin, null);
         }
 
         if(columnType.startsWith("binary_float")){
-            return FieldType.of(false, null, "Float", JDBCType.FLOAT, origin, null);
+            return FieldType.of(false, "java.lang.Float", null, "Float", JDBCType.FLOAT, origin, null);
         }
 
         if(columnType.startsWith("binary_double")){
-            return FieldType.of(false, null, "Double", JDBCType.DOUBLE, origin, null);
+            return FieldType.of(false, "java.lang.Double", null, "Double", JDBCType.DOUBLE, origin, null);
         }
 
         return FieldType.error(origin);

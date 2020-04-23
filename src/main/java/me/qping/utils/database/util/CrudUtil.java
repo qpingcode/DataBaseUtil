@@ -1,21 +1,14 @@
 package me.qping.utils.database.util;
 
 import lombok.Data;
-import me.qping.utils.database.DataBaseUtilBuilder;
 import me.qping.utils.database.bean.BeanConversion;
-import me.qping.utils.database.bean.BeanField;
-import me.qping.utils.database.bean.DatabaseColumn;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.dialect.DataBaseDialect;
 import me.qping.utils.database.exception.OrmException;
 
 import javax.sql.DataSource;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -93,6 +86,33 @@ public class CrudUtil {
             return false;
         }
     }
+
+
+    public QueryBatch openQuery(String sql, Object... parameters) throws SQLException {
+        Connection connection = getConnection();
+        return openQuery(connection, sql, parameters);
+    }
+
+    public QueryBatch openQuery(Connection connection, String sql, Object... parameters) throws SQLException {
+        // JDBC 流式读取
+        PreparedStatement ps = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        prepareParameters(ps, parameters);
+        ps.setFetchSize(0);
+
+        ResultSet rs = ps.executeQuery();
+
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
+        QueryBatch queryBatch = new QueryBatch();
+        queryBatch.setConnection(connection);
+        queryBatch.setPs(ps);
+        queryBatch.setRs(rs);
+        queryBatch.setColumnCount(columnCount);
+
+        return queryBatch;
+    }
+
 
     public <T> T queryOne(Class<T> clazz, String sql, Object... parameters) throws SQLException, IllegalAccessException, InstantiationException, OrmException {
         try(Connection connection = getConnection()){

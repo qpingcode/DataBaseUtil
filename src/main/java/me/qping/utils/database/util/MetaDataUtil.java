@@ -5,6 +5,7 @@ import me.qping.utils.database.metadata.bean.*;
 
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 public class MetaDataUtil extends CrudUtil {
 
@@ -193,7 +194,7 @@ public class MetaDataUtil extends CrudUtil {
                 boolean isPrimaryKey = primaryKeySet.contains(columnName);
 
                 columnMetas.add(ColumnMeta.of(columnName, columnType, remarks, size, digits, nullable == 1,
-                        isPrimaryKey, fieldType.getJavaType(), fieldType.getJavaPackage(), fieldType.isDate(), fieldType.getSqlType(), fieldType.getColumnDefinition()));
+                        isPrimaryKey, fieldType.getJavaFullType(), fieldType.getJavaType(), fieldType.getJavaPackage(), fieldType.isDate(), fieldType.getSqlType(), fieldType.getColumnDefinition()));
             }
 
 //            ResultSet foreignKeys = metadata.getImportedKeys(catalog, schema, tableName.toUpperCase());
@@ -225,7 +226,6 @@ public class MetaDataUtil extends CrudUtil {
 
             ResultSet rs = ps.executeQuery();
             ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
 
             List<ResultSetColumnMeta> columnMetaList = getResultColumnMeta(metaData);
             return columnMetaList;
@@ -294,36 +294,6 @@ public class MetaDataUtil extends CrudUtil {
         }
     }
 
-    public void queryListAndMeta(CallbackList callback, String sql, Object... paramters) throws SQLException {
-
-        try(Connection connection = getConnection()){
-
-            PreparedStatement ps = connection.prepareStatement(sql);
-            prepareParameters(ps, paramters);
-
-            ResultSet rs = ps.executeQuery();
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            List<ResultSetColumnMeta> columnMetaList = getResultColumnMeta(metaData);
-
-            int total = 0;
-            while (rs.next()) {
-                Map<String, Object> map = new HashMap<String, Object>();
-                for (int i = 0; i < columnCount; i++) {
-                    String label = metaData.getColumnLabel(i + 1);
-                    map.put(label, rs.getObject(label));
-                }
-                callback.next(map, columnMetaList, total);
-                total++;
-            }
-
-            callback.finish(total);
-
-        } catch (SQLException e) {
-            throw e;
-        }
-    }
 
     private List<ResultSetColumnMeta> getResultColumnMeta(ResultSetMetaData metaData) throws SQLException {
         List<ResultSetColumnMeta> columnMetaList = new ArrayList<>();
@@ -341,40 +311,6 @@ public class MetaDataUtil extends CrudUtil {
         }
         return columnMetaList;
     }
-
-    public void queryArrayAndMeta(CallbackArray callback, String sql, Object... paramters) throws SQLException {
-
-        try(Connection connection = getConnection()){
-            PreparedStatement ps = connection.prepareStatement(sql);
-            prepareParameters(ps, paramters);
-
-            ResultSet rs = ps.executeQuery();
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            List<ResultSetColumnMeta> columnMetaList = getResultColumnMeta(metaData);
-
-            int total = 0;
-            while (rs.next()) {
-                Object[] objects = new Object[columnCount];
-
-                for (int i = 0; i < columnCount; i++) {
-                    String label = metaData.getColumnLabel(i + 1);
-                    objects[i] = rs.getObject(label);
-                }
-                callback.next(objects, columnMetaList, total);
-                total++;
-            }
-
-            callback.finish(total);
-
-        } catch (SQLException e) {
-            throw e;
-        }
-    }
-
-
-
 
     private void switchTo(Connection connection, String catalogName, String schemaName) throws SQLException {
         DataBaseType dataBaseType = getDataBaseConnectType();

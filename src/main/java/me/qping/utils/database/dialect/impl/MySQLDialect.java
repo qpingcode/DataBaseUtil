@@ -64,7 +64,7 @@ public class MySQLDialect implements DataBaseDialect {
                 || columnType.equals("longtext")
                 ){
             String columnDefine = columnType.equals("varchar") ? null : columnType;
-            return FieldType.of(false, null, "String", JDBCType.VARCHAR, origin, columnDefine);
+            return FieldType.of(false, "java.lang.String", null, "String", JDBCType.VARCHAR, origin, columnDefine);
         }
 
         if(columnType.equals("tinyblob")
@@ -72,11 +72,11 @@ public class MySQLDialect implements DataBaseDialect {
                 || columnType.equals("mediumblob")
                 || columnType.equals("longblob")
                 ){
-            return FieldType.of(false, null, "byte[]", JDBCType.BINARY, origin, null);
+            return FieldType.of(false, "byte", null, "byte[]", JDBCType.BINARY, origin, null);
         }
 
         if(columnType.startsWith("bit")){
-            return FieldType.of(false, null, "Boolean", JDBCType.BIT, origin, null);
+            return FieldType.of(false, "java.lang.Boolean", null, "Boolean", JDBCType.BIT, origin, null);
         }
 
         if(columnType.equals("datetime")
@@ -85,7 +85,7 @@ public class MySQLDialect implements DataBaseDialect {
                 || columnType.equals("time")
                 || columnType.equals("year")
                 ){
-            return FieldType.of(true, "java.util.Date", "Date", JDBCType.DATE, origin, null);
+            return FieldType.of(true, "java.util.Date", "java.util.Date", "Date", JDBCType.DATE, origin, null);
         }
 
         if(columnType.equals("int")
@@ -94,30 +94,29 @@ public class MySQLDialect implements DataBaseDialect {
                 || columnType.equals("bool")
                 || columnType.equals("mediumint")
                 ){
-            return FieldType.of(false, null, "Integer", JDBCType.INTEGER, origin, null);
+            return FieldType.of(false, "java.lang.Integer", null, "Integer", JDBCType.INTEGER, origin, null);
         }
 
         if(columnType.equals("bigint")){
-            return FieldType.of(false, null, "Long", JDBCType.INTEGER, origin, null);
+            return FieldType.of(false, "java.lang.Long", null, "Long", JDBCType.INTEGER, origin, null);
         }
 
 
         if(columnType.equals("float")){
-            return FieldType.of(false, null, "Float", JDBCType.FLOAT, origin, null);
+            return FieldType.of(false, "java.lang.Float", null, "Float", JDBCType.FLOAT, origin, null);
         }
 
         if(columnType.equals("double")){
-            return FieldType.of(false, null, "Double", JDBCType.DOUBLE, origin, null);
+            return FieldType.of(false, "java.lang.Double", null, "Double", JDBCType.DOUBLE, origin, null);
         }
 
         if(columnType.equals("decimal")){
-            return FieldType.of(false, "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin, null);
+            return FieldType.of(false, "java.math.BigDecimal", "java.math.BigDecimal", "BigDecimal", JDBCType.DECIMAL, origin, null);
         }
 
-        switch (columnType){
-        }
         return FieldType.error(origin);
     }
+
 
 
     private String getColumnType(String origin){

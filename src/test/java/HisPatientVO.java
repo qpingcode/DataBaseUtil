@@ -1,4 +1,4 @@
-import me.qping.utils.database.bean.DatabaseColumn;
+import me.qping.utils.database.bean.DataBaseColumn;
 
 /**
  * @ClassName HisPatientVO
@@ -9,55 +9,55 @@ import me.qping.utils.database.bean.DatabaseColumn;
  **/
 public class HisPatientVO {
 
-    @DatabaseColumn(value = "GUARDIAN_NAME")
+    @DataBaseColumn(value = "GUARDIAN_NAME")
     private String guardianName;
 
-    @DatabaseColumn(value = "PATIENT_NAME")
+    @DataBaseColumn(value = "PATIENT_NAME")
     private String patientName;
 
-    @DatabaseColumn(value = "ID_CARD_TYPE")
+    @DataBaseColumn(value = "ID_CARD_TYPE")
     private Integer idCardType;
 
-    @DatabaseColumn(value = "ID_CARD_CODE")
+    @DataBaseColumn(value = "ID_CARD_CODE")
     private String idCardCode;
 
-    @DatabaseColumn(value = "IS_SELF")
+    @DataBaseColumn(value = "IS_SELF")
     private Integer isSelf;
 
-    @DatabaseColumn(value = "GENDE_CODE")
+    @DataBaseColumn(value = "GENDE_CODE")
     private Integer genderCode;
 
-    @DatabaseColumn(value = "BIRTH_DATE")
+    @DataBaseColumn(value = "BIRTH_DATE")
     private String birthDate;
 
-    @DatabaseColumn(value = "EMPLOYER_ORG_NAME")
+    @DataBaseColumn(value = "EMPLOYER_ORG_NAME")
     private String employerOrgName;
 
-    @DatabaseColumn(value = "TELE_COM")
+    @DataBaseColumn(value = "TELE_COM")
     private String teleCom;
 
-    @DatabaseColumn(value = "LIVING_ADDRESS")
+    @DataBaseColumn(value = "LIVING_ADDRESS")
     private String livingAddress;
 
-    @DatabaseColumn(value = "ONSET_DATE")
+    @DataBaseColumn(value = "ONSET_DATE")
     private String onsetDate;
 
-    @DatabaseColumn(value = "DOC_ID")
+    @DataBaseColumn(value = "DOC_ID")
     private String fillingDoctorCode;
 
-    @DatabaseColumn(value = "DOC_NAME")
+    @DataBaseColumn(value = "DOC_NAME")
     private String fillingDoctorName;
 
-    @DatabaseColumn(value = "PATIENT_NO")
+    @DataBaseColumn(value = "PATIENT_NO")
     private String hisPatientNo;
 
-    @DatabaseColumn(value = "DPT_NAME")
+    @DataBaseColumn(value = "DPT_NAME")
     private String hisDeptName;
 
-    @DatabaseColumn(value = "DPT_CODE")
+    @DataBaseColumn(value = "DPT_CODE")
 
     private String hisDeptCode;
-    @DatabaseColumn(value = "YLJGDM")
+    @DataBaseColumn(value = "YLJGDM")
     private String hisYljgdm;
 
     private Integer hisPatientType;

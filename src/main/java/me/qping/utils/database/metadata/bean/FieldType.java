@@ -16,12 +16,13 @@ import java.sql.SQLType;
 public class FieldType {
     boolean isDate = false;
     String columnDefinition;
+    String javaFullType;
     String javaPackage;
     String javaType;
     SQLType sqlType;
     String origin;
 
-    public static FieldType of(boolean isDate, String javaPackage, String javaType, SQLType sqlType, String origin, String columnDefinition){
+    public static FieldType of(boolean isDate, Object javaFullType, String javaPackage, String javaType, SQLType sqlType, String origin, String columnDefinition){
         FieldType t = new FieldType();
         t.setDate(isDate);
         t.setJavaPackage(javaPackage);

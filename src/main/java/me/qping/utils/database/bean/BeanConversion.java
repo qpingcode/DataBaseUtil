@@ -72,12 +72,15 @@ public class BeanConversion {
         Field[] fields = clazz.getDeclaredFields();
         Map<String, Field> beanDefine = new HashMap<>();
         for(Field field : fields){
-            DatabaseColumn column = field.getAnnotation(DatabaseColumn.class);
-            if(column == null){
+            DataBaseColumn[] columns = field.getAnnotationsByType(DataBaseColumn.class);
+//            DatabaseColumn column = field.getAnnotation(DatabaseColumn.class);
+            if(columns == null || columns.length == 0){
                 continue;
             }
             field.setAccessible(true);
-            beanDefine.put(column.value(), field);
+            for(DataBaseColumn column : columns){
+                beanDefine.put(column.value(), field);
+            }
         }
         return beanDefine;
     }

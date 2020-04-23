@@ -17,15 +17,15 @@ public class ResultSetColumnMeta {
     String type;
     int size;
     int digits;
-    String javaPackage;
+    String className;
 
-    public static ResultSetColumnMeta of(String name, String type, int size, int digits, String javaPackage){
+    public static ResultSetColumnMeta of(String name, String type, int size, int digits, String className){
         ResultSetColumnMeta columnMeta = new ResultSetColumnMeta();
         columnMeta.setName(name);
         columnMeta.setType(type);
         columnMeta.setSize(size);
         columnMeta.setDigits(digits);
-        columnMeta.setJavaPackage(javaPackage);
+        columnMeta.setClassName(className);
         return columnMeta;
     }
 
