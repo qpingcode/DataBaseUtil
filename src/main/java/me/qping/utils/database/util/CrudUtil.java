@@ -131,15 +131,13 @@ public class CrudUtil {
 
         ResultSet rs = ps.executeQuery();
         ResultSetMetaData metaData = rs.getMetaData();
-
-        int rows = 0;
         T t = null;
-        while (rs.next()) {
+        if (rs.next()) {
 
-            rows++;
-            if(rows > 1){
-                throw new SQLException("queryOne get rows more that 1!");
-            }
+//            rows++;
+//            if(rows > 1){
+//                throw new SQLException("queryOne get rows more that 1!");
+//            }
             t = BeanConversion.convert(clazz, metaData, rs);
         }
         return t;
@@ -164,15 +162,8 @@ public class CrudUtil {
         int columnCount = metaData.getColumnCount();
 
         Map<String, Object> result = new HashMap<>();
-        int rows = 0;
 
-        while (rs.next()) {
-
-            rows++;
-            if(rows > 1){
-                throw new SQLException("queryOne get rows more that 1!");
-            }
-
+        if (rs.next()) {
             for (int i = 0; i < columnCount; i++) {
                 String label = metaData.getColumnLabel(i + 1);
                 result.put(label, rs.getObject(label));
