@@ -97,7 +97,7 @@ public class CrudUtil {
         // JDBC 流式读取
         PreparedStatement ps = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         prepareParameters(ps, parameters);
-        ps.setFetchSize(0);
+        ps.setFetchSize(Integer.MIN_VALUE);
 
         ResultSet rs = ps.executeQuery();
 

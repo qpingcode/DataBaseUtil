@@ -218,7 +218,7 @@ public class MetaDataUtil extends CrudUtil {
                 switchTo(connection, catalogName, schemaName);
             }
 
-            sql = wrapperSQL(sql, getDataBaseConnectType());
+            sql = getDataBaseDialect().getPageSql(sql, 0, -1);
 
             PreparedStatement ps = connection.prepareStatement(sql);
             prepareParameters(ps, paramters);
@@ -235,23 +235,7 @@ public class MetaDataUtil extends CrudUtil {
         }
     }
 
-    private String wrapperSQL(String sql, DataBaseType dbtype) throws SQLException {
-        switch (dbtype ){
-            case MYSQL:
-                sql = "select * from (" + sql + ") _temp limit 0";
-                break;
-            case MSSQL:
-                sql = "select top 0 * from (" + sql + ") _temp ";
-                break;
-            case ORACLE:
-                sql = "select * from (" + sql + ") _temp where _temp.rownum < 0";
-                break;
-            default:
-                throw new SQLException(dbtype.toString() + " must implement function wrapperSQL(sql, dbtype)");
-        }
 
-        return sql;
-    }
 
     public Map<String, Object> queryListAndMeta(String sql, Object... paramters) throws SQLException {
         return queryListAndMeta(null, null, sql, paramters);

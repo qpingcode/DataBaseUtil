@@ -28,8 +28,17 @@ public class MSSQLDialect implements DataBaseDialect {
     }
 
     @Override
-    public String getTopNSql(String tableName, int rowCount) {
-        return "select top " + rowCount +" * from " + tableName;
+    public String getPageSql(String sql, int pageSize, int pageNum) {
+        int begin = pageSize * pageNum;
+        int end = pageSize * pageNum + pageSize;
+
+        if(pageNum < 0){
+            return "select top " + pageSize + " * from (" + sql + ") tmp_0";
+        }else{
+            return "select * from ( " +
+                    "   select *, ROW_NUMBER() OVER (ORDER BY (select 0)) AS rn from ("+ sql +") tmp_0 " +
+                    " ) as tmp_1 where rn > " + begin +" and rn <= " + end;
+        }
     }
 
     /**

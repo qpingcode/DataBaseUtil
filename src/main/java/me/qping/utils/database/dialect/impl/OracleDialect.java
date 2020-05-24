@@ -26,9 +26,19 @@ public class OracleDialect implements DataBaseDialect {
     } // oracle schema 等同于 user
 
     @Override
-    public String getTopNSql(String tableName, int rowCount) {
-        return "select * from " + tableName + " where rownum < " + rowCount;
+    public String getPageSql(String sql, int pageSize, int pageNum) {
+        int begin = pageSize * pageNum;
+        int end = pageSize * pageNum + pageSize;
+
+        if(pageNum < 0){
+            return "select * from (" + sql + ") where rownum <= " + pageSize;
+        }else{
+            return "select * from (" +
+                    "    select tmp_0.*, rownum as rn from (" + sql + ")  tmp_0 where rownum <= " + end +
+                    " ) where rn > " + begin;
+        }
     }
+
 
     @Override
     public Properties getConnectionProperties(DataBaseConnectPropertes connectType) {
