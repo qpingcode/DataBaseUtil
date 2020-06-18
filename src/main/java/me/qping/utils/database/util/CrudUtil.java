@@ -2,6 +2,7 @@ package me.qping.utils.database.util;
 
 import lombok.Data;
 import me.qping.utils.database.bean.BeanConversion;
+import me.qping.utils.database.bean.FieldDefines;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.dialect.DataBaseDialect;
@@ -97,7 +98,12 @@ public class CrudUtil {
         // JDBC 流式读取
         PreparedStatement ps = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         prepareParameters(ps, parameters);
-        ps.setFetchSize(Integer.MIN_VALUE);
+
+        if(DataBaseType.MYSQL.equals(getDataBaseConnectType())){
+            ps.setFetchSize(Integer.MIN_VALUE);
+        }else{
+            ps.setFetchSize(0);
+        }
 
         ResultSet rs = ps.executeQuery();
 
@@ -289,6 +295,41 @@ public class CrudUtil {
         } catch (SQLException e) {
             throw e;
         }
+    }
+
+    public int insert(Object obj) throws SQLException {
+
+        String tableName = BeanConversion.getTableAnnotation(obj.getClass());
+        FieldDefines fieldDefines = BeanConversion.getColumnAnnotation(obj.getClass());
+
+
+        int size = fieldDefines.size();
+
+        if(size == 0) return 0;
+
+        Set<String> keyset = fieldDefines.keySet();
+        Object[] row = new Object[size];
+        StringBuffer prefix = new StringBuffer();
+        StringBuffer suffix = new StringBuffer();
+
+        int i = -1;
+        for(String key : keyset){
+            i++;
+            prefix.append(key).append(",");
+            suffix.append("?").append(",");
+
+            try {
+                row[i] = fieldDefines.getValue(obj, key);
+            } catch (IllegalAccessException e) {
+                throw new SQLException("object get " + key + " value error: " + e.getMessage());
+            }
+        }
+
+        String insertSQL = "insert into " + tableName + "(" + prefix.substring(0, prefix.length() - 1) + ") values (" + suffix.substring(0, suffix.length() - 1) + ")";
+
+        System.out.println(insertSQL);
+
+        return insert(insertSQL, row);
     }
 
     public int update(Connection connection, String sql, Object... parameters) throws SQLException {
