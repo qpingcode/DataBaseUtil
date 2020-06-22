@@ -90,6 +90,19 @@ crud.update("delete from student where id = 1");
 
 ```
 
+流式查询
+``` java
+// 由于jdbc 是把返回的查询结果都加载在内存中，如果查询特别大的表时，会造成java内存溢出
+// 推荐大记录使用流式查询
+
+QueryBatch queryBatch = crud.openQuery(sql, sqlParams.toArray());
+while (queryBatch.next()) {
+    Object[] row = queryBatch.getArray();
+    System.out.println(row[0]);
+}
+
+```
+
 # 获取表或视图元数据
 
 

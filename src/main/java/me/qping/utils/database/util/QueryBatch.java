@@ -1,11 +1,11 @@
 package me.qping.utils.database.util;
 
 import lombok.Data;
+import org.apache.ibatis.jdbc.SQL;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 返回一个resultset的封装结构，用于一行一行获取数据
@@ -26,6 +26,17 @@ public class QueryBatch {
             count++;
         }
         return flag;
+    }
+
+    public Map<String,Object> get() throws SQLException{
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+        Map<String, Object> result = new HashMap<>();
+        for (int i = 0; i < columnCount; i++) {
+            String label = metaData.getColumnLabel(i + 1);
+            result.put(label, rs.getObject(label));
+        }
+        return result;
     }
 
     public Object[] getArray() throws SQLException {

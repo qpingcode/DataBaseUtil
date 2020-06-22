@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 /**
  * @ClassName TableMeta
+ * @Description 表属性
  * @Author qping
  * @Date 2019/8/3 21:32
  * @Version 1.0
@@ -56,14 +57,14 @@ public class TableMeta {
     }
 
 
-    public static TableMeta of(String catalog, String schema, String name, String nameLower, String type, String comment, DataBaseType databaseType){
+    public static TableMeta of(String catalog, String schema, String name, String type, String comment, DataBaseType databaseType){
 
         TableMeta tableMeta = new TableMeta();
 
         tableMeta.setCatalog(catalog);
         tableMeta.setSchema(schema);
         tableMeta.setName(name);
-        tableMeta.setNameLower(nameLower);
+        tableMeta.setNameLower(name == null ? null : name.toLowerCase());
         tableMeta.setType(type);
         tableMeta.setComment(comment);
         tableMeta.setDatabaseType(databaseType);

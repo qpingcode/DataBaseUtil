@@ -81,7 +81,6 @@ public class MetaDataUtil extends CrudUtil {
                         tableInfo.getString("TABLE_CAT"),
                         tableInfo.getString("TABLE_SCHEM"),
                         tableName,
-                        tableName.toLowerCase(),
                         tableInfo.getString("TABLE_TYPE"),  // 表类型
                         tableInfo.getString("REMARKS"),     // 表注释
                         dataBaseConnectProperties.getDataBaseType()
@@ -153,7 +152,6 @@ public class MetaDataUtil extends CrudUtil {
                         tableInfo.getString("TABLE_CAT"),
                         tableInfo.getString("TABLE_SCHEM"),
                         tableName,
-                        tableName.toLowerCase(),
                         tableInfo.getString("TABLE_TYPE"),  // 表类型
                         tableInfo.getString("REMARKS"),     // 表注释
                         dataBaseConnectProperties.getDataBaseType()

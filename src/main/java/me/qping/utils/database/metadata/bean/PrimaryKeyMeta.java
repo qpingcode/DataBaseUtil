@@ -4,6 +4,7 @@ import lombok.Data;
 
 /**
  * @ClassName ColumnMeta
+ * @Description 主键
  * @Author qping
  * @Date 2019/8/3 21:32
  * @Version 1.0

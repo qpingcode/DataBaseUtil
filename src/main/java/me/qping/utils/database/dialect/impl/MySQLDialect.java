@@ -34,7 +34,7 @@ public class MySQLDialect implements DataBaseDialect {
         if(pageNum < 0){
             return "select * from (" + sql + ") tmp_0 limit " + pageSize;
         }else{
-            return "select * from (" + sql + ") tmp_0 limit " + begin + "," + pageSize;
+            return "select * from (" + sql + ") tmp_0 limit " + pageSize + " offset " + begin;
         }
     }
 
