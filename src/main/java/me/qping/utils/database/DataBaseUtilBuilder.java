@@ -80,19 +80,19 @@ public class DataBaseUtilBuilder {
         return create().databaseType(dataBaseProperties);
     }
 
-//    public static DataBaseUtilBuilder init(DataBaseType dataBaseType, String host, String port, String database, String username, String password, boolean useServiceName, String schema){
-//        if(dataBaseType.equals(MYSQL)){
-//            MySQLDataBaseConnProp dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
-//            return create().databaseType(dataBaseProperties);
-//        }else if(dataBaseType.equals(MSSQL)){
-//            MSSQLDataBaseConnProp dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password, schema);
-//            return create().databaseType(dataBaseProperties);
-//        }else if(dataBaseType.equals(ORACLE)){
-//            OracleDataBaseConnProp dataBaseProperties = new OracleDataBaseConnProp(host, port, useServiceName, database, username, password);
-//            return create().databaseType(dataBaseProperties);
-//        }
-//        return null;
-//    }
+    public static DataBaseUtilBuilder init(DataBaseType dataBaseType, String host, String port, String database, String username, String password, boolean useServiceName, String schema){
+        if(dataBaseType.equals(MYSQL)){
+            MySQLDataBaseConnProp dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
+            return create().databaseType(dataBaseProperties);
+        }else if(dataBaseType.equals(MSSQL)){
+            MSSQLDataBaseConnProp dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password, schema);
+            return create().databaseType(dataBaseProperties);
+        }else if(dataBaseType.equals(ORACLE)){
+            OracleDataBaseConnProp dataBaseProperties = new OracleDataBaseConnProp(host, port, useServiceName, database, username, password);
+            return create().databaseType(dataBaseProperties);
+        }
+        return null;
+    }
 
     public static DataBaseUtilBuilder init(String url, String username, String password){
         DataBaseConnectPropertes dataBaseProperties;

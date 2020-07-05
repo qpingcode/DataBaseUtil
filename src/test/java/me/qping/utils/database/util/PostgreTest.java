@@ -15,12 +15,20 @@ public class PostgreTest {
     public void conn() {
 
         try {
+//            MetaDataUtil crud = DataBaseUtilBuilder.init(
+//                    "jdbc:postgresql://localhost:5432/test",
+//                    "postgres",
+//                    "123456"
+//            ).build();
+
+
             MetaDataUtil crud = DataBaseUtilBuilder.init(
-                    "jdbc:postgresql://localhost:5432/test",
-                    "postgres",
-                    "123456"
+                    "jdbc:postgresql://169.0.22.8:5432/test",
+                    "gpadmin",
+                    "rxthinkingpostgres"
             ).build();
 
+//
             List<Map<String, Object>> data = crud.queryList("select * from tb_test");
 
 
