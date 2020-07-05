@@ -23,22 +23,23 @@ public class PostgreTest {
 
 
             MetaDataUtil crud = DataBaseUtilBuilder.init(
-                    "jdbc:postgresql://169.0.22.8:5432/test",
+                    "jdbc:postgresql://169.0.22.8:5432/data_origin",
                     "gpadmin",
                     "rxthinkingpostgres"
             ).build();
 
 //
-            List<Map<String, Object>> data = crud.queryList("select * from tb_test");
+            List<ResultSetColumnMeta> a = crud.queryColumnMeta(null, null, "select * from REGISTERRECORD");
 
+            System.out.println(a.size());
 
-            TableMeta tableInfo = crud.getTableInfo("tb_test");
-
-
-            List<String> catalogs = crud.getCatalogs();
-            List<String> schemas = crud.getSchemas("test");
-            List<TableMeta> tables = crud.getTables("postgre","information_schema");
-            System.out.println(tableInfo.getColumns().size());
+//            TableMeta tableInfo = crud.getTableInfo("tb_test");
+//
+//
+//            List<String> catalogs = crud.getCatalogs();
+//            List<String> schemas = crud.getSchemas("test");
+//            List<TableMeta> tables = crud.getTables("postgre","information_schema");
+//            System.out.println(tableInfo.getColumns().size());
 
 
         } catch (ClassNotFoundException e) {

@@ -17,7 +17,7 @@ import static me.qping.utils.database.connect.DataBaseType.POSTGRESQL;
 @Data
 public class PostgresqlDataBaseConnProp implements DataBaseConnectPropertes {
 
-    public static final String URL = "jdbc:postgresql://${host}:${port}/${database}";;
+    public static final String URL = "jdbc:postgresql://${host}:${port}/${database}?socketTimeout=30&connectTimeout=30";;
     String driver = "org.postgresql.Driver";
 
     String validQuery = "select 1";

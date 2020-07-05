@@ -307,6 +307,12 @@ public class MetaDataUtil extends CrudUtil {
             case ORACLE:
                 update(connection, "ALTER SESSION SET CURRENT_SCHEMA = '" + schemaName +"'");
                 break;
+//            case POSTGRESQL:
+//                update(connection, "\\c " + catalogName );
+//                update(connection, "set search_path to " + schemaName );
+//                break;
+            default:
+                throw new RuntimeException("不支持的数据库类型，无法切换到：" + catalogName + " " + schemaName);
         }
     }
 

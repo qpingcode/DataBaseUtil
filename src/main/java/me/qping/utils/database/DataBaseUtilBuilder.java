@@ -81,17 +81,25 @@ public class DataBaseUtilBuilder {
     }
 
     public static DataBaseUtilBuilder init(DataBaseType dataBaseType, String host, String port, String database, String username, String password, boolean useServiceName, String schema){
-        if(dataBaseType.equals(MYSQL)){
-            MySQLDataBaseConnProp dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
-            return create().databaseType(dataBaseProperties);
-        }else if(dataBaseType.equals(MSSQL)){
-            MSSQLDataBaseConnProp dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password, schema);
-            return create().databaseType(dataBaseProperties);
-        }else if(dataBaseType.equals(ORACLE)){
-            OracleDataBaseConnProp dataBaseProperties = new OracleDataBaseConnProp(host, port, useServiceName, database, username, password);
-            return create().databaseType(dataBaseProperties);
+
+        DataBaseConnectPropertes dataBaseProperties = null;
+        switch (dataBaseType){
+            case MYSQL:
+                dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
+                break;
+            case MSSQL:
+                dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password, schema);
+                break;
+            case ORACLE:
+                dataBaseProperties = new OracleDataBaseConnProp(host, port, useServiceName, database, username, password);
+                break;
+            case POSTGRESQL:
+                dataBaseProperties = new PostgresqlDataBaseConnProp(host, port, database, username, password);
+                break;
+            default:
+                throw new RuntimeException("不支持的数据库类型："+ dataBaseType.name());
         }
-        return null;
+        return create().databaseType(dataBaseProperties);
     }
 
     public static DataBaseUtilBuilder init(String url, String username, String password){
@@ -105,7 +113,7 @@ public class DataBaseUtilBuilder {
         }else if(url.indexOf("postgresql") > -1){
             dataBaseProperties = new PostgresqlDataBaseConnProp(url, username, password);
         }else{
-            throw new RuntimeException("无法解析url");
+            throw new RuntimeException("不支持的数据库类型，无法解析url："+ url);
         }
         return create().databaseType(dataBaseProperties);
     }
