@@ -5,7 +5,6 @@ import me.qping.utils.database.metadata.bean.*;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 public class MetaDataUtil extends CrudUtil {
 
@@ -233,12 +232,6 @@ public class MetaDataUtil extends CrudUtil {
         }
     }
 
-
-
-    public Map<String, Object> queryListAndMeta(String sql, Object... paramters) throws SQLException {
-        return queryListAndMeta(null, null, sql, paramters);
-    }
-
     public Map<String, Object> queryListAndMeta(String catalogName, String schemaName, String sql, Object... paramters) throws SQLException {
 
         try(Connection connection = getConnection()){
@@ -293,29 +286,6 @@ public class MetaDataUtil extends CrudUtil {
         }
         return columnMetaList;
     }
-
-    private void switchTo(Connection connection, String catalogName, String schemaName) throws SQLException {
-        DataBaseType dataBaseType = getDataBaseConnectType();
-        switch (dataBaseType){
-            case MSSQL:
-                update(connection, "USE " + catalogName);
-                update(connection, "EXECUTE as USER ='" + schemaName + "'");
-                break;
-            case MYSQL:
-                update(connection, "USE " + catalogName);
-                break;
-            case ORACLE:
-                update(connection, "ALTER SESSION SET CURRENT_SCHEMA = '" + schemaName +"'");
-                break;
-//            case POSTGRESQL:
-//                update(connection, "\\c " + catalogName );
-//                update(connection, "set search_path to " + schemaName );
-//                break;
-            default:
-                throw new RuntimeException("不支持的数据库类型，无法切换到：" + catalogName + " " + schemaName);
-        }
-    }
-
 
 
 }

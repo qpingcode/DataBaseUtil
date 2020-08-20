@@ -29,16 +29,38 @@ public class CrudUtil {
     protected DataSource dataSource;
 
     public Connection getConnection() throws SQLException {
-
+        Connection connection = null;
         if(dataSource != null){
-            return dataSource.getConnection();
+            connection = dataSource.getConnection();
         }else{
-            Connection connection = DriverManager.getConnection(
+            connection = DriverManager.getConnection(
                     dataBaseConnectProperties.getUrl(),
                     dataBaseConnectProperties.getUsername(),
                     dataBaseConnectProperties.getPassword()
             );
-            return connection;
+        }
+        return connection;
+    }
+
+    public void switchTo(Connection connection, String catalogName, String schemaName) throws SQLException {
+        DataBaseType dataBaseType = getDataBaseConnectType();
+        switch (dataBaseType){
+            case MSSQL:
+                update(connection, "USE " + catalogName);
+                update(connection, "EXECUTE as USER ='" + schemaName + "'");
+                break;
+            case MYSQL:
+                update(connection, "USE " + catalogName);
+                break;
+            case ORACLE:
+                update(connection, "ALTER SESSION SET CURRENT_SCHEMA = '" + schemaName +"'");
+                break;
+//            case POSTGRESQL:
+//                update(connection, "\\c " + catalogName );
+//                update(connection, "set search_path to " + schemaName );
+//                break;
+            default:
+                throw new RuntimeException("不支持的数据库类型，无法切换到：" + catalogName + " " + schemaName);
         }
     }
 
