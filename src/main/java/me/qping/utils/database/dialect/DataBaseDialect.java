@@ -3,6 +3,7 @@ package me.qping.utils.database.dialect;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.metadata.bean.FieldType;
 
+import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -24,6 +25,14 @@ public interface DataBaseDialect {
 
     public String getSchemaQuery();
 
-    public String getTopNSql(String tableName, int rowCount);
+    /**
+     * 构建分页sql
+     * @param sql
+     * @param pageSize  每页数量
+     * @param pageNum   当前第几页，从0开始，当pageNum小于0时，会构建获取前pageSize条记录的sql
+     * @return
+     * @throws SQLException
+     */
+    public String getPageSql(String sql, int pageSize, int pageNum);
 
 }

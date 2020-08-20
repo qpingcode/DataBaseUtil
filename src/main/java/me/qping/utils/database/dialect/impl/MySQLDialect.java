@@ -25,9 +25,17 @@ public class MySQLDialect implements DataBaseDialect {
         return null;
     }
 
+
     @Override
-    public String getTopNSql(String tableName, int rowCount) {
-        return "select * from " + tableName + " limit " + rowCount;
+    public String getPageSql(String sql, int pageSize, int pageNum) {
+        int begin = pageSize * pageNum;
+        int end = pageSize * pageNum + pageSize;
+
+        if(pageNum < 0){
+            return "select * from (" + sql + ") tmp_0 limit " + pageSize;
+        }else{
+            return "select * from (" + sql + ") tmp_0 limit " + pageSize + " offset " + begin;
+        }
     }
 
     @Override

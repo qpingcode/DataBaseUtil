@@ -13,18 +13,17 @@ import java.util.Properties;
  * @Date 2019/8/3 22:07
  * @Version 1.0
  **/
-public class MSSQLDialect implements DataBaseDialect {
+public class PostgreSQLDialect implements DataBaseDialect {
 
 
     @Override
     public String getCatalogQuery() {
-        return "select name from master.dbo.SysDatabases where name not in ('master', 'model', 'msdb', 'tempdb')";
+        return "SELECT datname as name FROM pg_database where datname not in ('postgres','template1','template0')";
     }
 
     @Override
     public String getSchemaQuery() {
-        return "select name from sys.schemas " +
-                " where name not in ('INFORMATION_SCHEMA', 'db_owner', 'db_accessadmin', 'db_backupoperator', 'db_datareader', 'db_datawriter', 'db_ddladmin', 'db_denydatareader', 'db_denydatawriter', 'db_securityadmin', 'sys')";
+        return "select nspname as name from pg_namespace where nspname not in ('pg_toast','pg_temp_1','pg_toast_temp_1','pg_catalog', 'information_schema')\n";
     }
 
     @Override
@@ -33,11 +32,9 @@ public class MSSQLDialect implements DataBaseDialect {
         int end = pageSize * pageNum + pageSize;
 
         if(pageNum < 0){
-            return "select top " + pageSize + " * from (" + sql + ") tmp_0";
+            return "select  * from (" + sql + ") tmp_0 limit " + pageSize;
         }else{
-            return "select * from ( " +
-                    "   select *, ROW_NUMBER() OVER (ORDER BY (select 0)) AS rn from ("+ sql +") tmp_0 " +
-                    " ) as tmp_1 where rn > " + begin +" and rn <= " + end;
+            return  "select  * from (" + sql + ") tmp_0 limit " + pageSize + "";
         }
     }
 

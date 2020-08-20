@@ -6,6 +6,7 @@ import java.sql.SQLType;
 
 /**
  * @ClassName ColumnMeta
+ * @Description 查询 ResultSet 时返回的列属性，相对于 ColumnMeta 属性较少，但是不需要发起一次专门的查询，随数据一起返回
  * @Author qping
  * @Date 2019/8/3 21:32
  * @Version 1.0

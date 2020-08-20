@@ -5,7 +5,6 @@ import me.qping.utils.database.metadata.bean.*;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 public class MetaDataUtil extends CrudUtil {
 
@@ -81,7 +80,6 @@ public class MetaDataUtil extends CrudUtil {
                         tableInfo.getString("TABLE_CAT"),
                         tableInfo.getString("TABLE_SCHEM"),
                         tableName,
-                        tableName.toLowerCase(),
                         tableInfo.getString("TABLE_TYPE"),  // 表类型
                         tableInfo.getString("REMARKS"),     // 表注释
                         dataBaseConnectProperties.getDataBaseType()
@@ -153,7 +151,6 @@ public class MetaDataUtil extends CrudUtil {
                         tableInfo.getString("TABLE_CAT"),
                         tableInfo.getString("TABLE_SCHEM"),
                         tableName,
-                        tableName.toLowerCase(),
                         tableInfo.getString("TABLE_TYPE"),  // 表类型
                         tableInfo.getString("REMARKS"),     // 表注释
                         dataBaseConnectProperties.getDataBaseType()
@@ -218,7 +215,7 @@ public class MetaDataUtil extends CrudUtil {
                 switchTo(connection, catalogName, schemaName);
             }
 
-            sql = wrapperSQL(sql, getDataBaseConnectType());
+            sql = getDataBaseDialect().getPageSql(sql, 0, -1);
 
             PreparedStatement ps = connection.prepareStatement(sql);
             prepareParameters(ps, paramters);
@@ -233,28 +230,6 @@ public class MetaDataUtil extends CrudUtil {
         }catch (SQLException e) {
             throw e;
         }
-    }
-
-    private String wrapperSQL(String sql, DataBaseType dbtype) throws SQLException {
-        switch (dbtype ){
-            case MYSQL:
-                sql = "select * from (" + sql + ") _temp limit 0";
-                break;
-            case MSSQL:
-                sql = "select top 0 * from (" + sql + ") _temp ";
-                break;
-            case ORACLE:
-                sql = "select * from (" + sql + ") _temp where _temp.rownum < 0";
-                break;
-            default:
-                throw new SQLException(dbtype.toString() + " must implement function wrapperSQL(sql, dbtype)");
-        }
-
-        return sql;
-    }
-
-    public Map<String, Object> queryListAndMeta(String sql, Object... paramters) throws SQLException {
-        return queryListAndMeta(null, null, sql, paramters);
     }
 
     public Map<String, Object> queryListAndMeta(String catalogName, String schemaName, String sql, Object... paramters) throws SQLException {
@@ -311,23 +286,6 @@ public class MetaDataUtil extends CrudUtil {
         }
         return columnMetaList;
     }
-
-    private void switchTo(Connection connection, String catalogName, String schemaName) throws SQLException {
-        DataBaseType dataBaseType = getDataBaseConnectType();
-        switch (dataBaseType){
-            case MSSQL:
-                update(connection, "USE " + catalogName);
-                update(connection, "EXECUTE as USER ='" + schemaName + "'");
-                break;
-            case MYSQL:
-                update(connection, "USE " + catalogName);
-                break;
-            case ORACLE:
-                update(connection, "ALTER SESSION SET CURRENT_SCHEMA = '" + schemaName +"'");
-                break;
-        }
-    }
-
 
 
 }

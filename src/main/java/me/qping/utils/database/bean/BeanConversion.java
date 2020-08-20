@@ -21,7 +21,7 @@ import java.util.Map;
 public class BeanConversion {
 
     public static <T> T convert(Class<T> clazz, ResultSetMetaData metaData, ResultSet rs) throws SQLException, OrmException, IllegalAccessException, InstantiationException {
-        Map<String, Field> beanFields = getClassAnnotation(clazz);
+        FieldDefines fieldDefines = getColumnAnnotation(clazz);
         int columnCount = metaData.getColumnCount();
         T t = clazz.newInstance();
         for (int i = 0; i < columnCount; i++) {
@@ -30,8 +30,9 @@ public class BeanConversion {
 
             Object value = rs.getObject(label);
 
-            Field field = beanFields.get(label);
-            if(field == null){
+            Field field = fieldDefines.get(label);
+
+            if(field == null || value == null){
                 continue;
             }
 
@@ -68,9 +69,10 @@ public class BeanConversion {
 
     }
 
-    private static Map<String, Field> getClassAnnotation(Class clazz){
+    public static FieldDefines getColumnAnnotation(Class clazz){
         Field[] fields = clazz.getDeclaredFields();
-        Map<String, Field> beanDefine = new HashMap<>();
+        FieldDefines fieldDefines = new FieldDefines();
+
         for(Field field : fields){
             DataBaseColumn[] columns = field.getAnnotationsByType(DataBaseColumn.class);
 //            DatabaseColumn column = field.getAnnotation(DatabaseColumn.class);
@@ -79,9 +81,17 @@ public class BeanConversion {
             }
             field.setAccessible(true);
             for(DataBaseColumn column : columns){
-                beanDefine.put(column.value(), field);
+                fieldDefines.put(column.value(), field);
             }
         }
-        return beanDefine;
+        return fieldDefines;
+    }
+
+    public static String getTableAnnotation(Class clazz){
+        if(!clazz.isAnnotationPresent(DataBaseTable.class)){
+            throw new RuntimeException("must use @DataBaseTable annotation");
+        }
+        DataBaseTable table = (DataBaseTable) clazz.getAnnotation(DataBaseTable.class);
+        return table.value();
     }
 }

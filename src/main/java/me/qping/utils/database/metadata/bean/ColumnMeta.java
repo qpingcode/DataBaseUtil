@@ -6,6 +6,7 @@ import java.sql.SQLType;
 
 /**
  * @ClassName ColumnMeta
+ * @Description 列属性
  * @Author qping
  * @Date 2019/8/3 21:32
  * @Version 1.0

@@ -7,8 +7,8 @@ import me.qping.utils.database.connect.DataBaseType;
 import static me.qping.utils.database.connect.DataBaseType.MSSQL;
 
 /**
- * @ClassName MySQLDataBaseConnProp
- * @Description mysql连接
+ * @ClassName MSSQLDataBaseConnProp
+ * @Description sqlserver
  * @Author qping
  * @Date 2019/7/4 16:25
  * @Version 1.0
