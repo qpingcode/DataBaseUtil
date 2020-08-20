@@ -1,5 +1,6 @@
 package me.qping.utils.database.util;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import lombok.Data;
 import me.qping.utils.database.bean.BeanConversion;
 import me.qping.utils.database.bean.FieldDefines;
@@ -27,6 +28,13 @@ public class CrudUtil {
     protected DataBaseConnectPropertes dataBaseConnectProperties;
 
     protected DataSource dataSource;
+
+    public void close(){
+        if(dataSource != null && dataSource instanceof DruidDataSource){
+            DruidDataSource druidDataSource = (DruidDataSource) dataSource;
+            druidDataSource.close();
+        }
+    }
 
     public Connection getConnection() throws SQLException {
         Connection connection = null;
