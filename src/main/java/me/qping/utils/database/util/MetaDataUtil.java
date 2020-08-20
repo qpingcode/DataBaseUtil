@@ -232,6 +232,11 @@ public class MetaDataUtil extends CrudUtil {
         }
     }
 
+
+    public Map<String, Object> queryListAndMeta(String sql, Object... paramters) throws SQLException {
+        return queryListAndMeta(null, null, sql, paramters);
+    }
+
     public Map<String, Object> queryListAndMeta(String catalogName, String schemaName, String sql, Object... paramters) throws SQLException {
 
         try(Connection connection = getConnection()){
