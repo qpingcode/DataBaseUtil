@@ -5,6 +5,7 @@ import me.qping.utils.database.metadata.bean.*;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MetaDataUtil extends CrudUtil {
 
@@ -18,13 +19,8 @@ public class MetaDataUtil extends CrudUtil {
             return null;
         }
 
-        List<Object[]> result = queryArray(query);
-        List<String> names = new ArrayList<>();
-        for(Object[] o : result){
-            if(o != null && o.length > 0 && o[0] != null){
-                names.add(o[0].toString());
-            }
-        }
+        List<DataRecord> result = queryList(query);
+        List<String> names = result.stream().map(v->v.getString(0)).collect(Collectors.toList());
         return names;
     }
 
@@ -33,14 +29,8 @@ public class MetaDataUtil extends CrudUtil {
         if(query == null){
             return null;
         }
-
-        List<Object[]> result = queryArray(query);
-        List<String> names = new ArrayList<>();
-        for(Object[] o : result){
-            if(o != null && o.length > 0 && o[0] != null){
-                names.add(o[0].toString());
-            }
-        }
+        List<DataRecord> result = queryList(query);
+        List<String> names = result.stream().map(v->v.getString(0)).collect(Collectors.toList());
         return names;
     };
 

@@ -17,6 +17,7 @@ public class QueryBatch {
     Connection connection;
     PreparedStatement ps;
     ResultSet rs;
+    Map<String,Integer> nameMap;
 
     int count;
 
@@ -28,23 +29,23 @@ public class QueryBatch {
         return flag;
     }
 
-    public Map<String,Object> get() throws SQLException{
-        ResultSetMetaData metaData = rs.getMetaData();
-        int columnCount = metaData.getColumnCount();
-        Map<String, Object> result = new HashMap<>();
-        for (int i = 0; i < columnCount; i++) {
-            String label = metaData.getColumnLabel(i + 1);
-            result.put(label, rs.getObject(label));
+    public DataRecord get() throws SQLException{
+        if(nameMap == null){
+            ResultSetMetaData metaData = rs.getMetaData();
+            nameMap = new HashMap<>();
+            for (int i = 0; i < columnCount; i++) {
+                String label = metaData.getColumnLabel(i + 1);
+                nameMap.put(label, i);
+            }
         }
-        return result;
-    }
 
-    public Object[] getArray() throws SQLException {
-        Object[] values = new Object[columnCount];
+        Object[] row = new Object[columnCount];
         for (int i = 0; i < columnCount; i++) {
-            values[i] = rs.getObject(i + 1);
+            row[i] = rs.getObject(i + 1);
         }
-        return values;
+
+        DataRecord record = new DataRecord(row, nameMap);
+        return record;
     }
 
     public void close(){
