@@ -33,10 +33,10 @@ public class MSSQLDialect implements DataBaseDialect {
         int end = pageSize * pageNum + pageSize;
 
         if(pageNum < 0){
-            return "select top " + pageSize + " * from (" + sql + ") tmp_0";
+            return "select top " + pageSize + " * from (\n" + sql + "\n) tmp_0";
         }else{
             return "select * from ( " +
-                    "   select *, ROW_NUMBER() OVER (ORDER BY (select 0)) AS rn from ("+ sql +") tmp_0 " +
+                    "   select *, ROW_NUMBER() OVER (ORDER BY (select 0)) AS rn from (\n"+ sql +"\n) tmp_0 " +
                     " ) as tmp_1 where rn > " + begin +" and rn <= " + end;
         }
     }

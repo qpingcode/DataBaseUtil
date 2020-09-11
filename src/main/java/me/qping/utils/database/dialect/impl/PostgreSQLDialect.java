@@ -32,9 +32,9 @@ public class PostgreSQLDialect implements DataBaseDialect {
         int end = pageSize * pageNum + pageSize;
 
         if(pageNum < 0){
-            return "select  * from (" + sql + ") tmp_0 limit " + pageSize;
+            return "select  * from (\n" + sql + "\n) tmp_0 limit " + pageSize;
         }else{
-            return  "select  * from (" + sql + ") tmp_0 limit " + pageSize + "";
+            return "select * from (\n" + sql + "\n) tmp_0 limit " + pageSize + " offset " + begin;
         }
     }
 

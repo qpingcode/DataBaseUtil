@@ -31,10 +31,10 @@ public class OracleDialect implements DataBaseDialect {
         int end = pageSize * pageNum + pageSize;
 
         if(pageNum < 0){
-            return "select * from (" + sql + ") where rownum <= " + pageSize;
+            return "select * from (\n" + sql + "\n) where rownum <= " + pageSize;
         }else{
             return "select * from (" +
-                    "    select tmp_0.*, rownum as rn from (" + sql + ")  tmp_0 where rownum <= " + end +
+                    "    select tmp_0.*, rownum as rn from (\n" + sql + "\n)  tmp_0 where rownum <= " + end +
                     " ) where rn > " + begin;
         }
     }
