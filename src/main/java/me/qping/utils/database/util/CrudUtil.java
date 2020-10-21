@@ -2,6 +2,7 @@ package me.qping.utils.database.util;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import lombok.Data;
+import me.qping.common.model.DataRecord;
 import me.qping.utils.database.bean.BeanConversion;
 import me.qping.utils.database.bean.FieldDefines;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;

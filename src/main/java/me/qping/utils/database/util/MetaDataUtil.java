@@ -1,5 +1,6 @@
 package me.qping.utils.database.util;
 
+import me.qping.common.model.DataRecord;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.metadata.bean.*;
 

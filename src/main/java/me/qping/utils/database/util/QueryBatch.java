@@ -1,7 +1,7 @@
 package me.qping.utils.database.util;
 
 import lombok.Data;
-import org.apache.ibatis.jdbc.SQL;
+import me.qping.common.model.DataRecord;
 
 import java.sql.*;
 import java.util.HashMap;
