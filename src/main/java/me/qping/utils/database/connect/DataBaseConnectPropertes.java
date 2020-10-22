@@ -29,4 +29,7 @@ public interface DataBaseConnectPropertes {
      */
     public String getCatalog();
     public String getSchema();
+
+    //设置超时
+    public void setMaxWait(int maxWait);
 }

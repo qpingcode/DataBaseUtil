@@ -99,4 +99,9 @@ public class OracleDataBaseConnProp implements DataBaseConnectPropertes {
     public String getSchema() {
         return this.schema;
     }
+
+    @Override
+    public void setMaxWait(int maxWait) {
+    }
+
 }

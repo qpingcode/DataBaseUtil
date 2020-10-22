@@ -101,4 +101,8 @@ public class JTDSDataBaseConnProp implements DataBaseConnectPropertes {
         return schema;
     }
 
+    @Override
+    public void setMaxWait(int maxWait) {
+    }
+
 }

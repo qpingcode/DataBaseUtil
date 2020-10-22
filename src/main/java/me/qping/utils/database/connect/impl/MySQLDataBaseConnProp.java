@@ -16,7 +16,7 @@ import static me.qping.utils.database.connect.DataBaseType.MYSQL;
 @Data
 public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
 
-    public static final String URL = "jdbc:mysql://${host}:${port}/${database}?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false";;
+    public static final String URL = "jdbc:mysql://${host}:${port}/${database}?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&maxReconnects=2&connectTimeout=${connectTimeout}&socketTimeout=${socketTimeout}";;
     String driver = "com.mysql.cj.jdbc.Driver";
     String validQuery = "select 1 from dual";
 
@@ -29,6 +29,9 @@ public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
     String schema;
     String catalog;
     String url;
+
+    int socketTimeout = 30000;
+    int connectTimeout = 30000;
 
     /**
      * Catalog和Schema都属于抽象概念，主要用来解决命名冲突问题
@@ -85,7 +88,9 @@ public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
 
         return URL.replaceAll("\\$\\{host\\}", host)
                 .replaceAll("\\$\\{port\\}", port)
-                .replaceAll("\\$\\{database\\}", database == null ? "" : database);
+                .replaceAll("\\$\\{database\\}", database == null ? "" : database)
+                .replaceAll("\\$\\{socketTimeout\\}", socketTimeout + "")
+                .replaceAll("\\$\\{connectTimeout\\}", connectTimeout + "");
     }
 
     @Override
@@ -96,6 +101,12 @@ public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
     @Override
     public String getSchema() {
         return this.schema;
+    }
+
+    @Override
+    public void setMaxWait(int maxWait) {
+        this.socketTimeout = maxWait;
+        this.connectTimeout = maxWait;
     }
 
 }

@@ -166,6 +166,8 @@ public class DataBaseUtilBuilder {
         CrudUtil crud = new CrudUtil();
         crud.setDataBaseConnectProperties(dataBaseProperties);
 
+        dataBaseProperties.setMaxWait(maxWait);
+
         if(usePool){
             crud.setDataSource(createDataSource());
         }
@@ -190,6 +192,7 @@ public class DataBaseUtilBuilder {
 
         MetaDataUtil metaDataUtil = new MetaDataUtil();
         metaDataUtil.setDataBaseConnectProperties(dataBaseProperties);
+        dataBaseProperties.setMaxWait(maxWait);
         if(usePool){
             metaDataUtil.setDataSource(createDataSource());
         }

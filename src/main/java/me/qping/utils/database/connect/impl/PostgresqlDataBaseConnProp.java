@@ -93,4 +93,8 @@ public class PostgresqlDataBaseConnProp implements DataBaseConnectPropertes {
         return schema;
     }
 
+    @Override
+    public void setMaxWait(int maxWait) {
+    }
+
 }
