@@ -30,7 +30,7 @@ public class OracleDialect implements DataBaseDialect {
         int begin = pageSize * pageNum;
         int end = pageSize * pageNum + pageSize;
 
-        if(pageNum < 0){
+        if(pageNum <= 0 || pageSize <= 0){
             return "select * from (\n" + sql + "\n) where rownum <= " + pageSize;
         }else{
             return "select * from (" +

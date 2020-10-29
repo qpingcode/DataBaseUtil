@@ -32,7 +32,7 @@ public class MSSQLDialect implements DataBaseDialect {
         int begin = pageSize * pageNum;
         int end = pageSize * pageNum + pageSize;
 
-        if(pageNum < 0){
+        if(pageNum <= 0 || pageSize <= 0){
             return "select top " + pageSize + " * from (\n" + sql + "\n) tmp_0";
         }else{
             return "select * from ( " +
