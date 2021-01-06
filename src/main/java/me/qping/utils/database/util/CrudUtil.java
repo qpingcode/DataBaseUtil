@@ -54,6 +54,7 @@ public class CrudUtil {
     public void switchTo(Connection connection, String catalogName, String schemaName) throws SQLException {
         DataBaseType dataBaseType = getDataBaseConnectType();
         switch (dataBaseType){
+            case SQLSERVER2000:
             case MSSQL:
                 update(connection, "USE " + catalogName);
                 update(connection, "EXECUTE as USER ='" + schemaName + "'");
@@ -329,9 +330,17 @@ public class CrudUtil {
     }
 
     public static int update(Connection connection, String sql, Object... parameters) throws SQLException {
+
         PreparedStatement ps = connection.prepareStatement(sql);
-        prepareParameters(ps, parameters);
-        return ps.executeUpdate();
+        try{
+            prepareParameters(ps, parameters);
+            return ps.executeUpdate();
+        } catch (Exception ex){
+            throw ex;
+        } finally {
+            if(ps != null) ps.close();
+        }
+
     }
 
     public int update(String sql, Object... parameters) throws SQLException {

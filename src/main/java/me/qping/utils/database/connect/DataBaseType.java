@@ -1,7 +1,7 @@
 package me.qping.utils.database.connect;
 
 public enum DataBaseType {
-    MYSQL(1), MSSQL(2), ORACLE(3), DB2(4), SQLITE(5), POSTGRESQL(6);
+    MYSQL(1), MSSQL(2), ORACLE(3), DB2(4), SQLITE(5), POSTGRESQL(6), SQLSERVER2000(7);
 
     int intVal;
 

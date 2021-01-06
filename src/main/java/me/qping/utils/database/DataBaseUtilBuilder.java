@@ -4,10 +4,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
-import me.qping.utils.database.connect.impl.MSSQLDataBaseConnProp;
-import me.qping.utils.database.connect.impl.MySQLDataBaseConnProp;
-import me.qping.utils.database.connect.impl.OracleDataBaseConnProp;
-import me.qping.utils.database.connect.impl.PostgresqlDataBaseConnProp;
+import me.qping.utils.database.connect.impl.*;
 import me.qping.utils.database.dialect.DataBaseDialect;
 import me.qping.utils.database.dialect.impl.PostgreSQLDialect;
 import me.qping.utils.database.util.CrudUtil;
@@ -40,6 +37,9 @@ public class DataBaseUtilBuilder {
     int maxActive = 20;
     int maxWait = 60000;
     boolean usePool = false;
+
+
+    String key = "";
 
     public static DataBaseUtilBuilder create(){
         return new DataBaseUtilBuilder();
@@ -87,6 +87,9 @@ public class DataBaseUtilBuilder {
             case MYSQL:
                 dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
                 break;
+            case SQLSERVER2000:
+                dataBaseProperties = new SQLServer2000(host, port, database, username, password);
+                break;
             case MSSQL:
                 dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password, schema);
                 break;
@@ -104,8 +107,10 @@ public class DataBaseUtilBuilder {
 
     public static DataBaseUtilBuilder init(String url, String username, String password){
         DataBaseConnectPropertes dataBaseProperties;
-        if(url.indexOf("sqlserver") > -1){
+        if(url.indexOf("jdbc:sqlserver") > -1){
             dataBaseProperties = new MSSQLDataBaseConnProp(url, username, password);
+        }else if(url.indexOf("jdbc:microsoft:sqlserver") > -1){
+            dataBaseProperties = new SQLServer2000(url, username, password);
         }else if(url.indexOf("mysql") > -1){
             dataBaseProperties = new MySQLDataBaseConnProp(url, username, password);
         }else if(url.indexOf("oracle") > -1){
@@ -184,7 +189,7 @@ public class DataBaseUtilBuilder {
             dataBaseDialect = new MySQLDialect();
         } else if(this.dataBaseProperties.getDataBaseType().equals(ORACLE)){
             dataBaseDialect = new OracleDialect();
-        } else if(this.dataBaseProperties.getDataBaseType().equals(MSSQL)){
+        } else if(this.dataBaseProperties.getDataBaseType().equals(MSSQL) || this.dataBaseProperties.getDataBaseType().equals(SQLSERVER2000)){
             dataBaseDialect = new MSSQLDialect();
         } else if(this.dataBaseProperties.getDataBaseType().equals(POSTGRESQL)){
             dataBaseDialect = new PostgreSQLDialect();

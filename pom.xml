@@ -102,6 +102,32 @@
             <version>3.3.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.ulisesbocchio</groupId>
+            <artifactId>jasypt-spring-boot-starter</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+        <!-- sqlserver 2000 -->
+        <dependency>
+            <groupId>com.microsoft.jdbc.sqlserver2000</groupId>
+            <artifactId>msbase</artifactId>
+            <version>0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.jdbc.sqlserver2000</groupId>
+            <artifactId>msutil</artifactId>
+            <version>0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.jdbc.sqlserver2000</groupId>
+            <artifactId>mssqlserver</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <!-- -->
+
     </dependencies>
 
     <build>
