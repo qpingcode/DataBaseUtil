@@ -18,20 +18,11 @@ import static me.qping.utils.database.connect.DataBaseType.SQLSERVER2000;
  * @Version 1.0
  **/
 @Data
-public class SQLServer2000 implements DataBaseConnectPropertes {
+public class SQLServer2000 extends DataBaseConnAdapter {
 
     public static final String URL = "jdbc:microsoft:sqlserver://#{host}:#{port};DatabaseName=#{database}";
     String driver = "com.microsoft.jdbc.sqlserver.SQLServerDriver";
-    String validQuery = "select 1";
 
-    String url;
-    String host;
-    String port;
-    String database;
-    String username;
-    String password;
-    String schema;
-    String catalog;
 
     public SQLServer2000(String host, String port, String database, String username, String password) {
         this.host = host;
@@ -76,6 +67,10 @@ public class SQLServer2000 implements DataBaseConnectPropertes {
     @Override
     public String getUrl() {
 
+        if(url != null){
+            return url;
+        }
+
         Map params = new HashMap();
         params.put("host", host);
         params.put("port", port);
@@ -85,33 +80,4 @@ public class SQLServer2000 implements DataBaseConnectPropertes {
         return url;
     }
 
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getValidQuery() {
-        return validQuery;
-    }
-
-    @Override
-    public String getCatalog() {
-        return catalog;
-    }
-
-    @Override
-    public String getSchema() {
-        return schema;
-    }
-
-    @Override
-    public void setMaxWait(int maxWait) {
-
-    }
 }

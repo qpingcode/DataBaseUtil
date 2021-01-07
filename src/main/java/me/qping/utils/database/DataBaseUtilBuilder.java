@@ -96,6 +96,9 @@ public class DataBaseUtilBuilder {
             case POSTGRESQL:
                 dataBaseProperties = new PostgresqlDataBaseConnProp(host, port, database, username, password);
                 break;
+            case INFOSYSCACHE:
+                dataBaseProperties = new InfosysCache(host, port, database, username, password);
+                break;
             default:
                 throw new RuntimeException("不支持的数据库类型："+ dataBaseType.name());
         }
@@ -114,6 +117,8 @@ public class DataBaseUtilBuilder {
             dataBaseProperties = new OracleDataBaseConnProp(url, username, password);
         }else if(url.indexOf("postgresql") > -1){
             dataBaseProperties = new PostgresqlDataBaseConnProp(url, username, password);
+        }else if(url.indexOf("jdbc:Cache") > -1){
+            dataBaseProperties = new InfosysCache(url, username, password);
         }else{
             throw new RuntimeException("不支持的数据库类型，无法解析url："+ url);
         }
@@ -193,15 +198,14 @@ public class DataBaseUtilBuilder {
             case ORACLE:
                 dataBaseDialect = new OracleDialect();
                 break;
-            case DB2:
-                break;
-            case SQLITE:
-                break;
             case POSTGRESQL:
                 dataBaseDialect = new PostgreSQLDialect();
                 break;
             case SQLSERVER2000:
                 dataBaseDialect = new SQLServer2000Dialect();
+                break;
+            case INFOSYSCACHE:
+                dataBaseDialect = new InfosysCacheDialect();
                 break;
         }
 

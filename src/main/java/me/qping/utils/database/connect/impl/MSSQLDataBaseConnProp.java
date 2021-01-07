@@ -44,7 +44,6 @@ public class MSSQLDataBaseConnProp implements DataBaseConnectPropertes {
         this.database = database;
         this.username = username;
         this.password = password;
-
         this.catalog = database;
     }
 

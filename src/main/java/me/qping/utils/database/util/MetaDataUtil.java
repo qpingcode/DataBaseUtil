@@ -206,7 +206,7 @@ public class MetaDataUtil extends CrudUtil {
                 switchTo(connection, catalogName, schemaName);
             }
 
-            sql = getDataBaseDialect().getPageSql(sql, 0, -1);
+            sql = getDataBaseDialect().getPageSql(sql, 0, 0);
 
             PreparedStatement ps = connection.prepareStatement(sql);
             prepareParameters(ps, paramters);

@@ -59,7 +59,6 @@ public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
 
         this.catalog = this.database = getDatabaseByUrl(url);
         this.schema = null;
-        this.database = catalog;
 
     }
 

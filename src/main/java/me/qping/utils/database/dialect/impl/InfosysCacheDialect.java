@@ -8,21 +8,21 @@ import java.sql.JDBCType;
 import java.util.Properties;
 
 /**
- * @ClassName SQLServer2000
+ * @ClassName InfosysCacheDialect
  * @Author qping
  * @Date 2021/1/6 16:56
  * @Version 1.0
  **/
-public class SQLServer2000Dialect  implements DataBaseDialect {
+public class InfosysCacheDialect implements DataBaseDialect {
 
     @Override
     public String getCatalogQuery() {
-        return "select name from master.dbo.SysDatabases where name not in ('master', 'model', 'msdb', 'tempdb')";
+        return null;
     }
 
     @Override
     public String getSchemaQuery() {
-        return "SELECT TABLE_SCHEMA as name FROM INFORMATION_SCHEMA.TABLES  GROUP BY TABLE_SCHEMA";
+        return " SELECT SCHEMA_NAME as NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE NOT SCHEMA_NAME %STARTSWITH '%' ";
     }
 
     @Override
@@ -35,7 +35,7 @@ public class SQLServer2000Dialect  implements DataBaseDialect {
         if(pageNum <= 0 || pageSize == 0){
             return "select top " + pageSize + " * from (\n" + sql + "\n) tmp_0";
         }else{
-            throw new RuntimeException("SQLServer 2000 未定义分页方法");
+            throw new RuntimeException("InfosysCache 未实现方法");
         }
     }
 
@@ -52,17 +52,7 @@ public class SQLServer2000Dialect  implements DataBaseDialect {
         return props;
     }
 
-    /**
-     * 设置字段类型 MSSQL 数据类型
-     * 来源： https://docs.microsoft.com/zh-cn/sql/connect/jdbc/using-basic-data-types?view=sql-server-2017
-     * @param origin
-     *            列类型字符串
-     * @return
-     */
     public FieldType getFieldType(String origin) {
-        throw new RuntimeException("SQLServer 2000 未实现方法");
-
+        throw new RuntimeException("InfosysCache 未实现方法");
     }
-
-
 }

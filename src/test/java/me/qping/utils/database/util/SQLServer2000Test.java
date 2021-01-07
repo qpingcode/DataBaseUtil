@@ -20,11 +20,11 @@ public class SQLServer2000Test {
                 DataBaseType.SQLSERVER2000,
                 "192.168.1.110",
                 "1433",
-                "pubs",
+                "test",
                 "sa",
                 "123",
                 true,
-                "guest"
+                "dbo"
         );
 
         MetaDataUtil metaDataUtil = builder.build();
@@ -42,23 +42,31 @@ public class SQLServer2000Test {
 //        TableMeta t = metaDataUtil.getTableInfo("t_user");
 //        System.out.println(t);
 //
-        // 查询所有的表
-        List<String> databases = metaDataUtil.getCatalogs();
-        for(String m : databases ){
-            System.out.println(m);
-        }
+//        // 查询所有的表
+//        List<String> databases = metaDataUtil.getCatalogs();
+//        for(String m : databases ){
+//            System.out.println(m);
+//        }
+//
+//        List<String> schemas = metaDataUtil.getSchemas("test");
+//        for(String m : schemas ){
+//            System.out.println(m);
+//        }
+//
+//        // 查询所有的表
+////        List<TableMeta> tables = metaDataUtil.getTables("test", "dbo");
+//        List<TableMeta> tables = metaDataUtil.getTables();
+//        for(TableMeta m : tables ){
+//            System.out.println(m);
+//        }
+//
+//
+//        List<DataRecord> list = metaDataUtil.queryList("select top 2 * from t_user");
+//        System.out.println(list.size());
 
-        List<String> schemas = metaDataUtil.getSchemas("test");
-        for(String m : schemas ){
-            System.out.println(m);
-        }
 
-        // 查询所有的表
-//        List<TableMeta> tables = metaDataUtil.getTables("test", "dbo");
-        List<TableMeta> tables = metaDataUtil.getTables();
-        for(TableMeta m : tables ){
-            System.out.println(m);
-        }
+        List<DataRecord> list2 = metaDataUtil.queryList("select * from (  select *, ROW_NUMBER() OVER (ORDER BY (select 0)) AS rn from (select * from t_user) tmp_0  ) as tmp_1 where rn > 2 and rn <= 4;");
+        System.out.println(list2.size());
 
 
 

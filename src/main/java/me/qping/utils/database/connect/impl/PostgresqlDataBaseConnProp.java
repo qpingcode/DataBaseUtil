@@ -15,21 +15,10 @@ import static me.qping.utils.database.connect.DataBaseType.POSTGRESQL;
  * @Version 1.0
  **/
 @Data
-public class PostgresqlDataBaseConnProp implements DataBaseConnectPropertes {
+public class PostgresqlDataBaseConnProp extends DataBaseConnAdapter {
 
     public static final String URL = "jdbc:postgresql://${host}:${port}/${database}?socketTimeout=30&connectTimeout=30";;
     String driver = "org.postgresql.Driver";
-
-    String validQuery = "select 1";
-
-    String host;
-    String port;
-    String database;
-    String username;
-    String password;
-    String schema;
-    String catalog;
-    String url;
 
     public PostgresqlDataBaseConnProp(String host, String port, String database, String username, String password) {
         this.host = host;
@@ -37,7 +26,6 @@ public class PostgresqlDataBaseConnProp implements DataBaseConnectPropertes {
         this.database = database;
         this.username = username;
         this.password = password;
-
         this.catalog = database;
         this.schema = "public";
     }
@@ -81,20 +69,6 @@ public class PostgresqlDataBaseConnProp implements DataBaseConnectPropertes {
         return URL.replaceAll("\\$\\{host\\}", host)
                 .replaceAll("\\$\\{port\\}", port)
                 .replaceAll("\\$\\{database\\}", database == null ? "" : database);
-    }
-
-    @Override
-    public String getCatalog() {
-        return this.catalog;
-    }
-
-    @Override
-    public String getSchema() {
-        return schema;
-    }
-
-    @Override
-    public void setMaxWait(int maxWait) {
     }
 
 }

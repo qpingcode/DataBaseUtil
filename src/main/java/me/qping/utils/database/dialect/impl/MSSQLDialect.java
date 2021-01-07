@@ -29,10 +29,16 @@ public class MSSQLDialect implements DataBaseDialect {
 
     @Override
     public String getPageSql(String sql, int pageSize, int pageNum) {
+
+        if(pageSize < 0){
+            throw new RuntimeException("pageSize 不能小于 0 ");
+        }
+
+
         int begin = pageSize * pageNum;
         int end = pageSize * pageNum + pageSize;
 
-        if(pageNum <= 0 || pageSize <= 0){
+        if(pageNum <= 0 || pageSize == 0){
             return "select top " + pageSize + " * from (\n" + sql + "\n) tmp_0";
         }else{
             return "select * from ( " +
