@@ -60,8 +60,7 @@ public class SQLServer2000Dialect  implements DataBaseDialect {
      * @return
      */
     public FieldType getFieldType(String origin) {
-        throw new RuntimeException("SQLServer 2000 未实现方法");
-
+        return FieldType.error(origin);
     }
 
 

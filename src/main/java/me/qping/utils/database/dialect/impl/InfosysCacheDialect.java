@@ -53,6 +53,6 @@ public class InfosysCacheDialect implements DataBaseDialect {
     }
 
     public FieldType getFieldType(String origin) {
-        throw new RuntimeException("InfosysCache 未实现方法");
+         return FieldType.error(origin);
     }
 }
