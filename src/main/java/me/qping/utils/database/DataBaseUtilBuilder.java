@@ -6,12 +6,9 @@ import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.connect.impl.*;
 import me.qping.utils.database.dialect.DataBaseDialect;
-import me.qping.utils.database.dialect.impl.PostgreSQLDialect;
+import me.qping.utils.database.dialect.impl.*;
 import me.qping.utils.database.util.CrudUtil;
-import me.qping.utils.database.dialect.impl.MSSQLDialect;
 import me.qping.utils.database.util.MetaDataUtil;
-import me.qping.utils.database.dialect.impl.MySQLDialect;
-import me.qping.utils.database.dialect.impl.OracleDialect;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -88,7 +85,7 @@ public class DataBaseUtilBuilder {
                 dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
                 break;
             case SQLSERVER2000:
-                dataBaseProperties = new SQLServer2000(host, port, database, username, password);
+                dataBaseProperties = new SQLServer2000(host, port, database, username, password, schema);
                 break;
             case MSSQL:
                 dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password, schema);
@@ -185,14 +182,27 @@ public class DataBaseUtilBuilder {
         Class.forName(dataBaseProperties.getDriver());
 
         DataBaseDialect dataBaseDialect = null;
-        if(this.dataBaseProperties.getDataBaseType().equals(MYSQL)){
-            dataBaseDialect = new MySQLDialect();
-        } else if(this.dataBaseProperties.getDataBaseType().equals(ORACLE)){
-            dataBaseDialect = new OracleDialect();
-        } else if(this.dataBaseProperties.getDataBaseType().equals(MSSQL) || this.dataBaseProperties.getDataBaseType().equals(SQLSERVER2000)){
-            dataBaseDialect = new MSSQLDialect();
-        } else if(this.dataBaseProperties.getDataBaseType().equals(POSTGRESQL)){
-            dataBaseDialect = new PostgreSQLDialect();
+
+        switch (dataBaseProperties.getDataBaseType()){
+            case MYSQL:
+                dataBaseDialect = new MySQLDialect();
+                break;
+            case MSSQL:
+                dataBaseDialect = new MSSQLDialect();
+                break;
+            case ORACLE:
+                dataBaseDialect = new OracleDialect();
+                break;
+            case DB2:
+                break;
+            case SQLITE:
+                break;
+            case POSTGRESQL:
+                dataBaseDialect = new PostgreSQLDialect();
+                break;
+            case SQLSERVER2000:
+                dataBaseDialect = new SQLServer2000Dialect();
+                break;
         }
 
         MetaDataUtil metaDataUtil = new MetaDataUtil();

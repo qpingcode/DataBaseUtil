@@ -155,7 +155,7 @@ public class TableMeta {
         }
 
         String tableName = name;
-        if(databaseType.equals(DataBaseType.MSSQL) && schema != null){
+        if((databaseType.equals(DataBaseType.MSSQL) || databaseType.equals(DataBaseType.SQLSERVER2000)) && schema != null){
             tableName = schema + "." + name;
         }
 

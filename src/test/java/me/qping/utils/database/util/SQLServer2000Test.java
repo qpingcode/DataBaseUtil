@@ -20,11 +20,11 @@ public class SQLServer2000Test {
                 DataBaseType.SQLSERVER2000,
                 "192.168.1.110",
                 "1433",
-                "test",
+                "pubs",
                 "sa",
                 "123",
                 true,
-                null
+                "guest"
         );
 
         MetaDataUtil metaDataUtil = builder.build();
@@ -42,8 +42,19 @@ public class SQLServer2000Test {
 //        TableMeta t = metaDataUtil.getTableInfo("t_user");
 //        System.out.println(t);
 //
+        // 查询所有的表
+        List<String> databases = metaDataUtil.getCatalogs();
+        for(String m : databases ){
+            System.out.println(m);
+        }
+
+        List<String> schemas = metaDataUtil.getSchemas("test");
+        for(String m : schemas ){
+            System.out.println(m);
+        }
 
         // 查询所有的表
+//        List<TableMeta> tables = metaDataUtil.getTables("test", "dbo");
         List<TableMeta> tables = metaDataUtil.getTables();
         for(TableMeta m : tables ){
             System.out.println(m);
