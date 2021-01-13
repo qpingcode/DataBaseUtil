@@ -1,11 +1,10 @@
 package me.qping.utils.database.bean;
 
 import me.qping.utils.database.exception.OrmException;
+import oracle.sql.CLOB;
 
 import java.lang.reflect.Field;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -49,16 +48,34 @@ public class BeanConversion {
         return t;
     }
 
-    private static <T> Object conversionType(Object value, Class<T> targetClass) throws ParseException, OrmException {
-
+    private static <T> Object conversionType(Object value, Class<T> targetClass) throws ParseException, OrmException, SQLException {
         if(targetClass.equals(Integer.class)){
             return Integer.parseInt(String.valueOf(value));
         }
-
         else if(targetClass.equals(String.class)){
+
+            if(value instanceof Clob){
+                Clob clob = ((Clob) value);
+                return clob.getSubString((long) 1, (int) clob.length());
+            }
+
+            if(value instanceof Blob){
+                throw new OrmException("无法将BLOB转换为String");
+            }
+
+
             return String.valueOf(value);
         }
-
+        else if(targetClass.equals(byte[].class)){
+            if(value instanceof Blob){
+                Blob blob = ((Blob) value);
+                return blob.getBytes(1, (int) blob.length());
+            }
+            if(value instanceof Clob){
+                Clob clob = ((Clob) value);
+                return clob.getSubString(1, (int) clob.length()).getBytes();
+            }
+        }
         else if(targetClass.equals(java.util.Date.class)){
             if(value instanceof String){
                 new SimpleDateFormat("yyyy-MM-dd").parse(value.toString());
