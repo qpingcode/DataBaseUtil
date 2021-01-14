@@ -52,16 +52,4 @@ public class SQLServer2000Dialect  implements DataBaseDialect {
         return props;
     }
 
-    /**
-     * 设置字段类型 MSSQL 数据类型
-     * 来源： https://docs.microsoft.com/zh-cn/sql/connect/jdbc/using-basic-data-types?view=sql-server-2017
-     * @param origin
-     *            列类型字符串
-     * @return
-     */
-    public FieldType getFieldType(String origin) {
-        return FieldType.error(origin);
-    }
-
-
 }

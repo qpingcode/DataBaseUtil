@@ -1,7 +1,7 @@
 package me.qping.utils.database.util;
 
 import me.qping.utils.database.DataBaseUtilBuilder;
-import me.qping.utils.database.metadata.bean.ResultSetColumnMeta;
+import me.qping.utils.database.metadata.bean.ColumnMeta;
 import me.qping.utils.database.metadata.bean.TableMeta;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ public class PostgreTest {
             ).build();
 
 //
-            List<ResultSetColumnMeta> a = crud.queryColumnMeta(null, null, "select * from REGISTERRECORD");
+            List<ColumnMeta> a = crud.queryColumnMeta(null, null, "select * from REGISTERRECORD");
 
             System.out.println(a.size());
 

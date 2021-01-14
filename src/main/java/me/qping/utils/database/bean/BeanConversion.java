@@ -39,6 +39,7 @@ public class BeanConversion {
                 try{
                     value = conversionType(value, field.getType());
                 }catch (Exception ex){
+                    ex.printStackTrace();
                     throw new OrmException(String.format("列 %s 转换错误,期望类型 %s ，实际类型 %s", field.getName(), field.getType().getName(), className));
                 }
             }

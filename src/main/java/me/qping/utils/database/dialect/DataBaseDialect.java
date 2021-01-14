@@ -17,10 +17,6 @@ public interface DataBaseDialect {
 
     public Properties getConnectionProperties(DataBaseConnectPropertes connectType);
 
-    // 数据库类型与 java 类型映射
-    // https://blog.csdn.net/weixin_34195546/article/details/87611601
-    public FieldType getFieldType(String columnType);
-
     public String getCatalogQuery();
 
     public String getSchemaQuery();

@@ -1,7 +1,7 @@
 package me.qping.utils.database.util;
 
 import me.qping.utils.database.DataBaseUtilBuilder;
-import me.qping.utils.database.metadata.bean.ResultSetColumnMeta;
+import me.qping.utils.database.metadata.bean.ColumnMeta;
 import me.qping.utils.database.metadata.bean.TableMeta;
 import org.junit.Test;
 
@@ -43,7 +43,7 @@ public class MetaDataUtilTest {
                     "rxthinkingmysql"
             ).build();
 
-            List<ResultSetColumnMeta> tableInfo = crud.queryColumnMeta(null, null, "select * from PERSONALINFORMATION", null);
+            List<ColumnMeta> tableInfo = crud.queryColumnMeta(null, null, "select * from PERSONALINFORMATION", null);
 
             System.out.println(tableInfo);
         } catch (ClassNotFoundException e) {

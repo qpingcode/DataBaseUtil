@@ -3,7 +3,6 @@ package me.qping.utils.database.util;
 import me.qping.common.model.DataRecord;
 import me.qping.utils.database.DataBaseUtilBuilder;
 import me.qping.utils.database.connect.DataBaseType;
-import me.qping.utils.database.metadata.bean.ResultSetColumnMeta;
 import me.qping.utils.database.metadata.bean.TableMeta;
 import org.junit.Test;
 

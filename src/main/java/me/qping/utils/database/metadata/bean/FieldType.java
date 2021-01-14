@@ -19,10 +19,10 @@ public class FieldType {
     String javaFullType;
     String javaPackage;
     String javaType;
-    SQLType sqlType;
+    JDBCType sqlType;
     String origin;
 
-    public static FieldType of(boolean isDate, Object javaFullType, String javaPackage, String javaType, SQLType sqlType, String origin, String columnDefinition){
+    public static FieldType of(boolean isDate, Object javaFullType, String javaPackage, String javaType, JDBCType sqlType, String origin, String columnDefinition){
         FieldType t = new FieldType();
         t.setDate(isDate);
         t.setJavaPackage(javaPackage);

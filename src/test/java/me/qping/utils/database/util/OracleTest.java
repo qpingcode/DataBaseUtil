@@ -3,6 +3,8 @@ package me.qping.utils.database.util;
 import me.qping.common.model.DataRecord;
 import me.qping.utils.database.DataBaseUtilBuilder;
 import me.qping.utils.database.connect.DataBaseType;
+import me.qping.utils.database.metadata.bean.ColumnMeta;
+import me.qping.utils.database.metadata.bean.TableMeta;
 import me.qping.utils.database.util.bean.oracle.TestClob;
 import org.junit.Test;
 
@@ -40,14 +42,23 @@ public class OracleTest {
     }
 
     @Test
+    public void testTableMeta() throws SQLException, ClassNotFoundException {
+        MetaDataUtil util = conn();
+        TableMeta table = util.getTableInfo("test_clob");
+        System.out.println(table);
+    }
+
+    @Test
     public void testClob() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
         MetaDataUtil util = conn();
 
-        List<TestClob> data = util.queryList(TestClob.class,"select * from TEST.test_clob ");
+        List<ColumnMeta> d = util.queryColumnMeta(null, null, "test_clob");
 
+
+//        List<TestClob> data = util.queryList(TestClob.class,"select * from test_clob ");
+        List<DataRecord> data = util.queryList("select * from test_clob ");
         System.out.println(data);
-
 
     }
 

@@ -168,27 +168,122 @@ public class MetaDataUtil extends CrudUtil {
             while(columnsInfo.next()){
 
                 String columnName = columnsInfo.getString("COLUMN_NAME");
-                String columnType = columnsInfo.getString("TYPE_NAME");
-
-                columnType = columnType.toLowerCase();
+                int columnType = columnsInfo.getInt("DATA_TYPE");  // SQL type from java.sql.Types
+                String typeName = columnsInfo.getString("TYPE_NAME");
 
                 int size = columnsInfo.getInt("COLUMN_SIZE");
                 int digits = columnsInfo.getInt("DECIMAL_DIGITS");
                 int nullable = columnsInfo.getInt("NULLABLE");
                 String remarks = columnsInfo.getString("REMARKS");
 
-                FieldType fieldType = dataBaseDialect.getFieldType(columnType);
-
                 boolean isPrimaryKey = primaryKeySet.contains(columnName);
 
-                columnMetas.add(ColumnMeta.of(columnName, columnType, remarks, size, digits, nullable == 1,
-                        isPrimaryKey, fieldType.getJavaFullType(), fieldType.getJavaType(), fieldType.getJavaPackage(), fieldType.isDate(), fieldType.getSqlType(), fieldType.getColumnDefinition()));
+                // java.sql.Types
+                boolean isDate = false;
+                String javaType = null, javaFullType = null, javaPackage = null;
+                JDBCType jdbcType = JDBCType.valueOf(columnType);
+                switch (jdbcType){
+                    case BIT:
+                    case BOOLEAN:
+                        javaType = "Boolean";
+                        javaFullType = "java.lang.Boolean";
+                        break;
+                    case TINYINT:
+                        javaType = "Byte";
+                        javaFullType = "java.lang.Byte";
+                        break;
+                    case SMALLINT:
+                        javaType = "Short";
+                        javaFullType = "java.lang.Short";
+                        break;
+                    case INTEGER:
+                        javaType = "Integer";
+                        javaFullType = "java.lang.Integer";
+                        break;
+                    case BIGINT:
+                        javaType = "Long";
+                        javaFullType = "java.lang.Long";
+                        break;
+                    case DOUBLE:
+                    case NUMERIC:
+                    case DECIMAL:
+                    case FLOAT:
+                        javaType = "BigDecimal";
+                        javaFullType = "java.math.BigDecimal";
+                        javaPackage = "java.math.BigDecimal";
+                        break;
+                    case REAL:
+                        javaType = "Float";
+                        javaFullType = "java.lang.Float";
+                        break;
+                    case NCHAR:
+                    case NVARCHAR:
+                    case LONGNVARCHAR:
+                    case CHAR:
+                    case VARCHAR:
+                    case LONGVARCHAR:
+                        javaType = "String";
+                        javaFullType = "java.lang.String";
+                        break;
+                    case DATE:
+                    case TIME:
+                        isDate = true;
+                        javaType = "Date";
+                        javaFullType = "java.sql.Date";
+                        javaPackage = "java.sql.Date";
+                        break;
+                    case TIME_WITH_TIMEZONE:
+                    case TIMESTAMP_WITH_TIMEZONE:
+                    case TIMESTAMP:
+                        isDate = true;
+                        javaType = "Timestamp";
+                        javaFullType = "java.sql.Timestamp";
+                        javaPackage = "java.sql.Timestamp";
+                        break;
+                    case BINARY:
+                    case VARBINARY:
+                    case LONGVARBINARY:
+                        javaType = "byte[]";
+                        javaFullType = "byte[]";
+                        break;
+                    case STRUCT:
+                        javaType = "Struct";
+                        javaFullType = "java.sql.Struct";
+                        javaPackage = "java.sql.Struct";
+                        break;
+                    case ARRAY:
+                        javaType = "Array";
+                        javaFullType = "java.sql.Array";
+                        javaPackage = "java.sql.Array";
+                        break;
+                    case BLOB:
+                        javaType = "Blob";
+                        javaFullType = "java.sql.Blob";
+                        javaPackage = "java.sql.Blob";
+                        break;
+                    case CLOB:
+                        javaType = "Clob";
+                        javaFullType = "java.sql.Clob";
+                        javaPackage = "java.sql.Clob";
+                        break;
+                    case REF:
+                        javaType = "Ref";
+                        javaFullType = "java.sql.Ref";
+                        javaPackage = "java.sql.Ref";
+                        break;
+                    case DATALINK:
+                        javaType = "URL";
+                        javaFullType = "java.net.URL";
+                        javaPackage = "java.net.URL";
+                        break;
+                    case NCLOB:
+                        javaType = "NClob";
+                        javaFullType = "java.sql.NClob";
+                        javaPackage = "java.sql.NClob";
+                        break;
+                }
+                columnMetas.add(ColumnMeta.of(columnName, typeName, remarks, size, digits, nullable == 1, isPrimaryKey, javaFullType, javaType, javaPackage, isDate, jdbcType, null));
             }
-
-//            ResultSet foreignKeys = metadata.getImportedKeys(catalog, schema, tableName.toUpperCase());
-//            while(foreignKeys.next()){
-//
-//            }
 
             tableMeta.setColumns(columnMetas);
             tableMeta.setPrimaryKeys(primaryKeyMetas);
@@ -199,7 +294,7 @@ public class MetaDataUtil extends CrudUtil {
         }
     }
 
-    public List<ResultSetColumnMeta> queryColumnMeta(String catalogName, String schemaName, String sql, Object... paramters)throws SQLException {
+    public List<ColumnMeta> queryColumnMeta(String catalogName, String schemaName, String sql, Object... paramters)throws SQLException {
         try(Connection connection = getConnection()){
 
             if(catalogName != null || schemaName != null){
@@ -215,7 +310,7 @@ public class MetaDataUtil extends CrudUtil {
             ResultSet rs = ps.executeQuery();
             ResultSetMetaData metaData = rs.getMetaData();
 
-            List<ResultSetColumnMeta> columnMetaList = getResultColumnMeta(metaData);
+            List<ColumnMeta> columnMetaList = getResultColumnMeta(metaData);
             return columnMetaList;
 
         }catch (SQLException e) {
@@ -243,7 +338,7 @@ public class MetaDataUtil extends CrudUtil {
             ResultSetMetaData metaData = rs.getMetaData();
             int columnCount = metaData.getColumnCount();
 
-            List<ResultSetColumnMeta> columnMetaList = getResultColumnMeta(metaData);
+            List<ColumnMeta> columnMetaList = getResultColumnMeta(metaData);
 
             List<Map<String, Object>> resultData = new ArrayList<>();
             while (rs.next()) {
@@ -266,21 +361,41 @@ public class MetaDataUtil extends CrudUtil {
     }
 
 
-    private List<ResultSetColumnMeta> getResultColumnMeta(ResultSetMetaData metaData) throws SQLException {
-        List<ResultSetColumnMeta> columnMetaList = new ArrayList<>();
+    private List<ColumnMeta> getResultColumnMeta(ResultSetMetaData metaData) throws SQLException {
+        List<ColumnMeta> columnMetaList = new ArrayList<>();
         for(int i = 0; i < metaData.getColumnCount(); i++){
             String name = metaData.getColumnName(i + 1);
-            int type = metaData.getColumnType(i + 1);
-            String className = metaData.getColumnClassName(i + 1);
             String label = metaData.getColumnLabel(i + 1);
-            String typeName = metaData.getColumnTypeName(i + 1);
             int precision = metaData.getPrecision(i + 1);
             int scale = metaData.getScale(i + 1);
+            int sqlType = metaData.getColumnType(i + 1);
+            String typeName = metaData.getColumnTypeName(i + 1);
+            String className = metaData.getColumnClassName(i + 1);
 
-            ResultSetColumnMeta columnMeta = ResultSetColumnMeta.of(name, typeName, precision, scale, className);
+            ColumnMeta columnMeta = new ColumnMeta();
+            columnMeta.setName(name);
+            columnMeta.setAlias(label);
+            columnMeta.setSize(precision);
+            columnMeta.setDigits(scale);
+
+            columnMeta.setSqlType(JDBCType.valueOf(sqlType));
+            columnMeta.setType(typeName);
+            columnMeta.setJavaType(getjavaType(className));
+            columnMeta.setJavaPackage(className);
+            columnMeta.setJavaType(className.indexOf("java.lang") > -1 ? null : className);
+
             columnMetaList.add(columnMeta);
         }
         return columnMetaList;
+    }
+
+    private String getjavaType(String fullJavaType){
+
+        if(fullJavaType.indexOf("\\.") > -1){
+            return fullJavaType.substring(fullJavaType.indexOf("\\."));
+        }else{
+            return fullJavaType;
+        }
     }
 
 
