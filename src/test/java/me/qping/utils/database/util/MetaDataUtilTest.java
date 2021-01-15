@@ -43,7 +43,7 @@ public class MetaDataUtilTest {
                     "rxthinkingmysql"
             ).build();
 
-            List<ColumnMeta> tableInfo = crud.queryColumnMeta(null, null, "select * from PERSONALINFORMATION", null);
+            List<ColumnMeta> tableInfo = crud.queryColumnMeta(null, null, "select * from PERSONALINFORMATION");
 
             System.out.println(tableInfo);
         } catch (ClassNotFoundException e) {
