@@ -232,5 +232,4 @@ public class MetaDataUtil extends CrudUtil {
         return columnMetaList;
     }
 
-
 }

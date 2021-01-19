@@ -103,7 +103,16 @@ public class CrudUtil {
         if (params != null) {
             for (int i = 0; i < params.length; i++) {
                 try {
-                    ps.setObject(i + 1, params[i]);
+
+                    Object param = params[i];
+                    if(param instanceof String){
+                        ps.setString(i + 1, (String) param);
+                    } else if(param instanceof byte[]){
+                        ps.setBytes(i + 1, (byte[]) param);
+                    } else {
+                        ps.setObject(i + 1, param);
+                    }
+
                 } catch (SQLException e) {
                     throw new SQLException("index: " + (i + 1) + " param: " + params[i] + " error: " + e.getMessage());
                 }

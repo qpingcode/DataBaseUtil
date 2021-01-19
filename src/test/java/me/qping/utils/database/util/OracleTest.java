@@ -3,14 +3,13 @@ package me.qping.utils.database.util;
 import me.qping.common.model.DataRecord;
 import me.qping.utils.database.DataBaseUtilBuilder;
 import me.qping.utils.database.connect.DataBaseType;
-import me.qping.utils.database.metadata.bean.ColumnMeta;
 import me.qping.utils.database.metadata.bean.TableMeta;
-import me.qping.utils.database.util.bean.oracle.TestClob;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.sql.*;
-import java.util.List;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * @ClassName OracleTest
@@ -50,32 +49,39 @@ public class OracleTest {
     }
 
     @Test
-    public void testClob() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public void testClob() throws Exception {
 
         MetaDataUtil util = conn();
 
-//        List<TestClob> data = util.queryList(TestClob.class,"select * from test_clob ");
-        List<DataRecord> data = util.queryList("select * from test_clob ");
+//        List<DataRecord> data = util.queryList("select * from test_clob ");
+
+
+        QueryBatch batchQuery = util.openQuery("select * from test_clob ");
+        boolean has = batchQuery.next();
+        DataRecord data =  batchQuery.get();
+
         System.out.println(data);
 
-        Date d =  new java.sql.Date(new java.util.Date().getTime());
-
-        Clob clob = (Clob) data.get(0).get("LOG_B");
+        Clob clob = (Clob) data.get("COL_CLOB");
 
 
         String insertSQL = "insert into test_clob(COL_BLOB) values(?)";
 
+        Connection connection = util.getConnection();
+        PreparedStatement ps = connection.prepareStatement(insertSQL);
 
-        Connection conn = util.getConnection();
-//        Blob blob = conn.cre
-        PreparedStatement ps = conn.prepareStatement(insertSQL);
+//        Clob newClob = (Clob) createOracleLob(connection,  "oracle.sql.CLOB");
+//        oracleStr2Clob(str, newClob);
+//        ps.setClob(1, newClob);
+//        ps.executeUpdate();
 
-        String str = "1234567中文啊aa";
-        ps.setBlob(1, new ByteArrayInputStream(str.getBytes()), str.getBytes().length);
 
+        ps.setBytes(1, clob.getSubString(1, (int) clob.length()).getBytes("GBK"));
         ps.executeUpdate();
 
+
     }
+
 
 
 }
