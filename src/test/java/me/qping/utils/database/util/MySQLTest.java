@@ -3,13 +3,13 @@ package me.qping.utils.database.util;
 import me.qping.common.model.DataRecord;
 import me.qping.utils.database.DataBaseUtilBuilder;
 import me.qping.utils.database.connect.DataBaseType;
-import me.qping.utils.database.metadata.bean.ColumnMeta;
 import me.qping.utils.database.metadata.bean.TableMeta;
-import me.qping.utils.database.util.bean.oracle.TestClob;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.sql.*;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -19,17 +19,17 @@ import java.util.List;
  * @Date 2021/1/13 11:20
  * @Version 1.0
  **/
-public class OracleTest {
+public class MySQLTest {
 
 
     public MetaDataUtil conn() throws ClassNotFoundException, SQLException {
         DataBaseUtilBuilder builder = DataBaseUtilBuilder.init(
-                DataBaseType.ORACLE,
-                "192.168.1.112",
-                "1521",
-                "ORCL",
-                "rxthinking",
-                "rxthinking",
+                DataBaseType.MYSQL,
+                "192.168.1.201",
+                "30306",
+                "data_transform",
+                "root",
+                "rxthinkingmysql",
                 true,
                 null
         );
@@ -43,37 +43,26 @@ public class OracleTest {
     }
 
     @Test
-    public void testTableMeta() throws SQLException, ClassNotFoundException {
-        MetaDataUtil util = conn();
-        TableMeta table = util.getTableInfo("test_clob");
-        System.out.println(table);
-    }
-
-    @Test
     public void testClob() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
         MetaDataUtil util = conn();
 
 //        List<TestClob> data = util.queryList(TestClob.class,"select * from test_clob ");
-        List<DataRecord> data = util.queryList("select * from test_clob ");
+        List<DataRecord> data = util.queryList("select * from test_code ");
         System.out.println(data);
 
-        Date d =  new java.sql.Date(new java.util.Date().getTime());
+        Date d =  new Date(new java.util.Date().getTime());
 
-        Clob clob = (Clob) data.get(0).get("LOG_B");
+        java.sql.Time time = new java.sql.Time(new java.util.Date().getTime());
 
-
-        String insertSQL = "insert into test_clob(COL_BLOB) values(?)";
+        String insertSQL = "insert into test_code(COL_TIME) values(?)";
 
 
         Connection conn = util.getConnection();
 //        Blob blob = conn.cre
-        PreparedStatement ps = conn.prepareStatement(insertSQL);
+        util.update(insertSQL, time);
 
-        String str = "1234567中文啊aa";
-        ps.setBlob(1, new ByteArrayInputStream(str.getBytes()), str.getBytes().length);
 
-        ps.executeUpdate();
 
     }
 

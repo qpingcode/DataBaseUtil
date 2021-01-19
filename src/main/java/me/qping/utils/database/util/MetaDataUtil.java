@@ -168,7 +168,7 @@ public class MetaDataUtil extends CrudUtil {
             while(columnsInfo.next()){
 
                 String columnName = columnsInfo.getString("COLUMN_NAME");
-                int columnType = columnsInfo.getInt("DATA_TYPE");  // SQL type from java.sql.Types
+                int typeCode = columnsInfo.getInt("DATA_TYPE");  // SQL type from java.sql.Types
                 String typeName = columnsInfo.getString("TYPE_NAME");
 
                 int size = columnsInfo.getInt("COLUMN_SIZE");
@@ -179,18 +179,19 @@ public class MetaDataUtil extends CrudUtil {
                 boolean isPrimaryKey = primaryKeySet.contains(columnName);
 
                 // java.sql.Types
-                JDBCType jdbcType = JDBCType.valueOf(columnType);
+                JDBCType jdbcType = null;
+                try{
+                    jdbcType = JDBCType.valueOf(typeCode);
+                } catch (Exception ex){}
                 ColumnMeta columnMeta = ColumnMeta.getFromSqlType(jdbcType);
-                String javaType = columnMeta.getJavaType();
-
                 columnMeta.setName(columnName);
                 columnMeta.setType(typeName);
+                columnMeta.setTypeCode(typeCode);
                 columnMeta.setComment(remarks);
                 columnMeta.setSize(size);
                 columnMeta.setDigits(digits);
                 columnMeta.setNullable(nullable == 1);
                 columnMeta.setPrimaryKey(isPrimaryKey);
-                columnMeta.setIsDate(javaType != null && (javaType.equals("Date") || javaType.equals("Timestamp")));
                 columnMetas.add(columnMeta);
             }
 
@@ -213,14 +214,16 @@ public class MetaDataUtil extends CrudUtil {
             List<ColumnMeta> columnMetaList = queryColumnMeta(connection, sql);
             return columnMetaList;
         }catch (SQLException e) {
+            e.printStackTrace();
             throw e;
         }
     }
 
     public List<ColumnMeta> queryColumnMeta(Connection connection, String sql) throws SQLException {
         PreparedStatement ps = connection.prepareStatement(sql);
-        int columnCount = ps.getMetaData().getColumnCount();
+
         ResultSetMetaData metaData = ps.getMetaData();
+        int columnCount = metaData.getColumnCount();
         List<ColumnMeta> columnMetaList = new ArrayList<>();
         for(int i = 1 ; i< columnCount + 1; i++){
             ColumnMeta columnMeta = ColumnMeta.getFromResultSet(metaData, i ,  null);

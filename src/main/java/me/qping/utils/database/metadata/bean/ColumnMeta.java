@@ -38,6 +38,7 @@ public class ColumnMeta {
     String name;            // 列名
     String alias;           // 别名
     String type;            // TYPE_NAME  数据库原始列类型比如VARCHAR(200)
+    int typeCode;         // DATA_TYPE  数据库原始列类型 java.sql.types DATA_TYPE
     String comment;         // 备注
 
     int size;                   // 字段长度
@@ -51,7 +52,7 @@ public class ColumnMeta {
     String javaPackage;         // 自动生成代码时，需要 import 的类库 ,如 java.util.Date
     String columnDefinition;    // TYPE_NAME  数据库原始列类型比如VARCHAR(200)
     JDBCType sqlType;           // java.sql.Types
-    int selfType;               // 自定义识别类型
+
 
     public static ColumnMeta of(String name, String type, String comment, int size, int digits, boolean nullable, boolean isPrimaryKey, String javaFullType, String javaType, String javaPackage, Boolean isDate, JDBCType jdbcType, String columnDefinition) {
         ColumnMeta columnMeta = new ColumnMeta();
@@ -72,6 +73,11 @@ public class ColumnMeta {
     }
 
     public static ColumnMeta getFromSqlType(JDBCType jdbcType) {
+
+        if(jdbcType == null){
+            return new ColumnMeta();
+        }
+
         String javaType = null;
         switch (jdbcType){
             case BIT:
@@ -148,8 +154,11 @@ public class ColumnMeta {
         if(javaType == null){
             return col;
         }
+
+        String javaShortType = getjavaType(javaType);
         col.setJavaFullType(javaType);
-        col.setJavaType(getjavaType(javaType));
+        col.setJavaType(javaShortType);
+        col.setIsDate(javaShortType != null && (javaShortType.equals("Date") || javaShortType.equals("Timestamp")));
         col.setJavaPackage(javaType.indexOf("java.lang") > -1 ? null : javaType);
         return col;
     }
@@ -161,16 +170,14 @@ public class ColumnMeta {
         String label = rsmeta.getColumnLabel(index);
         int precision = rsmeta.getPrecision(index);
         int scale = rsmeta.getScale(index);
-        int columnType = rsmeta.getColumnType(index);
+        int typeCode = rsmeta.getColumnType(index);
         String typeName = rsmeta.getColumnTypeName(index);
-        String className = rsmeta.getColumnClassName(index);
+//        String className = rsmeta.getColumnClassName(index);
         int displaySize = rsmeta.getColumnDisplaySize(index);
 
 
         int size = displaySize;
         int digits = scale;
-        JDBCType jdbcType = JDBCType.valueOf(columnType);
-
 
 
         boolean signed = false;
@@ -178,16 +185,23 @@ public class ColumnMeta {
             signed = rsmeta.isSigned(index);
         } catch ( Exception ignored) { }
 
-        if(jdbcType.equals(JDBCType.DOUBLE)
-                || jdbcType.equals(JDBCType.NUMERIC)
-                || jdbcType.equals(JDBCType.DECIMAL)
-                || jdbcType.equals(JDBCType.FLOAT)
-                || jdbcType.equals(JDBCType.REAL)
-                ){
-            size = precision;
-        }
+        JDBCType jdbcType = null;
+        try{
+            jdbcType = JDBCType.valueOf(typeCode);
+            if(jdbcType.equals(JDBCType.DOUBLE)
+                    || jdbcType.equals(JDBCType.NUMERIC)
+                    || jdbcType.equals(JDBCType.DECIMAL)
+                    || jdbcType.equals(JDBCType.FLOAT)
+                    || jdbcType.equals(JDBCType.REAL)
+                    ){
+                size = precision;
+            }
+
+        } catch (Exception ex){}
+
 
         ColumnMeta col = getFromSqlType(jdbcType);
+        col.setTypeCode(typeCode);
         col.setName(name);
         col.setAlias(label);
         col.setSqlType(jdbcType);
