@@ -24,8 +24,8 @@ public class PostgreTest {
 
             MetaDataUtil crud = DataBaseUtilBuilder.init(
                     "jdbc:postgresql://169.0.22.8:5432/data_origin",
-                    "gpadmin",
-                    "rxthinkingpostgres"
+                    "",
+                    ""
             ).build();
 
 //
