@@ -35,6 +35,10 @@ public class DataBaseUtilBuilder {
     int maxWait = 60000;
     boolean usePool = false;
 
+    public DataBaseUtilBuilder setMaxWait(int maxWait){
+        this.maxWait = maxWait;
+        return this;
+    }
 
     String key = "";
 

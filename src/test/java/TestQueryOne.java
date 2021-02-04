@@ -29,5 +29,6 @@ public class TestQueryOne {
         HisPatientVO vo = crud.queryOne(HisPatientVO.class, "select * from V_PATIENT_INFO_MZ where PATIENT_NO = ? and PATIENT_TYPE = ?", "123", 1);
         System.out.println(vo);
 
+
     }
 }
