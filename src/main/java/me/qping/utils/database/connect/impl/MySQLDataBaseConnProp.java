@@ -16,7 +16,10 @@ import static me.qping.utils.database.connect.DataBaseType.MYSQL;
 @Data
 public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
 
-    public static final String URL = "jdbc:mysql://${host}:${port}/${database}?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&maxReconnects=2&connectTimeout=${connectTimeout}&socketTimeout=${socketTimeout}";;
+    /**
+     * zeroDateTimeBehavior  0000-00-00 00:00:00 读取时不报错，转换为null
+     */
+    public static final String URL = "jdbc:mysql://${host}:${port}/${database}?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&maxReconnects=2&connectTimeout=${connectTimeout}&socketTimeout=${socketTimeout}&zeroDateTimeBehavior=convertToNull";;
     String driver = "com.mysql.cj.jdbc.Driver";
     String validQuery = "select 1 from dual";
 
