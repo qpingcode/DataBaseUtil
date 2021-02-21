@@ -1,16 +1,12 @@
 package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
-import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
-import me.qping.utils.database.util.ParamsUtil;
-
-import java.util.HashMap;
-import java.util.Map;
+import me.qping.utils.database.connect.DataBaseDialect;
 
 /**
  * @ClassName InfosysCache
- * @Description TODO
+ * @Description infosys cache 支持
  * @Author qping
  * @Date 2021/1/7 10:01
  * @Version 1.0
@@ -60,14 +56,35 @@ public class InfosysCache extends DataBaseConnAdapter {
 
     @Override
     public String getUrl() {
+        return getURL(URL, null);
+    }
 
-        Map params = new HashMap();
-        params.put("host", host);
-        params.put("port", port);
-        params.put("database", database);
+    @Override
+    public DataBaseDialect getDataBaseDialect() {
+        return new DataBaseDialect() {
+            @Override
+            public String getCatalogQuery() {
+                return null;
+            }
 
-        String url = ParamsUtil.dealParamUnsafe(params, URL, true);
-        return url;
+            @Override
+            public String getSchemaQuery() {
+                return " SELECT SCHEMA_NAME as NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE NOT SCHEMA_NAME %STARTSWITH '%' ";
+            }
+
+            @Override
+            public String getPageSql(String sql, int pageSize, int pageNum) {
+                if(pageSize < 0){
+                    throw new RuntimeException("pageSize 不能小于 0 ");
+                }
+
+                if(pageNum <= 0 || pageSize == 0){
+                    return "select top " + pageSize + " * from (\n" + sql + "\n) tmp_0";
+                }else{
+                    throw new RuntimeException("InfosysCache 未实现方法");
+                }
+            }
+        };
     }
 
 }

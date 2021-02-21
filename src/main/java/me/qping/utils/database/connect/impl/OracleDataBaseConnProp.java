@@ -1,8 +1,10 @@
 package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
-import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
+import me.qping.utils.database.connect.DataBaseDialect;
+
+import java.util.Properties;
 
 import static me.qping.utils.database.connect.DataBaseType.ORACLE;
 
@@ -14,7 +16,7 @@ import static me.qping.utils.database.connect.DataBaseType.ORACLE;
  * @Version 1.0
  **/
 @Data
-public class OracleDataBaseConnProp implements DataBaseConnectPropertes {
+public class OracleDataBaseConnProp extends DataBaseConnAdapter {
 
     public static final String SID_URL = "jdbc:oracle:thin:@${host}:${port}:${sid}";
     public static final String SERVICE_NAME_URL = "jdbc:oracle:thin:@//${host}:${port}/${serviceName}";
@@ -102,6 +104,51 @@ public class OracleDataBaseConnProp implements DataBaseConnectPropertes {
 
     @Override
     public void setMaxWait(int maxWait) {
+    }
+
+    @Override
+    public DataBaseDialect getDataBaseDialect() {
+        return new DataBaseDialect() {
+
+            @Override
+            public String getCatalogQuery() {
+                return null;
+            }
+
+            // oracle schema 等同于 user
+            @Override
+            public String getSchemaQuery() {
+                return "select username from all_users order by username";
+            }
+
+            @Override
+            public String getPageSql(String sql, int pageSize, int pageNum) {
+
+                if(pageSize < 0){
+                    throw new RuntimeException("pageSize 不能小于 0 ");
+                }
+
+                int begin = pageSize * pageNum;
+                int end = pageSize * pageNum + pageSize;
+
+                if(pageNum <= 0 || pageSize == 0){
+                    return "select * from (\n" + sql + "\n) where rownum <= " + pageSize;
+                }else{
+                    return "select * from (" +
+                            "    select tmp_0.*, rownum as rn from (\n" + sql + "\n)  tmp_0 where rownum <= " + end +
+                            " ) where rn > " + begin;
+                }
+            }
+        };
+    }
+
+    @Override
+    public Properties getConnectionProperties() {
+        Properties props = new Properties();
+        props.setProperty("user", getUsername());
+        props.setProperty("password", getPassword());
+        props.setProperty("remarks", "true");               //设置可以获取remarks信息
+        return props;
     }
 
 }

@@ -1,8 +1,8 @@
 package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
-import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
+import me.qping.utils.database.connect.DataBaseDialect;
 import me.qping.utils.database.util.ParamsUtil;
 
 import java.util.HashMap;
@@ -78,6 +78,35 @@ public class SQLServer2000 extends DataBaseConnAdapter {
 
         String url = ParamsUtil.dealParamUnsafe(params, URL, true);
         return url;
+    }
+
+    @Override
+    public DataBaseDialect getDataBaseDialect() {
+        return new DataBaseDialect() {
+            @Override
+            public String getCatalogQuery() {
+                return "select name from master.dbo.SysDatabases where name not in ('master', 'model', 'msdb', 'tempdb')";
+            }
+
+            @Override
+            public String getSchemaQuery() {
+                return "SELECT TABLE_SCHEMA as name FROM INFORMATION_SCHEMA.TABLES  GROUP BY TABLE_SCHEMA";
+            }
+
+            @Override
+            public String getPageSql(String sql, int pageSize, int pageNum) {
+
+                if(pageSize < 0){
+                    throw new RuntimeException("pageSize 不能小于 0 ");
+                }
+
+                if(pageNum <= 0 || pageSize == 0){
+                    return "select top " + pageSize + " * from (\n" + sql + "\n) tmp_0";
+                }else{
+                    throw new RuntimeException("SQLServer 2000 未定义分页方法");
+                }
+            }
+        };
     }
 
 }

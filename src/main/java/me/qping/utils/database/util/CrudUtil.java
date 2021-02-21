@@ -7,7 +7,7 @@ import me.qping.utils.database.bean.BeanConversion;
 import me.qping.utils.database.bean.FieldDefines;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
-import me.qping.utils.database.dialect.DataBaseDialect;
+import me.qping.utils.database.connect.DataBaseDialect;
 import me.qping.utils.database.exception.OrmException;
 
 import javax.sql.DataSource;
@@ -23,8 +23,6 @@ import java.util.*;
  **/
 @Data
 public class CrudUtil {
-
-    protected DataBaseDialect dataBaseDialect;
 
     protected DataBaseConnectPropertes dataBaseConnectProperties;
 
@@ -72,10 +70,6 @@ public class CrudUtil {
             default:
                 throw new RuntimeException("不支持的数据库类型，无法切换到：" + catalogName + " " + schemaName);
         }
-    }
-
-    public DataBaseDialect getDataBaseDialect(){
-        return dataBaseDialect;
     }
 
     public DataBaseType getDataBaseConnectType(){

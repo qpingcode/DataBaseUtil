@@ -15,7 +15,7 @@ public class MetaDataUtil extends CrudUtil {
     public static final String TYPE_VIEW = "VIEW";
 
     public List<String> getCatalogs() throws SQLException {
-        String query = dataBaseDialect.getCatalogQuery();
+        String query = dataBaseConnectProperties.getDataBaseDialect().getCatalogQuery();
         if(query == null){
             return null;
         }
@@ -26,7 +26,7 @@ public class MetaDataUtil extends CrudUtil {
     }
 
     public List<String> getSchemas(String catalog) throws SQLException {
-        String query = dataBaseDialect.getSchemaQuery();
+        String query = dataBaseConnectProperties.getDataBaseDialect().getSchemaQuery();
         if(query == null){
             return null;
         }
@@ -60,7 +60,7 @@ public class MetaDataUtil extends CrudUtil {
             schema = dataBaseConnectProperties.getSchema();
         }
 
-        try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), dataBaseDialect.getConnectionProperties(dataBaseConnectProperties))) {
+        try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), dataBaseConnectProperties.getConnectionProperties())) {
             DatabaseMetaData metadata = connection.getMetaData();
             ResultSet tableInfo = metadata.getTables(catalog, schema, "%", types);
             List<TableMeta> list = new ArrayList<>();
@@ -122,7 +122,7 @@ public class MetaDataUtil extends CrudUtil {
             tableName = tableName.toUpperCase();
         }
 
-        try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), dataBaseDialect.getConnectionProperties(dataBaseConnectProperties))){
+        try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), dataBaseConnectProperties.getConnectionProperties())){
             TableMeta tableMeta = new TableMeta();
 
             DatabaseMetaData metadata = connection.getMetaData();

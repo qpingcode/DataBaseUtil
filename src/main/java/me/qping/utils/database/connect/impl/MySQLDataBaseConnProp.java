@@ -3,6 +3,9 @@ package me.qping.utils.database.connect.impl;
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
+import me.qping.utils.database.connect.DataBaseDialect;
+
+import java.util.Properties;
 
 import static me.qping.utils.database.connect.DataBaseType.MYSQL;
 
@@ -109,6 +112,52 @@ public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
     public void setMaxWait(int maxWait) {
         this.socketTimeout = maxWait;
         this.connectTimeout = maxWait;
+    }
+
+    @Override
+    public Properties getConnectionProperties() {
+        /**
+         * mysql  需要 useInformationSchema=true 和 remarks=true
+         * oracle 需要 remarks=true
+         * 来源： http://www.tinygroup.org/docs/6638819901697136844
+         */
+        Properties props = new Properties();
+        props.setProperty("user", getUsername());
+        props.setProperty("password", getPassword());
+        props.setProperty("remarks", "true");               //设置可以获取remarks信息
+        props.setProperty("useInformationSchema", "true");  //设置可以获取tables remarks信息
+        return props;
+    }
+
+    @Override
+    public DataBaseDialect getDataBaseDialect() {
+        return new DataBaseDialect() {
+            @Override
+            public String getCatalogQuery() {
+                return "show databases";
+            }
+
+            @Override
+            public String getSchemaQuery() {
+                return null;
+            }
+
+            @Override
+            public String getPageSql(String sql, int pageSize, int pageNum) {
+                if(pageSize < 0){
+                    throw new RuntimeException("pageSize 不能小于 0 ");
+                }
+
+                int begin = pageSize * pageNum;
+                int end = pageSize * pageNum + pageSize;
+
+                if(pageNum <= 0|| pageSize == 0){
+                    return "select * from (\n" + sql + "\n) tmp_0 limit " + pageSize;
+                }else{
+                    return "select * from (\n" + sql + "\n) tmp_0 limit " + pageSize + " offset " + begin;
+                }
+            }
+        };
     }
 
 }

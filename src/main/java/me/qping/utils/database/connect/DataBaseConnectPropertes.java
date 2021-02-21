@@ -1,5 +1,7 @@
 package me.qping.utils.database.connect;
 
+import java.util.Properties;
+
 /**
  * @ClassName DataBaseConnectPropertes
  * @Description 数据库连接串模版
@@ -8,6 +10,8 @@ package me.qping.utils.database.connect;
  * @Version 1.0
  **/
 public interface DataBaseConnectPropertes {
+
+    public Properties getConnectionProperties();
 
     public DataBaseType getDataBaseType();
     public String getDriver();
@@ -32,4 +36,6 @@ public interface DataBaseConnectPropertes {
 
     //设置超时
     public void setMaxWait(int maxWait);
+
+    public DataBaseDialect getDataBaseDialect();
 }

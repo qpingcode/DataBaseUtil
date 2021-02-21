@@ -134,6 +134,14 @@
         </dependency>
         <!-- -->
 
+        <!-- db2 -->
+        <dependency>
+            <groupId>com.ibm.db2</groupId>
+            <artifactId>jcc</artifactId>
+            <version>11.5.5.0</version>
+        </dependency>
+        <!-- -->
+
     </dependencies>
 
     <build>

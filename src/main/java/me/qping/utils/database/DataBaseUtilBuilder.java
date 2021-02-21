@@ -5,8 +5,6 @@ import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.connect.impl.*;
-import me.qping.utils.database.dialect.DataBaseDialect;
-import me.qping.utils.database.dialect.impl.*;
 import me.qping.utils.database.util.CrudUtil;
 import me.qping.utils.database.util.MetaDataUtil;
 
@@ -14,8 +12,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-import static me.qping.utils.database.connect.DataBaseType.*;
 
 /**
  * @ClassName DataBaseDialect
@@ -35,56 +31,56 @@ public class DataBaseUtilBuilder {
     int maxWait = 60000;
     boolean usePool = false;
 
-    public DataBaseUtilBuilder setMaxWait(int maxWait){
+    public DataBaseUtilBuilder setMaxWait(int maxWait) {
         this.maxWait = maxWait;
         return this;
     }
 
     String key = "";
 
-    public static DataBaseUtilBuilder create(){
+    public static DataBaseUtilBuilder create() {
         return new DataBaseUtilBuilder();
     }
 
-    public DataBaseUtilBuilder databaseType(DataBaseConnectPropertes dataBaseProperties){
+    public DataBaseUtilBuilder databaseType(DataBaseConnectPropertes dataBaseProperties) {
         this.dataBaseProperties = dataBaseProperties;
         return this;
     }
 
-    public static DataBaseUtilBuilder mysql(String host, String port, String database, String username, String password){
+    public static DataBaseUtilBuilder mysql(String host, String port, String database, String username, String password) {
         MySQLDataBaseConnProp dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
         return create().databaseType(dataBaseProperties);
     }
 
-    public static DataBaseUtilBuilder oracle(String host, String port, String serviceName, String username, String password){
+    public static DataBaseUtilBuilder oracle(String host, String port, String serviceName, String username, String password) {
         OracleDataBaseConnProp dataBaseProperties = new OracleDataBaseConnProp(host, port, true, serviceName, username, password);
         return create().databaseType(dataBaseProperties);
     }
 
-    public static DataBaseUtilBuilder oracle(String host, String port, boolean useServiceName, String database, String username, String password){
+    public static DataBaseUtilBuilder oracle(String host, String port, boolean useServiceName, String database, String username, String password) {
         OracleDataBaseConnProp dataBaseProperties = new OracleDataBaseConnProp(host, port, useServiceName, database, username, password);
         return create().databaseType(dataBaseProperties);
     }
 
-    public static DataBaseUtilBuilder mssql(String host, String port, String database, String username, String password){
+    public static DataBaseUtilBuilder mssql(String host, String port, String database, String username, String password) {
         MSSQLDataBaseConnProp dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password);
         return create().databaseType(dataBaseProperties);
     }
 
-    public static DataBaseUtilBuilder mssql(String host, String port, String database, String username, String password, String schema){
+    public static DataBaseUtilBuilder mssql(String host, String port, String database, String username, String password, String schema) {
         MSSQLDataBaseConnProp dataBaseProperties = new MSSQLDataBaseConnProp(host, port, database, username, password, schema);
         return create().databaseType(dataBaseProperties);
     }
 
-    public static DataBaseUtilBuilder postgre(String host,String port,String database,String username,String password){
+    public static DataBaseUtilBuilder postgre(String host, String port, String database, String username, String password) {
         PostgresqlDataBaseConnProp dataBaseProperties = new PostgresqlDataBaseConnProp(host, port, database, username, password);
         return create().databaseType(dataBaseProperties);
     }
 
-    public static DataBaseUtilBuilder init(DataBaseType dataBaseType, String host, String port, String database, String username, String password, boolean useServiceName, String schema){
+    public static DataBaseUtilBuilder init(DataBaseType dataBaseType, String host, String port, String database, String username, String password, boolean useServiceName, String schema) {
 
         DataBaseConnectPropertes dataBaseProperties = null;
-        switch (dataBaseType){
+        switch (dataBaseType) {
             case MYSQL:
                 dataBaseProperties = new MySQLDataBaseConnProp(host, port, database, username, password);
                 break;
@@ -103,41 +99,47 @@ public class DataBaseUtilBuilder {
             case INFOSYSCACHE:
                 dataBaseProperties = new InfosysCache(host, port, database, username, password);
                 break;
+            case DB2:
+                dataBaseProperties = new DB2ConnProp(host, port, database, username, password);
+                break;
             default:
-                throw new RuntimeException("不支持的数据库类型："+ dataBaseType.name());
+                throw new RuntimeException("不支持的数据库类型：" + dataBaseType.name());
         }
         return create().databaseType(dataBaseProperties);
     }
 
-    public static DataBaseUtilBuilder init(String url, String username, String password){
+    public static DataBaseUtilBuilder init(String url, String username, String password) {
         DataBaseConnectPropertes dataBaseProperties;
-        if(url.indexOf("jdbc:sqlserver") > -1){
+        if (url.indexOf("jdbc:sqlserver") > -1) {
             dataBaseProperties = new MSSQLDataBaseConnProp(url, username, password);
-        }else if(url.indexOf("jdbc:microsoft:sqlserver") > -1){
+        } else if (url.indexOf("jdbc:microsoft:sqlserver") > -1) {
             dataBaseProperties = new SQLServer2000(url, username, password);
-        }else if(url.indexOf("mysql") > -1){
+        } else if (url.indexOf("mysql") > -1) {
             dataBaseProperties = new MySQLDataBaseConnProp(url, username, password);
-        }else if(url.indexOf("oracle") > -1){
+        } else if (url.indexOf("oracle") > -1) {
             dataBaseProperties = new OracleDataBaseConnProp(url, username, password);
-        }else if(url.indexOf("postgresql") > -1){
+        } else if (url.indexOf("postgresql") > -1) {
             dataBaseProperties = new PostgresqlDataBaseConnProp(url, username, password);
-        }else if(url.indexOf("jdbc:Cache") > -1){
+        } else if (url.indexOf("jdbc:Cache") > -1) {
             dataBaseProperties = new InfosysCache(url, username, password);
-        }else{
-            throw new RuntimeException("不支持的数据库类型，无法解析url："+ url);
+        } else if (url.indexOf("jdbc:db2:") > -1) {
+            dataBaseProperties = new DB2ConnProp(url, username, password);
+        } else {
+            throw new RuntimeException("不支持的数据库类型，无法解析url：" + url);
         }
         return create().databaseType(dataBaseProperties);
     }
 
     /**
      * 连接池设置
+     *
      * @param initialSize
      * @param minIdle
      * @param maxActive
      * @param maxWait
      * @return
      */
-    public DataBaseUtilBuilder pool(int initialSize, int minIdle, int maxActive, int maxWait){
+    public DataBaseUtilBuilder pool(int initialSize, int minIdle, int maxActive, int maxWait) {
         this.initialSize = initialSize;
         this.minIdle = minIdle;
         this.maxActive = maxActive;
@@ -146,7 +148,7 @@ public class DataBaseUtilBuilder {
         return this;
     }
 
-    private DataSource createDataSource(){
+    private DataSource createDataSource() {
         DruidDataSource ds = new DruidDataSource();
         ds.setUrl(dataBaseProperties.getUrl());
         ds.setUsername(dataBaseProperties.getUsername());
@@ -179,7 +181,7 @@ public class DataBaseUtilBuilder {
 
         dataBaseProperties.setMaxWait(maxWait);
 
-        if(usePool){
+        if (usePool) {
             crud.setDataSource(createDataSource());
         }
 
@@ -190,36 +192,13 @@ public class DataBaseUtilBuilder {
 
         Class.forName(dataBaseProperties.getDriver());
 
-        DataBaseDialect dataBaseDialect = null;
-
-        switch (dataBaseProperties.getDataBaseType()){
-            case MYSQL:
-                dataBaseDialect = new MySQLDialect();
-                break;
-            case MSSQL:
-                dataBaseDialect = new MSSQLDialect();
-                break;
-            case ORACLE:
-                dataBaseDialect = new OracleDialect();
-                break;
-            case POSTGRESQL:
-                dataBaseDialect = new PostgreSQLDialect();
-                break;
-            case SQLSERVER2000:
-                dataBaseDialect = new SQLServer2000Dialect();
-                break;
-            case INFOSYSCACHE:
-                dataBaseDialect = new InfosysCacheDialect();
-                break;
-        }
 
         MetaDataUtil metaDataUtil = new MetaDataUtil();
         metaDataUtil.setDataBaseConnectProperties(dataBaseProperties);
         dataBaseProperties.setMaxWait(maxWait);
-        if(usePool){
+        if (usePool) {
             metaDataUtil.setDataSource(createDataSource());
         }
-        metaDataUtil.setDataBaseDialect(dataBaseDialect);
         return metaDataUtil;
     }
 }

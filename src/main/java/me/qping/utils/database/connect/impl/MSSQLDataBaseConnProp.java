@@ -1,8 +1,8 @@
 package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
-import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
+import me.qping.utils.database.connect.DataBaseDialect;
 
 import static me.qping.utils.database.connect.DataBaseType.MSSQL;
 
@@ -14,7 +14,7 @@ import static me.qping.utils.database.connect.DataBaseType.MSSQL;
  * @Version 1.0
  **/
 @Data
-public class MSSQLDataBaseConnProp implements DataBaseConnectPropertes {
+public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
 
     public static final String URL = "jdbc:sqlserver://${host}:${port};DatabaseName=${database}";;
     String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
@@ -29,6 +29,9 @@ public class MSSQLDataBaseConnProp implements DataBaseConnectPropertes {
     String catalog;
     String url;
 
+    public MSSQLDataBaseConnProp(){
+
+    }
 
     /**
      * Catalog和Schema都属于抽象概念，主要用来解决命名冲突问题
@@ -75,39 +78,60 @@ public class MSSQLDataBaseConnProp implements DataBaseConnectPropertes {
     }
 
     public String getUrl(){
-
-        if(url != null){
-            return url;
-        }
-
-        return URL.replaceAll("\\$\\{host\\}", host)
-                .replaceAll("\\$\\{port\\}", port)
-                .replaceAll("\\$\\{database\\}", database == null ? "" : database);
+        return getURL(URL, null);
     }
 
-    @Override
-    public String getCatalog() {
-        return this.catalog;
-    }
 
+    /**
+     * sqlserver 如果当前登录用户为Sue，且不指定scheme，执行 "select * from table_test"
+     * 默认的搜索顺序是：
+     *      sys.table_test （Sys Schema）
+     *      Sue.table_test （Default Schema）
+     *      dbo.table_test （Dbo Schema）
+     *
+     * 在查询数据库表中的数据时，最好指定特定的Schema前缀，
+     * 这样数据库就不用去扫描Sys Schema了，就可以提高查询的速度了
+     */
     @Override
     public String getSchema() {
-        /**
-         * sqlserver 如果当前登录用户为Sue，且不指定scheme，执行 "select * from table_test"
-         * 默认的搜索顺序是：
-         *      sys.table_test （Sys Schema）
-         *      Sue.table_test （Default Schema）
-         *      dbo.table_test （Dbo Schema）
-         *
-         * 在查询数据库表中的数据时，最好指定特定的Schema前缀，
-         * 这样数据库就不用去扫描Sys Schema了，就可以提高查询的速度了
-         */
         return schema;
     }
 
     @Override
-    public void setMaxWait(int maxWait) {
+    public DataBaseDialect getDataBaseDialect() {
+        return new DataBaseDialect() {
+            @Override
+            public String getCatalogQuery() {
+                return "select name from master.dbo.SysDatabases where name not in ('master', 'model', 'msdb', 'tempdb')";
+            }
+
+            @Override
+            public String getSchemaQuery() {
+                return "select name from sys.schemas " +
+                        " where name not in ('INFORMATION_SCHEMA', 'db_owner', 'db_accessadmin', 'db_backupoperator', 'db_datareader', 'db_datawriter', 'db_ddladmin', 'db_denydatareader', 'db_denydatawriter', 'db_securityadmin', 'sys')";
+            }
+
+            @Override
+            public String getPageSql(String sql, int pageSize, int pageNum) {
+                if(pageSize < 0){
+                    throw new RuntimeException("pageSize 不能小于 0 ");
+                }
+
+
+                int begin = pageSize * pageNum;
+                int end = pageSize * pageNum + pageSize;
+
+                if(pageNum <= 0 || pageSize == 0){
+                    return "select top " + pageSize + " * from (\n" + sql + "\n) tmp_0";
+                }else{
+                    return "select * from ( " +
+                            "   select *, ROW_NUMBER() OVER (ORDER BY (select 0)) AS rn from (\n"+ sql +"\n) tmp_0 " +
+                            " ) as tmp_1 where rn > " + begin +" and rn <= " + end;
+                }
+            }
+        };
     }
+
 
 
 }

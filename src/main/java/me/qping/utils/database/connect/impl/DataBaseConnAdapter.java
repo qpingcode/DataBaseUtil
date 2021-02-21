@@ -2,7 +2,12 @@ package me.qping.utils.database.connect.impl;
 
 import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
-import me.qping.utils.database.connect.DataBaseType;
+import me.qping.utils.database.connect.DataBaseDialect;
+import me.qping.utils.database.util.ParamsUtil;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * @ClassName DataBaseConnAdapter
@@ -40,5 +45,54 @@ public abstract class DataBaseConnAdapter implements DataBaseConnectPropertes {
         this.database = database;
         this.username = username;
         this.password = password;
+    }
+
+    protected String getURL(String template, Map map){
+
+        if(url != null){
+            return url;
+        }
+
+        Map params = new HashMap();
+        params.put("host", host);
+        params.put("port", port);
+        params.put("database", database);
+        if(map != null){
+            params.putAll(map);
+        }
+
+        if(template == null){
+            return null;
+        }
+
+        String url = ParamsUtil.dealParamUnsafe(params, template, true);
+        return url;
+    }
+
+    public Properties getConnectionProperties(){
+        Properties props = new Properties();
+        props.setProperty("user", getUsername());
+        props.setProperty("password", getPassword());
+        return props;
+    }
+
+    @Override
+    public DataBaseDialect getDataBaseDialect() {
+        return new DataBaseDialect() {
+            @Override
+            public String getCatalogQuery() {
+                return null;
+            }
+
+            @Override
+            public String getSchemaQuery() {
+                return null;
+            }
+
+            @Override
+            public String getPageSql(String sql, int pageSize, int pageNum) {
+                return null;
+            }
+        };
     }
 }

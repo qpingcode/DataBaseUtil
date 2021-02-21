@@ -54,11 +54,11 @@ public class SQLServer2000Test {
 //        }
 //
 //        // 查询所有的表
-////        List<TableMeta> tables = metaDataUtil.getTables("test", "dbo");
-//        List<TableMeta> tables = metaDataUtil.getTables();
-//        for(TableMeta m : tables ){
-//            System.out.println(m);
-//        }
+//        List<TableMeta> tables = metaDataUtil.getTables("test", "dbo");
+        List<TableMeta> tables = metaDataUtil.getTables();
+        for(TableMeta m : tables ){
+            System.out.println(m);
+        }
 //
 //
 //        List<DataRecord> list = metaDataUtil.queryList("select top 2 * from t_user");
