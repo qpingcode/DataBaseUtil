@@ -16,8 +16,8 @@ public class QueryBatchTest {
         try {
             MetaDataUtil crud = DataBaseUtilBuilder.init(
                     "jdbc:mysql://192.168.80.20:30306/data_luhe_origin?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false",
-                    "root",
-                    "rxthinkingmysql"
+                    "",
+                    ""
             ).build();
 
             String sql = "select * from MEDICALRECORD";
@@ -56,7 +56,7 @@ public class QueryBatchTest {
 
         long begin = System.currentTimeMillis();
         try {
-            MetaDataUtil crud = DataBaseUtilBuilder.oracle("127.0.0.1", "1522", "phsmscache", "phsms_buffer", "phsms_buffer_2019").build();
+            MetaDataUtil crud = DataBaseUtilBuilder.oracle("127.0.0.1", "1522", "", "", "").build();
 
 
             String sql = "select * from TM_DICT_ORG";

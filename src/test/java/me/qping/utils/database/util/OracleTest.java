@@ -27,8 +27,8 @@ public class OracleTest {
                 "192.168.1.112",
                 "1521",
                 "ORCL",
-                "rxthinking",
-                "rxthinking",
+                "",
+                "",
                 true,
                 null
         );

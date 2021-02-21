@@ -15,10 +15,10 @@ public class EncrptUtilTest {
     public void test(){
 
         EncryptUtil u = new EncryptUtil();
-        u.setPassword("Rxthinking@Nj2020");
+        u.setPassword("");
 
         try {
-            u.de("HyOdVDayOUJqZYwaBJXd3KK8CsmhCGHG");
+            u.de("");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -20,8 +20,8 @@ public class CacheTest {
 //        Class.forName("com.intersys.jdbc.CacheDriver");
 //        Connection connection = DriverManager.getConnection(
 //                    "jdbc:Cache://127.0.0.1:1972/dhc-app",
-//                    "_system",
-//                    "SYS"
+//                    "",
+//                    ""
 //            );
 //
 //        CrudUtil util = new CrudUtil();
@@ -40,8 +40,8 @@ public class CacheTest {
                 "127.0.0.1",
                 "1972",
                 "dhc-app",
-                "_system",
-                "SYS",
+                "",
+                "",
                 true,
                 null
         );

@@ -24,7 +24,7 @@ public class ColumnMetaTest {
                 "30306",
                 "data_transform",
                 "root",
-                "rxthinkingmysql",
+                "",
                 true,
                 null
         );
