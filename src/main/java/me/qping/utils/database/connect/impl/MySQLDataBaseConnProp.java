@@ -22,7 +22,19 @@ public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
     /**
      * zeroDateTimeBehavior  0000-00-00 00:00:00 读取时不报错，转换为null
      */
-    public static final String URL = "jdbc:mysql://${host}:${port}/${database}?useUnicode=true&characterEncoding=UTF-8&tinyInt1isBit=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&maxReconnects=2&connectTimeout=${connectTimeout}&socketTimeout=${socketTimeout}&zeroDateTimeBehavior=convertToNull";;
+    public static final String URL = "jdbc:mysql://${host}:${port}/${database}" +
+            "?useUnicode=true" +
+            "&characterEncoding=UTF-8" +
+            "&tinyInt1isBit=false" +
+            "&serverTimezone=GMT%2B8" +  // serverTimezone=GMT%2B8   serverTimezone=Asia/Shanghai
+            "&rewriteBatchedStatements=true" +
+            "&autoReconnect=true" +
+            "&failOverReadOnly=false" +
+            "&maxReconnects=2" +
+            "&connectTimeout=${connectTimeout}" +
+            "&socketTimeout=${socketTimeout}" +
+            "&zeroDateTimeBehavior=convertToNull";
+
     String driver = "com.mysql.cj.jdbc.Driver";
     String validQuery = "select 1 from dual";
 
@@ -86,6 +98,7 @@ public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
     }
 
     public String getUrl(){
+
 
         if(url != null){
             return url;
