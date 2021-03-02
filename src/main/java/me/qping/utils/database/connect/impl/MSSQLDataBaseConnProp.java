@@ -16,18 +16,8 @@ import static me.qping.utils.database.connect.DataBaseType.MSSQL;
 @Data
 public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
 
-    public static final String URL = "jdbc:sqlserver://${host}:${port};DatabaseName=${database}";;
+    public static final String URL = "jdbc:sqlserver://#{host}:#{port};DatabaseName=#{database}";;
     String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-    String validQuery = "select 1";
-
-    String host;
-    String port;
-    String database;
-    String username;
-    String password;
-    String schema;
-    String catalog;
-    String url;
 
     public MSSQLDataBaseConnProp(){
 

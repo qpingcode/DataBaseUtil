@@ -16,7 +16,7 @@ import static me.qping.utils.database.connect.DataBaseType.MSSQL;
 @Data
 public class JTDSDataBaseConnProp extends MSSQLDataBaseConnProp {
 
-    public static final String URL_JTDS = "jdbc:jtds:sqlserver://${host}:${port}/${database}";;
+    public static final String URL_JTDS = "jdbc:jtds:sqlserver://#{host}:#{port}/#{database}";;
     String driver = "net.sourceforge.jtds.jdbc.Driver";
 
     public JTDSDataBaseConnProp(String host, String port, String database, String username, String password) {
@@ -43,25 +43,6 @@ public class JTDSDataBaseConnProp extends MSSQLDataBaseConnProp {
 
     public String getUrl(){
         return getURL(URL_JTDS, null);
-    }
-
-    /**
-     * sqlserver 如果当前登录用户为Sue，且不指定scheme，执行 "select * from table_test"
-     * 默认的搜索顺序是：
-     *      sys.table_test （Sys Schema）
-     *      Sue.table_test （Default Schema）
-     *      dbo.table_test （Dbo Schema）
-     *
-     * 在查询数据库表中的数据时，最好指定特定的Schema前缀，
-     * 这样数据库就不用去扫描Sys Schema了，就可以提高查询的速度了
-     */
-    @Override
-    public String getSchema() {
-        return schema;
-    }
-
-    @Override
-    public void setMaxWait(int maxWait) {
     }
 
     public static void main(String[] args) {

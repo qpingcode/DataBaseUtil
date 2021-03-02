@@ -15,27 +15,15 @@ import static me.qping.utils.database.connect.DataBaseType.ORACLE;
  * @Date 2019/7/4 15:59
  * @Version 1.0
  **/
-@Data
 public class OracleDataBaseConnProp extends DataBaseConnAdapter {
 
     public static final String SID_URL = "jdbc:oracle:thin:@${host}:${port}:${sid}";
     public static final String SERVICE_NAME_URL = "jdbc:oracle:thin:@//${host}:${port}/${serviceName}";
 
     String driver = "oracle.jdbc.driver.OracleDriver";
-    String validQuery = "select 1 from dual";
 
-    String host;
-    String port;
     String serviceName;
-    String username;
-    String password;
-    String url;
-
     boolean useServiceName;
-
-    String database;
-    String schema;
-    String catalog;
 
     /**
      * Catalog和Schema都属于抽象概念，主要用来解决命名冲突问题
@@ -73,6 +61,16 @@ public class OracleDataBaseConnProp extends DataBaseConnAdapter {
         return ORACLE;
     }
 
+    @Override
+    public String getDriver() {
+        return driver;
+    }
+
+    @Override
+    public String getValidQuery() {
+        return "select 1 from dual";
+    }
+
     public String getUrl(){
 
         if(url != null){
@@ -90,20 +88,6 @@ public class OracleDataBaseConnProp extends DataBaseConnAdapter {
         }
 
 
-    }
-
-    @Override
-    public String getCatalog() {
-        return this.catalog;
-    }
-
-    @Override
-    public String getSchema() {
-        return this.schema;
-    }
-
-    @Override
-    public void setMaxWait(int maxWait) {
     }
 
     @Override
