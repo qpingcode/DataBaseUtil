@@ -60,10 +60,17 @@ public class DB2ConnProp extends DataBaseConnAdapter {
                 }
 
 
+
                 int begin = pageSize * pageNum;
                 int end = pageSize * pageNum + pageSize;
 
                 if(pageNum <= 0 || pageSize == 0){
+
+                    //fix db2 pageSize不能为0
+                    if(pageSize == 0){
+                        pageSize = 1;
+                    }
+
                     return String.format("select * from (%s) fetch first %s rows only", sql, pageSize);
                 }else{
                     return "select * from ( " +
