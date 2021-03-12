@@ -4,6 +4,9 @@ import lombok.Data;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.connect.DataBaseDialect;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static me.qping.utils.database.connect.DataBaseType.MSSQL;
 
 /**
@@ -16,8 +19,14 @@ import static me.qping.utils.database.connect.DataBaseType.MSSQL;
 @Data
 public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
 
-    public static final String URL = "jdbc:sqlserver://#{host}:#{port};DatabaseName=#{database}";;
+    public static final String URL = "jdbc:sqlserver://#{host}:#{port};DatabaseName=#{database}";
+
+
+    public static final String URL_WITH_INSTANCE = "jdbc:sqlserver://#{host}:#{port};DatabaseName=#{database};instanceName=#{instanceName}";
+
     String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+
+    String instanceName = null;
 
     public MSSQLDataBaseConnProp(){
 
@@ -32,6 +41,16 @@ public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
      * @return
      */
     public MSSQLDataBaseConnProp(String host, String port, String database, String username, String password) {
+
+        if(host.indexOf("\\") > -1 ){
+            String[] hostArr = host.split("\\\\");
+            if(hostArr.length > 2){
+                throw new RuntimeException("host不合法：" + host);
+            }
+            host = hostArr[0];
+            this.instanceName = hostArr[1];
+        }
+
         this.host = host;
         this.port = port == null ? "1433" : port;
         this.database = database;
@@ -57,7 +76,8 @@ public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
         String markStr = "DatabaseName=";
         int begin = url.indexOf(markStr);
         if( begin > -1){
-            return url.substring(begin + markStr.length(), url.length());
+            int end = url.indexOf(";", begin) > -1 ? url.indexOf(";", begin) : url.length();
+            return url.substring(begin + markStr.length(), end);
         }
         return null;
     }
@@ -68,7 +88,13 @@ public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
     }
 
     public String getUrl(){
-        return getURL(URL, null);
+        if(instanceName != null){
+            Map<String, Object> paramsMap = new HashMap<>();
+            paramsMap.put("instanceName", instanceName);
+            return getURL(URL_WITH_INSTANCE, paramsMap);
+        }else{
+            return getURL(URL, null);
+        }
     }
 
 
