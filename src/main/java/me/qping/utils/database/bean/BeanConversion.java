@@ -50,7 +50,7 @@ public class BeanConversion {
     }
 
     private static <T> Object conversionType(Object value, Class<T> targetClass) throws ParseException, OrmException, SQLException {
-        if(targetClass.equals(Integer.class)){
+        if(targetClass.equals(Integer.class) || targetClass.equals(int.class)){
             return Integer.parseInt(String.valueOf(value));
         }
         else if(targetClass.equals(String.class)){
