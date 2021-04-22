@@ -25,7 +25,7 @@ public class MySQLDataBaseConnProp extends DataBaseConnAdapter {
     /**
      * zeroDateTimeBehavior  0000-00-00 00:00:00 读取时不报错，转换为null
      */
-    public static final String URL = "jdbc:mysql://${host}:${port}/${database}" +
+    public static final String URL = "jdbc:mysql://#{host}:#{port}/#{database}" +
             "?useUnicode=true" +
             "&characterEncoding=UTF-8" +
             "&tinyInt1isBit=false" +
