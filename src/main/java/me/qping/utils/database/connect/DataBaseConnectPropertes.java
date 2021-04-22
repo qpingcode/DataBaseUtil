@@ -11,6 +11,10 @@ import java.util.Properties;
  **/
 public interface DataBaseConnectPropertes {
 
+    public static final String SERVER_TIME_ZONE_GMT8 = "GMT%2B8";              // 使用这个可以防止错误  HOUR_OF_DAY:0->1
+    public static final String SERVER_TIME_ZONE_SHANGHAI = "Asia/Shanghai";
+
+
     public Properties getConnectionProperties();
 
     public DataBaseType getDataBaseType();
@@ -36,6 +40,8 @@ public interface DataBaseConnectPropertes {
 
     //设置超时
     public void setMaxWait(int maxWait);
+    //设置时区 mysql 专用
+    public void setTimezone(String timezone);
 
     public DataBaseDialect getDataBaseDialect();
 }

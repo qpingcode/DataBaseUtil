@@ -30,6 +30,7 @@ public class DataBaseUtilBuilder {
     int maxActive = 20;
     int maxWait = 60000;
     boolean usePool = false;
+    String timezone;
 
     public DataBaseUtilBuilder setMaxWait(int maxWait) {
         this.maxWait = maxWait;
@@ -196,6 +197,7 @@ public class DataBaseUtilBuilder {
         MetaDataUtil metaDataUtil = new MetaDataUtil();
         metaDataUtil.setDataBaseConnectProperties(dataBaseProperties);
         dataBaseProperties.setMaxWait(maxWait);
+        dataBaseProperties.setTimezone(timezone);
         if (usePool) {
             metaDataUtil.setDataSource(createDataSource());
         }

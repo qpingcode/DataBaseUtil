@@ -4,7 +4,10 @@ import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.connect.DataBaseDialect;
+import me.qping.utils.database.util.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import static me.qping.utils.database.connect.DataBaseType.MYSQL;
@@ -17,7 +20,7 @@ import static me.qping.utils.database.connect.DataBaseType.MYSQL;
  * @Version 1.0
  **/
 @Data
-public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
+public class MySQLDataBaseConnProp extends DataBaseConnAdapter {
 
     /**
      * zeroDateTimeBehavior  0000-00-00 00:00:00 读取时不报错，转换为null
@@ -26,13 +29,13 @@ public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
             "?useUnicode=true" +
             "&characterEncoding=UTF-8" +
             "&tinyInt1isBit=false" +
-            "&serverTimezone=GMT%2B8" +  // serverTimezone=GMT%2B8   serverTimezone=Asia/Shanghai
+            "&serverTimezone=#{timezone}" +
             "&rewriteBatchedStatements=true" +
             "&autoReconnect=true" +
             "&failOverReadOnly=false" +
-            "&maxReconnects=2" +
-            "&connectTimeout=${connectTimeout}" +
-            "&socketTimeout=${socketTimeout}" +
+            "&maxReconnects=#{maxReconnects}" +
+            "&connectTimeout=#{connectTimeout}" +
+            "&socketTimeout=#{socketTimeout}" +
             "&zeroDateTimeBehavior=convertToNull";
 
     String driver = "com.mysql.cj.jdbc.Driver";
@@ -50,6 +53,8 @@ public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
 
     int socketTimeout = 30000;
     int connectTimeout = 30000;
+    String timezone = SERVER_TIME_ZONE_SHANGHAI;
+    int maxReconnects = 2;
 
     /**
      * Catalog和Schema都属于抽象概念，主要用来解决命名冲突问题
@@ -97,28 +102,15 @@ public class MySQLDataBaseConnProp implements DataBaseConnectPropertes {
         return MYSQL;
     }
 
+
     public String getUrl(){
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("socketTimeout", socketTimeout);
+        paramsMap.put("connectTimeout", connectTimeout);
+        paramsMap.put("timezone", timezone);
+        paramsMap.put("maxReconnects", maxReconnects);
 
-
-        if(url != null){
-            return url;
-        }
-
-        return URL.replaceAll("\\$\\{host\\}", host)
-                .replaceAll("\\$\\{port\\}", port)
-                .replaceAll("\\$\\{database\\}", database == null ? "" : database)
-                .replaceAll("\\$\\{socketTimeout\\}", socketTimeout + "")
-                .replaceAll("\\$\\{connectTimeout\\}", connectTimeout + "");
-    }
-
-    @Override
-    public String getCatalog() {
-        return this.catalog;
-    }
-
-    @Override
-    public String getSchema() {
-        return this.schema;
+        return getURL(URL, paramsMap);
     }
 
     @Override

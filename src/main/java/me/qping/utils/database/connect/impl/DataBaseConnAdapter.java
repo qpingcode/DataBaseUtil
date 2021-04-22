@@ -4,6 +4,7 @@ import lombok.Data;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseDialect;
 import me.qping.utils.database.util.ParamsUtil;
+import me.qping.utils.database.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,7 @@ public abstract class DataBaseConnAdapter implements DataBaseConnectPropertes {
     String username;
     String password;
     String url;
+    String timezone;
     int maxWait;
 
 
@@ -67,6 +69,13 @@ public abstract class DataBaseConnAdapter implements DataBaseConnectPropertes {
 
         String url = ParamsUtil.dealParamUnsafe(params, template, true);
         return url;
+    }
+
+    @Override
+    public void setTimezone(String timezone) {
+        if(StringUtils.isNotBlank(timezone)){
+            this.timezone = timezone;
+        }
     }
 
     public Properties getConnectionProperties(){
