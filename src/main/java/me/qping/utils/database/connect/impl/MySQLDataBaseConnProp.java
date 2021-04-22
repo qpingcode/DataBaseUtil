@@ -41,16 +41,6 @@ public class MySQLDataBaseConnProp extends DataBaseConnAdapter {
     String driver = "com.mysql.cj.jdbc.Driver";
     String validQuery = "select 1 from dual";
 
-    String host;
-    String port;
-    String database;
-    String username;
-    String password;
-
-    String schema;
-    String catalog;
-    String url;
-
     int socketTimeout = 30000;
     int connectTimeout = 30000;
     String timezone = SERVER_TIME_ZONE_SHANGHAI;
