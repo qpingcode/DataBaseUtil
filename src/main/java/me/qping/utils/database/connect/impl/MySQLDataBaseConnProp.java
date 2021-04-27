@@ -43,7 +43,6 @@ public class MySQLDataBaseConnProp extends DataBaseConnAdapter {
 
     int socketTimeout = 30000;
     int connectTimeout = 30000;
-    String timezone = SERVER_TIME_ZONE_SHANGHAI;
     int maxReconnects = 2;
 
     /**

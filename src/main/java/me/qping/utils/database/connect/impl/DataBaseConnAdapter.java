@@ -75,6 +75,8 @@ public abstract class DataBaseConnAdapter implements DataBaseConnectPropertes {
     public void setTimezone(String timezone) {
         if(StringUtils.isNotBlank(timezone)){
             this.timezone = timezone;
+        }else{
+            this.timezone = DataBaseConnectPropertes.SERVER_TIME_ZONE_SHANGHAI;
         }
     }
 
