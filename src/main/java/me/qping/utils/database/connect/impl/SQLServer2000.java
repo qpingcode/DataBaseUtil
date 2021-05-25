@@ -106,6 +106,19 @@ public class SQLServer2000 extends DataBaseConnAdapter {
                     throw new RuntimeException("SQLServer 2000 未定义分页方法");
                 }
             }
+
+            @Override
+            public String getTablePageSql(String tableName, int pageSize, int pageNum) {
+                if(pageSize < 0){
+                    throw new RuntimeException("pageSize 不能小于 0 ");
+                }
+
+                if(pageNum <= 0 || pageSize == 0){
+                    return "select top " + pageSize + " * from " + tableName ;
+                }else{
+                    throw new RuntimeException("SQLServer 2000 未定义分页方法");
+                }
+            }
         };
     }
 

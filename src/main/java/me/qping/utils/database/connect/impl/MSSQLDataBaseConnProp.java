@@ -145,6 +145,25 @@ public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
                             " ) as tmp_1 where rn > " + begin +" and rn <= " + end;
                 }
             }
+
+            @Override
+            public String getTablePageSql(String tableName, int pageSize, int pageNum) {
+                if(pageSize < 0){
+                    throw new RuntimeException("pageSize 不能小于 0 ");
+                }
+
+
+                int begin = pageSize * pageNum;
+                int end = pageSize * pageNum + pageSize;
+
+                if(pageNum <= 0 || pageSize == 0){
+                    return "select top " + pageSize + " * from " + tableName ;
+                }else{
+                    return "select * from ( " +
+                            "   select *, ROW_NUMBER() OVER (ORDER BY (select 0)) AS rn from "+ tableName +" tmp_0 " +
+                            " ) as tmp_1 where rn > " + begin +" and rn <= " + end;
+                }
+            }
         };
     }
 

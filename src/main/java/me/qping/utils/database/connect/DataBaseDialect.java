@@ -29,4 +29,15 @@ public interface DataBaseDialect {
      */
     public String getPageSql(String sql, int pageSize, int pageNum);
 
+
+    /**
+     * 构建分页sql
+     * @param tableName 表名
+     * @param pageSize  每页数量
+     * @param pageNum   当前第几页，从0开始，当pageNum小于0时，会构建获取前pageSize条记录的sql
+     * @return
+     * @throws SQLException
+     */
+    public String getTablePageSql(String tableName, int pageSize, int pageNum);
+
 }

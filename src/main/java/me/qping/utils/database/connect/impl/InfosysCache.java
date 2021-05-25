@@ -84,6 +84,19 @@ public class InfosysCache extends DataBaseConnAdapter {
                     throw new RuntimeException("InfosysCache 未实现方法");
                 }
             }
+
+            @Override
+            public String getTablePageSql(String tableName, int pageSize, int pageNum) {
+                if(pageSize < 0){
+                    throw new RuntimeException("pageSize 不能小于 0 ");
+                }
+
+                if(pageNum <= 0 || pageSize == 0){
+                    return "select top " + pageSize + " * from " + tableName ;
+                }else{
+                    throw new RuntimeException("InfosysCache 未实现方法");
+                }
+            }
         };
     }
 

@@ -104,6 +104,11 @@ public abstract class DataBaseConnAdapter implements DataBaseConnectPropertes {
             public String getPageSql(String sql, int pageSize, int pageNum) {
                 return null;
             }
+
+            @Override
+            public String getTablePageSql(String tableName, int pageSize, int pageNum) {
+                return null;
+            }
         };
     }
 }

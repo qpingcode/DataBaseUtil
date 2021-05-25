@@ -123,6 +123,24 @@ public class OracleDataBaseConnProp extends DataBaseConnAdapter {
                             " ) where rn > " + begin;
                 }
             }
+
+            @Override
+            public String getTablePageSql(String tableName, int pageSize, int pageNum) {
+                if(pageSize < 0){
+                    throw new RuntimeException("pageSize 不能小于 0 ");
+                }
+
+                int begin = pageSize * pageNum;
+                int end = pageSize * pageNum + pageSize;
+
+                if(pageNum <= 0 || pageSize == 0){
+                    return "select * from " + tableName + " where rownum <= " + pageSize;
+                }else{
+                    return "select * from (" +
+                            "    select tmp_0.*, rownum as rn from " + tableName + "  tmp_0 where rownum <= " + end +
+                            " ) where rn > " + begin;
+                }
+            }
         };
     }
 

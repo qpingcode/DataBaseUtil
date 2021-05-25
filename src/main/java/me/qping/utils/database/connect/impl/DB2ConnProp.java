@@ -78,6 +78,30 @@ public class DB2ConnProp extends DataBaseConnAdapter {
                             " ) where rn > " + begin +" and rn <= " + end;
                 }
             }
+
+            @Override
+            public String getTablePageSql(String tableName, int pageSize, int pageNum) {
+                if(pageSize < 0){
+                    throw new RuntimeException("pageSize 不能小于 0 ");
+                }
+
+                int begin = pageSize * pageNum;
+                int end = pageSize * pageNum + pageSize;
+
+                if(pageNum <= 0 || pageSize == 0){
+
+                    //fix db2 pageSize不能为0
+                    if(pageSize == 0){
+                        pageSize = 1;
+                    }
+
+                    return String.format("select * from %s fetch first %s rows only", tableName, pageSize);
+                }else{
+                    return "select * from ( " +
+                            "   select *, ROW_NUMBER() OVER () AS rn from "+ tableName +
+                            " ) where rn > " + begin +" and rn <= " + end;
+                }
+            }
         };
     }
 
