@@ -3,12 +3,14 @@ package me.qping.utils.database.util;
 import com.alibaba.druid.pool.DruidDataSource;
 import lombok.Data;
 import me.qping.common.model.DataRecord;
+import me.qping.utils.database.bean.ArrayListWithMeta;
 import me.qping.utils.database.bean.BeanConversion;
 import me.qping.utils.database.bean.FieldDefines;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.connect.DataBaseDialect;
 import me.qping.utils.database.exception.OrmException;
+import me.qping.utils.database.metadata.bean.ColumnMeta;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -252,6 +254,41 @@ public class CrudUtil {
             result.add(record);
         }
         return result;
+    }
+
+    public ArrayListWithMeta queryListWithMeta(Connection connection, String sql, Object... parameters) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        prepareParameters(ps, parameters);
+
+
+        ArrayListWithMeta<DataRecord> arrayListWithMeta = new ArrayListWithMeta<>();
+
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
+        for(int i = 0; i < columnCount; i++){
+            ColumnMeta columnMeta = ColumnMeta.getFromResultSet(metaData, i +1, null);
+            arrayListWithMeta.addColumnMeta(columnMeta);
+        }
+
+
+        Map<String,Integer> nameMap = new HashMap<>();
+        for (int i = 0; i < columnCount; i++) {
+            String label = metaData.getColumnLabel(i + 1);
+            nameMap.put(label, i);
+        }
+
+        List<DataRecord> result = new ArrayList<>();
+        while (rs.next()) {
+            Object[] row = new Object[columnCount];
+            for(int i = 0; i < columnCount; i++) {
+                row[i] = rs.getObject(i + 1);
+            }
+            DataRecord record = new DataRecord(row, nameMap);
+            result.add(record);
+        }
+        return arrayListWithMeta;
     }
 
     public <T> T insertReturnPrimaryKey(String sql, Object...parameters) throws SQLException {
