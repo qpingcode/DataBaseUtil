@@ -256,6 +256,14 @@ public class CrudUtil {
         return result;
     }
 
+    public ArrayListWithMeta<DataRecord> queryListWithMeta(String sql, Object... parameters) throws SQLException {
+        try(Connection connection = getConnection()){
+            return queryListWithMeta(connection, sql, parameters);
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
     public ArrayListWithMeta<DataRecord> queryListWithMeta(Connection connection, String sql, Object... parameters) throws SQLException {
         PreparedStatement ps = connection.prepareStatement(sql);
         prepareParameters(ps, parameters);
