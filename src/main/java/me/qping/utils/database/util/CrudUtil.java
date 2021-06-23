@@ -275,26 +275,23 @@ public class CrudUtil {
         ResultSetMetaData metaData = rs.getMetaData();
         int columnCount = metaData.getColumnCount();
 
+
+        Map<String,Integer> nameMap = new HashMap<>();
         for(int i = 0; i < columnCount; i++){
+            String label = metaData.getColumnLabel(i + 1);
+            nameMap.put(label, i);
+
             ColumnMeta columnMeta = ColumnMeta.getFromResultSet(metaData, i +1, null);
             arrayListWithMeta.addColumnMeta(columnMeta);
         }
 
-
-        Map<String,Integer> nameMap = new HashMap<>();
-        for (int i = 0; i < columnCount; i++) {
-            String label = metaData.getColumnLabel(i + 1);
-            nameMap.put(label, i);
-        }
-
-        List<DataRecord> result = new ArrayList<>();
         while (rs.next()) {
             Object[] row = new Object[columnCount];
             for(int i = 0; i < columnCount; i++) {
                 row[i] = rs.getObject(i + 1);
             }
             DataRecord record = new DataRecord(row, nameMap);
-            result.add(record);
+            arrayListWithMeta.add(record);
         }
         return arrayListWithMeta;
     }
