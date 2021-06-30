@@ -82,8 +82,14 @@ public abstract class DataBaseConnAdapter implements DataBaseConnectPropertes {
 
     public Properties getConnectionProperties(){
         Properties props = new Properties();
-        props.setProperty("user", getUsername());
-        props.setProperty("password", getPassword());
+
+        if(getUsername() != null){
+            props.setProperty("user", getUsername());
+        }
+
+        if(getPassword() != null){
+            props.setProperty("password", getPassword());
+        }
         return props;
     }
 

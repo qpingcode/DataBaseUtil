@@ -65,6 +65,9 @@ public class CrudUtil {
             case ORACLE:
                 update(connection, "ALTER SESSION SET CURRENT_SCHEMA = '" + schemaName +"'");
                 break;
+            case HIVE:
+                update(connection, "USE " + catalogName);
+                break;
 //            case POSTGRESQL:
 //                update(connection, "\\c " + catalogName );
 //                update(connection, "set search_path to " + schemaName );

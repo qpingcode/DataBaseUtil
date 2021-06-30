@@ -103,6 +103,9 @@ public class DataBaseUtilBuilder {
             case DB2:
                 dataBaseProperties = new DB2ConnProp(host, port, database, username, password);
                 break;
+            case HIVE:
+                dataBaseProperties = new Hive(host, port, database, username, password, schema);
+                break;
             default:
                 throw new RuntimeException("不支持的数据库类型：" + dataBaseType.name());
         }
@@ -111,7 +114,9 @@ public class DataBaseUtilBuilder {
 
     public static DataBaseUtilBuilder init(String url, String username, String password) {
         DataBaseConnectPropertes dataBaseProperties;
-        if (url.indexOf("jdbc:sqlserver") > -1) {
+        if (url.indexOf("jdbc:hive") > -1) {
+            dataBaseProperties = new Hive(url, username, password);
+        } else if (url.indexOf("jdbc:sqlserver") > -1) {
             dataBaseProperties = new MSSQLDataBaseConnProp(url, username, password);
         } else if (url.indexOf("jdbc:microsoft:sqlserver") > -1) {
             dataBaseProperties = new SQLServer2000(url, username, password);
