@@ -23,15 +23,21 @@ public class H2Test {
     @Before
     public void conn() throws ClassNotFoundException, SQLException {
 
+//        DataBaseUtilBuilder builder = DataBaseUtilBuilder.init(
+//                DataBaseType.H2,
+//                null,
+//                null,
+//                "test",
+//                "sa",
+//                "",
+//                false,
+//                "~/.h2"
+//        );
+
         DataBaseUtilBuilder builder = DataBaseUtilBuilder.init(
-                DataBaseType.H2,
-                null,
-                null,
-                "test",
+                "jdbc:h2:file:/Users/qping/test/.h2/upgradedb;AUTO_SERVER=TRUE",
                 "sa",
-                "",
-                false,
-                "~/.h2"
+                ""
         );
 
         metaDataUtil = builder.build();
@@ -41,8 +47,8 @@ public class H2Test {
     @Test
     public void testCRUD() throws SQLException, ClassNotFoundException {
 
-//        metaDataUtil.update("create table test(name varchar(100))");
-//        metaDataUtil.update("insert into test values('小王'),('效力')");
+        metaDataUtil.update("create table test(name varchar(100))");
+        metaDataUtil.update("insert into test values('小王'),('效力')");
         List<DataRecord> dataRecords = metaDataUtil.queryList("select * from test limit 0,1");
         for (DataRecord dataRecord : dataRecords) {
             System.out.println(dataRecord);
