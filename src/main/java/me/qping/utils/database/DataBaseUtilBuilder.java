@@ -78,6 +78,18 @@ public class DataBaseUtilBuilder {
         return create().databaseType(dataBaseProperties);
     }
 
+    /**
+     *
+     * @param dataBaseType  数据库类型
+     * @param host          数据库地址
+     * @param port          数据库端口
+     * @param database      数据库名称
+     * @param username      用户名
+     * @param password      密码
+     * @param useServiceName       oracle：是否使用service name  H2(借用为 useMemoryMode) 是否使用内存模式
+     * @param schema        sqlserver、hive 可指定schema         H2(借用为 dbPath）指定数据库文件路径
+     * @return
+     */
     public static DataBaseUtilBuilder init(DataBaseType dataBaseType, String host, String port, String database, String username, String password, boolean useServiceName, String schema) {
 
         DataBaseConnectPropertes dataBaseProperties = null;
@@ -106,6 +118,12 @@ public class DataBaseUtilBuilder {
             case HIVE:
                 dataBaseProperties = new Hive(host, port, database, username, password, schema);
                 break;
+            case H2:
+                // 当host和port传null时，默认为嵌入式（本地）模式
+                // schema 此处借用为dbPath，指定数据库文件路径
+                // useServiceName 此处借用为 useMemoryMode，是否使用内存模式
+                dataBaseProperties = new H2Database(host, port, schema, database, username, password, useServiceName);
+                break;
             default:
                 throw new RuntimeException("不支持的数据库类型：" + dataBaseType.name());
         }
@@ -130,6 +148,8 @@ public class DataBaseUtilBuilder {
             dataBaseProperties = new InfosysCache(url, username, password);
         } else if (url.indexOf("jdbc:db2:") > -1) {
             dataBaseProperties = new DB2ConnProp(url, username, password);
+        } else if(url.indexOf("jdbc:h2:") > -1){
+            dataBaseProperties = new H2Database(url, username, password);
         } else {
             throw new RuntimeException("不支持的数据库类型，无法解析url：" + url);
         }
