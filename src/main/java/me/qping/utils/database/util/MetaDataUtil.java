@@ -136,6 +136,7 @@ public class MetaDataUtil extends CrudUtil {
             String[] types = {"TABLE", "VIEW"};
 
             ResultSet tableInfo = metadata.getTables(catalog, schema, tableName, types);
+            boolean exists = false;
             if(tableInfo.next()){
 
                 tableMeta = TableMeta.of(
@@ -146,6 +147,11 @@ public class MetaDataUtil extends CrudUtil {
                         tableInfo.getString("REMARKS"),     // 表注释
                         dataBaseConnectProperties.getDataBaseType()
                 );
+                exists = true;
+            }
+
+            if(!exists){
+                return null;
             }
 
             List<PrimaryKeyMeta> primaryKeyMetas = new ArrayList<>();
