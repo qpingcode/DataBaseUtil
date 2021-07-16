@@ -51,4 +51,8 @@ public class FieldDefines {
         this.caseSensitive = sensitive;
     }
 
+    public boolean isCaseSensitive(){
+        return this.caseSensitive;
+    }
+
 }

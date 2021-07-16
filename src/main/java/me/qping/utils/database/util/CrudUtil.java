@@ -342,7 +342,7 @@ public class CrudUtil {
         }
     }
 
-    public int insert(Object obj) throws SQLException {
+    public int insert(Object obj, String... ignoreColumns) throws SQLException {
 
         String tableName = BeanConversion.getTableAnnotation(obj.getClass());
         FieldDefines fieldDefines = BeanConversion.getColumnAnnotation(obj.getClass());
@@ -350,15 +350,21 @@ public class CrudUtil {
 
         int size = fieldDefines.size();
 
-        if(size == 0) return 0;
-
         Set<String> keyset = fieldDefines.keySet();
-        Object[] row = new Object[size];
+
         StringBuffer prefix = new StringBuffer();
         StringBuffer suffix = new StringBuffer();
 
+        Set<String> ignoreColumnSet = getIgnoreColumnSet(fieldDefines, ignoreColumns);
+        Object[] row = new Object[size - ignoreColumnSet.size()];
+
         int i = -1;
         for(String key : keyset){
+
+            if(ignoreColumnSet.contains(key)){
+                continue;
+            }
+
             i++;
             prefix.append(key).append(",");
             suffix.append("?").append(",");
@@ -376,6 +382,84 @@ public class CrudUtil {
 
         return insert(insertSQL, row);
     }
+
+    public <T> T insertReturnPrimaryKey(Object obj, String... ignoreColumns) throws SQLException {
+        try(Connection connection = getConnection()){
+            return insertReturnPrimaryKey(connection, obj, ignoreColumns);
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    private static Set<String> getIgnoreColumnSet(FieldDefines fieldDefines, String... ignoreColumns){
+        Set<String> ignoreColumnSet = new HashSet<>();
+        if(ignoreColumns != null){
+            for (String ignoreColumn : ignoreColumns) {
+
+                if(fieldDefines.get(ignoreColumn) == null){
+                    continue;
+                }
+
+                if(!fieldDefines.isCaseSensitive()){
+                    ignoreColumnSet.add(ignoreColumn.toUpperCase());
+                }else{
+                    ignoreColumnSet.add(ignoreColumn);
+                }
+            }
+        }
+        return ignoreColumnSet;
+
+    }
+
+    public static <T> T insertReturnPrimaryKey(Connection connection, Object obj, String... ignoreColumns) throws SQLException {
+
+        String tableName = BeanConversion.getTableAnnotation(obj.getClass());
+        FieldDefines fieldDefines = BeanConversion.getColumnAnnotation(obj.getClass());
+
+        int size = fieldDefines.size();
+
+        Set<String> keyset = fieldDefines.keySet();
+        StringBuffer prefix = new StringBuffer();
+        StringBuffer suffix = new StringBuffer();
+
+        Set<String> ignoreColumnSet = getIgnoreColumnSet(fieldDefines, ignoreColumns);
+        Object[] row = new Object[size - ignoreColumnSet.size()];
+
+        int i = -1;
+        for(String key : keyset){
+
+            if(ignoreColumnSet.contains(key)){
+                continue;
+            }
+
+            i++;
+            prefix.append(key).append(",");
+            suffix.append("?").append(",");
+
+            try {
+                row[i] = fieldDefines.getValue(obj, key);
+            } catch (IllegalAccessException e) {
+                throw new SQLException("object get " + key + " value error: " + e.getMessage());
+            }
+        }
+
+        String insertSQL = "insert into " + tableName + "(" + prefix.substring(0, prefix.length() - 1) + ") values (" + suffix.substring(0, suffix.length() - 1) + ")";
+
+        try(PreparedStatement ps = connection.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS)){
+            prepareParameters(ps, row);
+            ps.executeUpdate();
+
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            while (generatedKeys.next()) {
+                T generateKey = (T)generatedKeys.getObject(1);
+                return generateKey;
+            }
+            return null;
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
 
     public static int update(Connection connection, String sql, Object... parameters) throws SQLException {
 
