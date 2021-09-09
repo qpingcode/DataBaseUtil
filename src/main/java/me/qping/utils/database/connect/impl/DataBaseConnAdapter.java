@@ -32,6 +32,8 @@ public abstract class DataBaseConnAdapter implements DataBaseConnectPropertes {
     String timezone;
     int maxWait;
 
+    String serverEncoding = null;  // ISO8859-1
+    String clientEncoding = null;  // GBK
 
     public DataBaseConnAdapter(){}
 
@@ -117,4 +119,17 @@ public abstract class DataBaseConnAdapter implements DataBaseConnectPropertes {
             }
         };
     }
+
+    public void setEncoding(String serverEncoding, String clientEncoding){
+        this.clientEncoding = clientEncoding;
+        this.serverEncoding = serverEncoding;
+    }
+
+    public String getServerEncoding(){
+        return serverEncoding;
+    }
+    public String getClientEncoding(){
+        return clientEncoding;
+    }
+
 }

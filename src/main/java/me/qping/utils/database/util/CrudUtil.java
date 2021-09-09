@@ -8,11 +8,11 @@ import me.qping.utils.database.bean.BeanConversion;
 import me.qping.utils.database.bean.FieldDefines;
 import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
-import me.qping.utils.database.connect.DataBaseDialect;
 import me.qping.utils.database.exception.OrmException;
 import me.qping.utils.database.metadata.bean.ColumnMeta;
 
 import javax.sql.DataSource;
+import java.io.UnsupportedEncodingException;
 import java.sql.*;
 import java.util.*;
 
@@ -155,6 +155,7 @@ public class CrudUtil {
         queryBatch.setPs(ps);
         queryBatch.setRs(rs);
         queryBatch.setColumnCount(columnCount);
+        queryBatch.setEncoding(dataBaseConnectProperties.getServerEncoding(), dataBaseConnectProperties.getClientEncoding());
 
         return queryBatch;
     }
@@ -179,7 +180,7 @@ public class CrudUtil {
         ResultSetMetaData metaData = rs.getMetaData();
         T t = null;
         if (rs.next()) {
-            t = BeanConversion.convert(clazz, metaData, rs);
+            t = BeanConversion.convert(clazz, metaData, rs, dataBaseConnectProperties);
         }
         return t;
     }
@@ -217,7 +218,7 @@ public class CrudUtil {
         List<T> list = new ArrayList<>();
         while (rs.next()) {
             rows++;
-            T t = BeanConversion.convert(clazz, metaData, rs);
+            T t = BeanConversion.convert(clazz, metaData, rs, dataBaseConnectProperties);
             list.add(t);
         }
         return list;
@@ -249,12 +250,7 @@ public class CrudUtil {
 
         List<DataRecord> result = new ArrayList<>();
         while (rs.next()) {
-            Object[] row = new Object[columnCount];
-            for(int i = 0; i < columnCount; i++) {
-                row[i] = rs.getObject(i + 1);
-            }
-            DataRecord record = new DataRecord(row, nameMap);
-            result.add(record);
+            result.add(toRecord(rs, columnCount, nameMap));
         }
         return result;
     }
@@ -289,14 +285,29 @@ public class CrudUtil {
         }
 
         while (rs.next()) {
-            Object[] row = new Object[columnCount];
-            for(int i = 0; i < columnCount; i++) {
-                row[i] = rs.getObject(i + 1);
-            }
-            DataRecord record = new DataRecord(row, nameMap);
-            arrayListWithMeta.add(record);
+            arrayListWithMeta.add(toRecord(rs, columnCount, nameMap));
         }
         return arrayListWithMeta;
+    }
+
+    private DataRecord toRecord(ResultSet rs, int columnCount, Map<String,Integer> nameMap) throws SQLException {
+        Object[] row = new Object[columnCount];
+
+        String clientEncoding = dataBaseConnectProperties.getClientEncoding();
+        String serverEncoding = dataBaseConnectProperties.getServerEncoding();
+        for(int i = 0; i < columnCount; i++) {
+            Object o = rs.getObject(i + 1);
+            if(clientEncoding != null && serverEncoding != null && row[i] instanceof String){
+                try {
+                    o = new String(((String) o).getBytes(serverEncoding), clientEncoding);
+                } catch (UnsupportedEncodingException e) {
+                    throw new SQLException("unsupport encoding : " + e.getMessage());
+                }
+            }
+            row[i] = o;
+        }
+        DataRecord record = new DataRecord(row, nameMap);
+        return record;
     }
 
     public <T> T insertReturnPrimaryKey(String sql, Object...parameters) throws SQLException {
