@@ -10,7 +10,10 @@
 
     <name>DataBaseUtil</name>
     <url>https://github.com/qpingcode/DataBaseUtil</url>
-    <description>2.2版本增加了Hive的支持,hive依赖的包需要自行引入</description>
+    <description>
+        2.2 版本：增加了Hive的支持,hive依赖的包需要自行引入
+        2.2 版本：oracle的驱动可能造成中文乱码的问题，如果出现乱码，且 new String(str.getBytes(SERVER_CODING), CLIENT_CODING) 仍为乱码，则建议使用 11.2.0.2的驱动
+    </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
