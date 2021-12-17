@@ -6,11 +6,16 @@
 
     <groupId>me.qping.utils</groupId>
     <artifactId>DataBaseUtil</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>2.3-SNAPSHOT</version>
 
     <name>DataBaseUtil</name>
     <url>https://github.com/qpingcode/DataBaseUtil</url>
-    <description>2.2版本增加了Hive的支持,hive依赖的包需要自行引入</description>
+    <description>
+        2.2版本:
+            - 增加了Hive的支持,hive依赖的包需要自行引入
+        2.3版本:
+            - MYSQL 增加了可配置 useSSL
+    </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
