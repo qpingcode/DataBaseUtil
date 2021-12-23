@@ -207,7 +207,7 @@ public class CrudUtil {
         }
     }
 
-    public static <T> List<T> queryList(Class<T> clazz, Connection connection, String sql, Object... parameters) throws SQLException, IllegalAccessException, InstantiationException, OrmException {
+    public <T> List<T> queryList(Class<T> clazz, Connection connection, String sql, Object... parameters) throws SQLException, IllegalAccessException, InstantiationException, OrmException {
         PreparedStatement ps = connection.prepareStatement(sql);
         prepareParameters(ps, parameters);
 
@@ -226,7 +226,12 @@ public class CrudUtil {
 
     public List<DataRecord> queryList(String sql, Object... parameters) throws SQLException {
         try(Connection connection = getConnection()){
-            return queryList(connection, sql, parameters);
+            List<DataRecord> list = queryList(connection, sql, parameters);
+
+            // 字符串转码
+            serverEncoding(list, dataBaseConnectProperties);
+
+            return list;
         } catch (SQLException e) {
             throw e;
         }
@@ -284,26 +289,42 @@ public class CrudUtil {
             arrayListWithMeta.addColumnMeta(columnMeta);
         }
 
+
         while (rs.next()) {
             arrayListWithMeta.add(toRecord(rs, columnCount, nameMap));
         }
+
+        // 字符串转码
+        serverEncoding(arrayListWithMeta, dataBaseConnectProperties);
+
         return arrayListWithMeta;
     }
 
-    private DataRecord toRecord(ResultSet rs, int columnCount, Map<String,Integer> nameMap) throws SQLException {
-        Object[] row = new Object[columnCount];
-
+    private void serverEncoding(List<DataRecord> list, DataBaseConnectPropertes dataBaseConnectProperties) throws SQLException {
         String clientEncoding = dataBaseConnectProperties.getClientEncoding();
         String serverEncoding = dataBaseConnectProperties.getServerEncoding();
-        for(int i = 0; i < columnCount; i++) {
-            Object o = rs.getObject(i + 1);
-            if(clientEncoding != null && serverEncoding != null && row[i] instanceof String){
-                try {
-                    o = new String(((String) o).getBytes(serverEncoding), clientEncoding);
-                } catch (UnsupportedEncodingException e) {
-                    throw new SQLException("unsupport encoding : " + e.getMessage());
+        if(clientEncoding == null || serverEncoding == null || list == null){
+            return;
+        }
+        for (DataRecord dataRecord : list) {
+            for (int i = 0; i < dataRecord.size(); i++) {
+                Object o = dataRecord.get(i);
+                if(o instanceof String){
+                    try {
+                        o = new String(((String) o).getBytes(serverEncoding), clientEncoding);
+                        dataRecord.put(i, o);
+                    } catch (UnsupportedEncodingException e) {
+                        throw new SQLException("unsupport encoding : " + e.getMessage());
+                    }
                 }
             }
+        }
+    }
+
+    private static DataRecord toRecord(ResultSet rs, int columnCount, Map<String,Integer> nameMap) throws SQLException {
+        Object[] row = new Object[columnCount];
+        for(int i = 0; i < columnCount; i++) {
+            Object o = rs.getObject(i + 1);
             row[i] = o;
         }
         DataRecord record = new DataRecord(row, nameMap);
