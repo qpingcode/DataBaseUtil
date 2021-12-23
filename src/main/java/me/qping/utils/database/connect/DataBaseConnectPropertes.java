@@ -11,18 +11,23 @@ import java.util.Properties;
  **/
 public interface DataBaseConnectPropertes {
 
-    public static final String SERVER_TIME_ZONE_GMT8 = "GMT%2B8";              // 使用这个可以防止错误  HOUR_OF_DAY:0->1
-    public static final String SERVER_TIME_ZONE_SHANGHAI = "Asia/Shanghai";
+    static final String SERVER_TIME_ZONE_GMT8 = "GMT%2B8";              // 使用这个可以防止错误  HOUR_OF_DAY:0->1
+    static final String SERVER_TIME_ZONE_SHANGHAI = "Asia/Shanghai";
 
 
-    public Properties getConnectionProperties();
+    String getServerEncoding();
+    String getClientEncoding();
+    void setEncoding(String serverEncoding, String clientEncoding);
 
-    public DataBaseType getDataBaseType();
-    public String getDriver();
-    public String getUrl();
-    public String getUsername();
-    public String getPassword();
-    public String getValidQuery();
+
+    Properties getConnectionProperties();
+
+    DataBaseType getDataBaseType();
+    String getDriver();
+    String getUrl();
+    String getUsername();
+    String getPassword();
+    String getValidQuery();
 
     /**
      * Catalog和Schema都属于抽象概念，主要用来解决命名冲突问题
@@ -35,13 +40,13 @@ public interface DataBaseConnectPropertes {
      | DB2           | 指定数据库对象时，Catalog部分省略    | Catalog属主名              |
      * @return
      */
-    public String getCatalog();
-    public String getSchema();
+    String getCatalog();
+    String getSchema();
 
     //设置超时
-    public void setMaxWait(int maxWait);
+    void setMaxWait(int maxWait);
     //设置时区 mysql 专用
-    public void setTimezone(String timezone);
+    void setTimezone(String timezone);
 
-    public DataBaseDialect getDataBaseDialect();
+    DataBaseDialect getDataBaseDialect();
 }

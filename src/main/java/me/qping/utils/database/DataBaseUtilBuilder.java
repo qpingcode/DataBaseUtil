@@ -218,14 +218,22 @@ public class DataBaseUtilBuilder {
 
         Class.forName(dataBaseProperties.getDriver());
 
-
         MetaDataUtil metaDataUtil = new MetaDataUtil();
         metaDataUtil.setDataBaseConnectProperties(dataBaseProperties);
         dataBaseProperties.setMaxWait(maxWait);
         dataBaseProperties.setTimezone(timezone);
+
         if (usePool) {
             metaDataUtil.setDataSource(createDataSource());
         }
         return metaDataUtil;
+    }
+
+    public DataBaseUtilBuilder setEncoding(String serverEncoding, String clientEncoding) {
+        if(dataBaseProperties == null){
+            throw new RuntimeException("must init dataBaseProperties first");
+        }
+        dataBaseProperties.setEncoding(serverEncoding, clientEncoding);
+        return this;
     }
 }

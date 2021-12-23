@@ -1,14 +1,13 @@
 package me.qping.utils.database.bean;
 
+import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.exception.OrmException;
-import oracle.sql.CLOB;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @ClassName BeanConversion
@@ -19,7 +18,7 @@ import java.util.Map;
  **/
 public class BeanConversion {
 
-    public static <T> T convert(Class<T> clazz, ResultSetMetaData metaData, ResultSet rs) throws SQLException, OrmException, IllegalAccessException, InstantiationException {
+    public static <T> T convert(Class<T> clazz, ResultSetMetaData metaData, ResultSet rs, DataBaseConnectPropertes dataBaseConnectProperties) throws SQLException, OrmException, IllegalAccessException, InstantiationException {
         FieldDefines fieldDefines = getColumnAnnotation(clazz);
         int columnCount = metaData.getColumnCount();
         T t = clazz.newInstance();
@@ -37,7 +36,7 @@ public class BeanConversion {
 
             if(!field.getType().getName().equals(className)){
                 try{
-                    value = conversionType(value, field.getType());
+                    value = conversionType(value, field.getType(), dataBaseConnectProperties);
                 }catch (Exception ex){
                     ex.printStackTrace();
                     throw new OrmException(String.format("列 %s 转换错误,期望类型 %s ，实际类型 %s", field.getName(), field.getType().getName(), className));
@@ -49,23 +48,32 @@ public class BeanConversion {
         return t;
     }
 
-    private static <T> Object conversionType(Object value, Class<T> targetClass) throws ParseException, OrmException, SQLException {
+    private static <T> Object conversionType(Object value, Class<T> targetClass, DataBaseConnectPropertes dataBaseConnectProperties) throws ParseException, OrmException, SQLException {
         if(targetClass.equals(Integer.class) || targetClass.equals(int.class)){
             return Integer.parseInt(String.valueOf(value));
         }
         else if(targetClass.equals(String.class)){
 
+            String retVal = null;
+
             if(value instanceof Clob){
                 Clob clob = ((Clob) value);
-                return clob.getSubString((long) 1, (int) clob.length());
-            }
-
-            if(value instanceof Blob){
+                retVal = clob.getSubString((long) 1, (int) clob.length());
+            }else if(value instanceof Blob){
                 throw new OrmException("无法将BLOB转换为String");
+            }else{
+                retVal = String.valueOf(value);
             }
 
+            if(dataBaseConnectProperties.getClientEncoding() != null && dataBaseConnectProperties.getServerEncoding() != null && retVal instanceof String){
+                try {
+                    retVal = new String(retVal.getBytes(dataBaseConnectProperties.getServerEncoding()), dataBaseConnectProperties.getClientEncoding());
+                } catch (UnsupportedEncodingException e) {
+                    throw new SQLException("unsupport encoding : " + e.getMessage());
+                }
+            }
 
-            return String.valueOf(value);
+            return retVal;
         }
         else if(targetClass.equals(byte[].class)){
             if(value instanceof Blob){

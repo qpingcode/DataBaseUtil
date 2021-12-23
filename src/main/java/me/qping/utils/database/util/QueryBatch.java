@@ -3,6 +3,7 @@ package me.qping.utils.database.util;
 import lombok.Data;
 import me.qping.common.model.DataRecord;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,10 @@ public class QueryBatch {
 
     boolean clobToString = false;
     boolean blobToByteArray = false;
+
+    boolean encoding = false;
+    String serverEncoding = null;  // ISO8859-1
+    String clientEncoding = null;  // GBK
 
     int count;
 
@@ -58,6 +63,14 @@ public class QueryBatch {
                 blob.free();
             }
 
+            if(encoding && o instanceof String){
+                try {
+                    o = new String(((String) o).getBytes(serverEncoding), clientEncoding);
+                } catch (UnsupportedEncodingException e) {
+                    throw new SQLException("unsupport encoding : " + e.getMessage());
+                }
+            }
+
             row[i] = o;
         }
 
@@ -88,4 +101,13 @@ public class QueryBatch {
     }
 
 
+    public void setEncoding(String serverEncoding, String clientEncoding) {
+        this.clientEncoding = clientEncoding;
+        this.serverEncoding = serverEncoding;
+        if(clientEncoding == null || serverEncoding == null){
+            encoding = false;
+        }else{
+            encoding = true;
+        }
+    }
 }
