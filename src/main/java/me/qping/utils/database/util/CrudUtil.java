@@ -206,7 +206,7 @@ public class CrudUtil {
         }
     }
 
-    public <T> List<T> queryList(Class<T> clazz, Connection connection, String sql, Object... parameters) throws SQLException, IllegalAccessException, InstantiationException, OrmException {
+    public static <T> List<T> queryList(Class<T> clazz, Connection connection, String sql, Object... parameters) throws SQLException, IllegalAccessException, InstantiationException, OrmException {
         PreparedStatement ps = connection.prepareStatement(sql);
         prepareParameters(ps, parameters);
 
@@ -231,7 +231,7 @@ public class CrudUtil {
         }
     }
 
-    public List<DataRecord> queryList(Connection connection, String sql, Object... parameters) throws SQLException {
+    public static List<DataRecord> queryList(Connection connection, String sql, Object... parameters) throws SQLException {
         PreparedStatement ps = connection.prepareStatement(sql);
         prepareParameters(ps, parameters);
 
