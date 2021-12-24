@@ -17,6 +17,7 @@
             - MYSQL 增加了可配置 useSSL
         2.4版本：
             - 增加 queryList 的static方法
+            - 增加 queryArray 方法
     </description>
 
     <properties>
