@@ -224,6 +224,34 @@ public class CrudUtil {
         return list;
     }
 
+    public List<Object[]> queryArray(String sql, Object... parameters) throws SQLException {
+        try(Connection connection = getConnection()){
+            List<Object[]> list = queryArray(connection, sql, parameters);
+            return list;
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public static List<Object[]> queryArray(Connection connection, String sql, Object... parameters) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        prepareParameters(ps, parameters);
+
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
+        List<Object[]> result = new ArrayList<>();
+        while (rs.next()) {
+            Object[] row = new Object[columnCount];
+            for(int i = 0; i < columnCount; i++) {
+                Object o = rs.getObject(i + 1);
+                row[i] = o;
+            }
+        }
+        return result;
+    }
+
     public List<DataRecord> queryList(String sql, Object... parameters) throws SQLException {
         try(Connection connection = getConnection()){
             List<DataRecord> list = queryList(connection, sql, parameters);
