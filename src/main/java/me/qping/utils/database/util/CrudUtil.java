@@ -248,6 +248,7 @@ public class CrudUtil {
                 Object o = rs.getObject(i + 1);
                 row[i] = o;
             }
+            result.add(row);
         }
         return result;
     }

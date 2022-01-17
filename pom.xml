@@ -18,6 +18,8 @@
         2.4版本：
             - 增加 queryList 的static方法
             - 增加 queryArray 方法
+        2.5版本:
+            - DataRecord 增加了 Object[] toArray(Object... befores)
     </description>
 
     <properties>
