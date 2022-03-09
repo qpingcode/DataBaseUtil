@@ -60,6 +60,7 @@ public class CrudUtil {
                 update(connection, "EXECUTE as USER ='" + schemaName + "'");
                 break;
             case MYSQL:
+            case MYSQL5:
                 update(connection, "USE " + catalogName);
                 break;
             case ORACLE:
@@ -139,7 +140,7 @@ public class CrudUtil {
         PreparedStatement ps = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         prepareParameters(ps, parameters);
 
-        if(DataBaseType.MYSQL.equals(getDataBaseConnectType())){
+        if(DataBaseType.MYSQL.equals(getDataBaseConnectType()) || DataBaseType.MYSQL5.equals(getDataBaseConnectType())){
             ps.setFetchSize(Integer.MIN_VALUE);
         }else{
             ps.setFetchSize(0);

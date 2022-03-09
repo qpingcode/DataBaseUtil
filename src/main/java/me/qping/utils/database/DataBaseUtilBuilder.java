@@ -124,6 +124,9 @@ public class DataBaseUtilBuilder {
                 // useServiceName 此处借用为 useMemoryMode，是否使用内存模式
                 dataBaseProperties = new H2Database(host, port, schema, database, username, password, useServiceName);
                 break;
+            case MYSQL5:
+                dataBaseProperties = new MySQL5DataBaseConnProp(host, port, database, username, password);
+                break;
             default:
                 throw new RuntimeException("不支持的数据库类型：" + dataBaseType.name());
         }
