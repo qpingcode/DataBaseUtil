@@ -1,5 +1,7 @@
 package me.qping.utils.database.connect;
 
+import me.qping.utils.dynamicloader.DynamicClassLoader;
+
 import java.util.Properties;
 
 /**
@@ -28,6 +30,7 @@ public interface DataBaseConnectPropertes {
     String getUsername();
     String getPassword();
     String getValidQuery();
+    DynamicClassLoader getClassLoader();
 
     /**
      * Catalog和Schema都属于抽象概念，主要用来解决命名冲突问题
@@ -47,6 +50,8 @@ public interface DataBaseConnectPropertes {
     void setMaxWait(int maxWait);
     //设置时区 mysql 专用
     void setTimezone(String timezone);
+
+    void setClassLoader(DynamicClassLoader classLoader);
 
     DataBaseDialect getDataBaseDialect();
 }

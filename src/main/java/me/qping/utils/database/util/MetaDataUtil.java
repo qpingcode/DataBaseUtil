@@ -60,7 +60,7 @@ public class MetaDataUtil extends CrudUtil {
             schema = dataBaseConnectProperties.getSchema();
         }
 
-        try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), dataBaseConnectProperties.getConnectionProperties())) {
+        try (Connection connection = getMetaConnection()) {
             DatabaseMetaData metadata = connection.getMetaData();
             ResultSet tableInfo = metadata.getTables(catalog, schema, "%", types);
             List<TableMeta> list = new ArrayList<>();
@@ -122,7 +122,7 @@ public class MetaDataUtil extends CrudUtil {
             tableName = tableName.toUpperCase();
         }
 
-        try (Connection connection = DriverManager.getConnection(dataBaseConnectProperties.getUrl(), dataBaseConnectProperties.getConnectionProperties())){
+        try (Connection connection = getMetaConnection()){
             TableMeta tableMeta = new TableMeta();
 
             DatabaseMetaData metadata = connection.getMetaData();

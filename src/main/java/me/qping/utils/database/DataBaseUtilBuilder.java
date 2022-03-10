@@ -7,6 +7,7 @@ import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.connect.impl.*;
 import me.qping.utils.database.util.CrudUtil;
 import me.qping.utils.database.util.MetaDataUtil;
+import me.qping.utils.dynamicloader.DynamicClassLoader;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -31,6 +32,9 @@ public class DataBaseUtilBuilder {
     int maxWait = 60000;
     boolean usePool = false;
     String timezone;
+    DynamicClassLoader classLoader;
+    String serverEncoding;
+    String clientEncoding;
 
     public DataBaseUtilBuilder setMaxWait(int maxWait) {
         this.maxWait = maxWait;
@@ -202,13 +206,15 @@ public class DataBaseUtilBuilder {
         return connection;
     }
 
-    public CrudUtil buildCrudUtil() throws ClassNotFoundException {
-        Class.forName(dataBaseProperties.getDriver());
+    public CrudUtil buildCrudUtil() {
 
         CrudUtil crud = new CrudUtil();
         crud.setDataBaseConnectProperties(dataBaseProperties);
-
         dataBaseProperties.setMaxWait(maxWait);
+        dataBaseProperties.setTimezone(timezone);
+
+        dataBaseProperties.setClassLoader(this.classLoader);
+        dataBaseProperties.setEncoding(serverEncoding, clientEncoding);
 
         if (usePool) {
             crud.setDataSource(createDataSource());
@@ -217,14 +223,15 @@ public class DataBaseUtilBuilder {
         return crud;
     }
 
-    public MetaDataUtil build() throws ClassNotFoundException {
-
-        Class.forName(dataBaseProperties.getDriver());
+    public MetaDataUtil build() {
 
         MetaDataUtil metaDataUtil = new MetaDataUtil();
         metaDataUtil.setDataBaseConnectProperties(dataBaseProperties);
         dataBaseProperties.setMaxWait(maxWait);
         dataBaseProperties.setTimezone(timezone);
+
+        dataBaseProperties.setClassLoader(this.classLoader);
+        dataBaseProperties.setEncoding(serverEncoding, clientEncoding);
 
         if (usePool) {
             metaDataUtil.setDataSource(createDataSource());
@@ -233,10 +240,13 @@ public class DataBaseUtilBuilder {
     }
 
     public DataBaseUtilBuilder setEncoding(String serverEncoding, String clientEncoding) {
-        if(dataBaseProperties == null){
-            throw new RuntimeException("must init dataBaseProperties first");
-        }
-        dataBaseProperties.setEncoding(serverEncoding, clientEncoding);
+        this.serverEncoding = serverEncoding;
+        this.clientEncoding = clientEncoding;
+        return this;
+    }
+
+    public DataBaseUtilBuilder setClassLoader(DynamicClassLoader loader) {
+        this.classLoader = loader;
         return this;
     }
 }

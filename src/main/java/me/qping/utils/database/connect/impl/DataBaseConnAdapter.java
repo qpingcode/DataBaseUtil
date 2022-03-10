@@ -5,6 +5,7 @@ import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseDialect;
 import me.qping.utils.database.util.ParamsUtil;
 import me.qping.utils.database.util.StringUtils;
+import me.qping.utils.dynamicloader.DynamicClassLoader;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,8 @@ public abstract class DataBaseConnAdapter implements DataBaseConnectPropertes {
 
     String serverEncoding = null;  // ISO8859-1
     String clientEncoding = null;  // GBK
+
+    DynamicClassLoader classLoader;
 
     public DataBaseConnAdapter(){}
 
@@ -131,5 +134,6 @@ public abstract class DataBaseConnAdapter implements DataBaseConnectPropertes {
     public String getClientEncoding(){
         return clientEncoding;
     }
+
 
 }

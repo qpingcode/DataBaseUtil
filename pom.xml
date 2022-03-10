@@ -23,6 +23,7 @@
 
         2.6版本：
             - 增加支持mysql5.0
+            - 增加动态加载所需要的驱动类
     </description>
 
     <properties>
@@ -79,11 +80,11 @@
             <version>42.2.14</version>
         </dependency>
 
-        <dependency>
-            <groupId>mysql5</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.49</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>mysql5</groupId>-->
+            <!--<artifactId>mysql-connector-java</artifactId>-->
+            <!--<version>5.1.49</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>mysql</groupId>

@@ -10,6 +10,7 @@ import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.exception.OrmException;
 import me.qping.utils.database.metadata.bean.ColumnMeta;
+import me.qping.utils.dynamicloader.DynamicClassLoader;
 
 import javax.sql.DataSource;
 import java.io.UnsupportedEncodingException;
@@ -36,17 +37,41 @@ public class CrudUtil {
             druidDataSource.close();
         }
     }
-
     public Connection getConnection() throws SQLException {
+        Properties props = new Properties();
+        if(dataBaseConnectProperties.getUsername() != null){
+            props.setProperty("user", dataBaseConnectProperties.getUsername());
+        }
+        if(dataBaseConnectProperties.getPassword() != null){
+            props.setProperty("password", dataBaseConnectProperties.getPassword());
+        }
+        return getConnection(props);
+    }
+
+    public Connection getMetaConnection() throws SQLException {
+        return getConnection(dataBaseConnectProperties.getConnectionProperties());
+    }
+
+    public Connection getConnection(Properties properties) throws SQLException {
         Connection connection = null;
         if(dataSource != null){
             connection = dataSource.getConnection();
         }else{
-            connection = DriverManager.getConnection(
-                    dataBaseConnectProperties.getUrl(),
-                    dataBaseConnectProperties.getUsername(),
-                    dataBaseConnectProperties.getPassword()
-            );
+            DynamicClassLoader classLoader = dataBaseConnectProperties.getClassLoader();
+            String driverClass = dataBaseConnectProperties.getDriver();
+            String url = dataBaseConnectProperties.getUrl();
+            if(classLoader != null){
+                try {
+
+                    Driver driver = (Driver) classLoader.findClass(driverClass).newInstance();
+                    connection = driver.connect(url, properties);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new SQLException("无法获取连接，错误：" + e.getMessage());
+                }
+            }else{
+                connection = DriverManager.getConnection(url, properties);
+            }
         }
         return connection;
     }
@@ -128,6 +153,7 @@ public class CrudUtil {
             return false;
         }
     }
+
 
 
     public QueryBatch openQuery(String sql, Object... parameters) throws SQLException {
