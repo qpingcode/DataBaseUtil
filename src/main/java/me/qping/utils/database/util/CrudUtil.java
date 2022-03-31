@@ -10,6 +10,7 @@ import me.qping.utils.database.connect.DataBaseConnectPropertes;
 import me.qping.utils.database.connect.DataBaseType;
 import me.qping.utils.database.exception.OrmException;
 import me.qping.utils.database.metadata.bean.ColumnMeta;
+import me.qping.utils.dynamicloader.DynamicClassLoader;
 
 import javax.sql.DataSource;
 import java.io.UnsupportedEncodingException;
@@ -36,17 +37,41 @@ public class CrudUtil {
             druidDataSource.close();
         }
     }
-
     public Connection getConnection() throws SQLException {
+        Properties props = new Properties();
+        if(dataBaseConnectProperties.getUsername() != null){
+            props.setProperty("user", dataBaseConnectProperties.getUsername());
+        }
+        if(dataBaseConnectProperties.getPassword() != null){
+            props.setProperty("password", dataBaseConnectProperties.getPassword());
+        }
+        return getConnection(props);
+    }
+
+    public Connection getMetaConnection() throws SQLException {
+        return getConnection(dataBaseConnectProperties.getConnectionProperties());
+    }
+
+    public Connection getConnection(Properties properties) throws SQLException {
         Connection connection = null;
         if(dataSource != null){
             connection = dataSource.getConnection();
         }else{
-            connection = DriverManager.getConnection(
-                    dataBaseConnectProperties.getUrl(),
-                    dataBaseConnectProperties.getUsername(),
-                    dataBaseConnectProperties.getPassword()
-            );
+            DynamicClassLoader classLoader = dataBaseConnectProperties.getClassLoader();
+            String driverClass = dataBaseConnectProperties.getDriver();
+            String url = dataBaseConnectProperties.getUrl();
+            if(classLoader != null){
+                try {
+
+                    Driver driver = (Driver) classLoader.findClass(driverClass).newInstance();
+                    connection = driver.connect(url, properties);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new SQLException("无法获取连接，错误：" + e.getMessage());
+                }
+            }else{
+                connection = DriverManager.getConnection(url, properties);
+            }
         }
         return connection;
     }
@@ -60,6 +85,7 @@ public class CrudUtil {
                 update(connection, "EXECUTE as USER ='" + schemaName + "'");
                 break;
             case MYSQL:
+            case MYSQL5:
                 update(connection, "USE " + catalogName);
                 break;
             case ORACLE:
@@ -129,6 +155,7 @@ public class CrudUtil {
     }
 
 
+
     public QueryBatch openQuery(String sql, Object... parameters) throws SQLException {
         Connection connection = getConnection();
         return openQuery(connection, sql, parameters);
@@ -139,7 +166,7 @@ public class CrudUtil {
         PreparedStatement ps = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         prepareParameters(ps, parameters);
 
-        if(DataBaseType.MYSQL.equals(getDataBaseConnectType())){
+        if(DataBaseType.MYSQL.equals(getDataBaseConnectType()) || DataBaseType.MYSQL5.equals(getDataBaseConnectType())){
             ps.setFetchSize(Integer.MIN_VALUE);
         }else{
             ps.setFetchSize(0);
@@ -224,15 +251,49 @@ public class CrudUtil {
         return list;
     }
 
-    public List<DataRecord> queryList(String sql, Object... parameters) throws SQLException {
+    public List<Object[]> queryArray(String sql, Object... parameters) throws SQLException {
         try(Connection connection = getConnection()){
-            return queryList(connection, sql, parameters);
+            List<Object[]> list = queryArray(connection, sql, parameters);
+            return list;
         } catch (SQLException e) {
             throw e;
         }
     }
 
-    public List<DataRecord> queryList(Connection connection, String sql, Object... parameters) throws SQLException {
+    public static List<Object[]> queryArray(Connection connection, String sql, Object... parameters) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        prepareParameters(ps, parameters);
+
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
+        List<Object[]> result = new ArrayList<>();
+        while (rs.next()) {
+            Object[] row = new Object[columnCount];
+            for(int i = 0; i < columnCount; i++) {
+                Object o = rs.getObject(i + 1);
+                row[i] = o;
+            }
+            result.add(row);
+        }
+        return result;
+    }
+
+    public List<DataRecord> queryList(String sql, Object... parameters) throws SQLException {
+        try(Connection connection = getConnection()){
+            List<DataRecord> list = queryList(connection, sql, parameters);
+
+            // 字符串转码
+            serverEncoding(list, dataBaseConnectProperties);
+
+            return list;
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public static List<DataRecord> queryList(Connection connection, String sql, Object... parameters) throws SQLException {
         PreparedStatement ps = connection.prepareStatement(sql);
         prepareParameters(ps, parameters);
 
@@ -284,26 +345,42 @@ public class CrudUtil {
             arrayListWithMeta.addColumnMeta(columnMeta);
         }
 
+
         while (rs.next()) {
             arrayListWithMeta.add(toRecord(rs, columnCount, nameMap));
         }
+
+        // 字符串转码
+        serverEncoding(arrayListWithMeta, dataBaseConnectProperties);
+
         return arrayListWithMeta;
     }
 
-    private DataRecord toRecord(ResultSet rs, int columnCount, Map<String,Integer> nameMap) throws SQLException {
-        Object[] row = new Object[columnCount];
-
+    private void serverEncoding(List<DataRecord> list, DataBaseConnectPropertes dataBaseConnectProperties) throws SQLException {
         String clientEncoding = dataBaseConnectProperties.getClientEncoding();
         String serverEncoding = dataBaseConnectProperties.getServerEncoding();
-        for(int i = 0; i < columnCount; i++) {
-            Object o = rs.getObject(i + 1);
-            if(clientEncoding != null && serverEncoding != null && row[i] instanceof String){
-                try {
-                    o = new String(((String) o).getBytes(serverEncoding), clientEncoding);
-                } catch (UnsupportedEncodingException e) {
-                    throw new SQLException("unsupport encoding : " + e.getMessage());
+        if(clientEncoding == null || serverEncoding == null || list == null){
+            return;
+        }
+        for (DataRecord dataRecord : list) {
+            for (int i = 0; i < dataRecord.size(); i++) {
+                Object o = dataRecord.get(i);
+                if(o instanceof String){
+                    try {
+                        o = new String(((String) o).getBytes(serverEncoding), clientEncoding);
+                        dataRecord.put(i, o);
+                    } catch (UnsupportedEncodingException e) {
+                        throw new SQLException("unsupport encoding : " + e.getMessage());
+                    }
                 }
             }
+        }
+    }
+
+    private static DataRecord toRecord(ResultSet rs, int columnCount, Map<String,Integer> nameMap) throws SQLException {
+        Object[] row = new Object[columnCount];
+        for(int i = 0; i < columnCount; i++) {
+            Object o = rs.getObject(i + 1);
             row[i] = o;
         }
         DataRecord record = new DataRecord(row, nameMap);

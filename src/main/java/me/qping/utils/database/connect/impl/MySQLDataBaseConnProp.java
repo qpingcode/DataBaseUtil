@@ -44,6 +44,7 @@ public class MySQLDataBaseConnProp extends DataBaseConnAdapter {
     int socketTimeout = 30000;
     int connectTimeout = 30000;
     int maxReconnects = 2;
+    Boolean useSSL = null;
 
     /**
      * Catalog和Schema都属于抽象概念，主要用来解决命名冲突问题
@@ -99,7 +100,16 @@ public class MySQLDataBaseConnProp extends DataBaseConnAdapter {
         paramsMap.put("timezone", timezone);
         paramsMap.put("maxReconnects", maxReconnects);
 
-        return getURL(URL, paramsMap);
+        String url = URL;
+        if(useSSL != null){
+            if(useSSL){
+                url += "&useSSL=true";
+            }else{
+                url += "&useSSL=false";
+            }
+        }
+
+        return getURL(url, paramsMap);
     }
 
     @Override
