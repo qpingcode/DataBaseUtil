@@ -25,6 +25,9 @@
         2.6版本：
             - 增加支持mysql5.0
             - 增加动态加载所需要的驱动类
+
+        2.7版本：
+            - 增加count方法
     </description>
 
     <properties>
@@ -287,11 +290,11 @@
     <distributionManagement>
         <repository>
             <id>releases</id>
-            <url>http://njoffice.dashudaren.com:30081/repository/maven-releases</url>
+            <url>http://192.168.3.242:50081/repository/maven-releases</url>
         </repository>
         <snapshotRepository>
             <id>snapshots</id>
-            <url>http://njoffice.dashudaren.com:30081/repository/maven-snapshots</url>
+            <url>http://192.168.3.242:50081/repository/maven-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 

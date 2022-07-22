@@ -624,5 +624,20 @@ public class CrudUtil {
         return updateBatch;
     }
 
+    public long count(String sql, Object... parameters) throws SQLException {
+        try(Connection connection = getConnection()){
+            return count(connection, sql, parameters);
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
 
+    public long count(Connection connection, String sql, Object... parameters) throws SQLException {
+        DataRecord dataRecord = queryOne("select count(1) TEMP_CNT from ( \n" + sql + "\n ) TEMP_TB1", parameters);
+        Object cnt = dataRecord.get("CNT") == null ? dataRecord.get("cnt") : dataRecord.get("CNT");
+        if(cnt == null){
+            return 0;
+        }
+        return Long.parseLong(cnt.toString());
+    }
 }
