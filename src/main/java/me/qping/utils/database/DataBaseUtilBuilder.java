@@ -82,6 +82,11 @@ public class DataBaseUtilBuilder {
         return create().databaseType(dataBaseProperties);
     }
 
+    public static DataBaseUtilBuilder dameng(String host, String port, String username, String password){
+        Dameng dameng = new Dameng(host, port, username, password);
+        return create().databaseType(dameng);
+    }
+
     /**
      *
      * @param dataBaseType  数据库类型

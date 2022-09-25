@@ -634,9 +634,9 @@ public class CrudUtil {
 
     public long count(Connection connection, String sql, Object... parameters) throws SQLException {
         DataRecord dataRecord = queryOne("select count(1) TEMP_CNT from ( \n" + sql + "\n ) TEMP_TB1", parameters);
-        Object cnt = dataRecord.get("CNT") == null ? dataRecord.get("cnt") : dataRecord.get("CNT");
+        Object cnt =  dataRecord.get(0);
         if(cnt == null){
-            return 0;
+            throw new SQLException("无法构建count语句查询数量");
         }
         return Long.parseLong(cnt.toString());
     }
