@@ -172,6 +172,11 @@ public class CrudUtil {
             ps.setFetchSize(0);
         }
 
+        if(DataBaseType.POSTGRESQL.equals(getDataBaseConnectType())){
+            connection.setAutoCommit(false);
+            ps.setFetchSize(50);
+        }
+
         ResultSet rs = ps.executeQuery();
 
         ResultSetMetaData metaData = rs.getMetaData();

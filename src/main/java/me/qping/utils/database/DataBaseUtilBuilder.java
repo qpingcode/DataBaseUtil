@@ -136,6 +136,9 @@ public class DataBaseUtilBuilder {
             case MYSQL5:
                 dataBaseProperties = new MySQL5DataBaseConnProp(host, port, database, username, password);
                 break;
+            case DAMENG:
+                dataBaseProperties = new Dameng(host, port, username, password);
+                break;
             default:
                 throw new RuntimeException("不支持的数据库类型：" + dataBaseType.name());
         }
