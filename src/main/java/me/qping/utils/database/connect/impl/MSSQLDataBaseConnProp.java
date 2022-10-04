@@ -20,12 +20,11 @@ import static me.qping.utils.database.connect.DataBaseType.MSSQL;
 public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
 
     public static final String URL = "jdbc:sqlserver://#{host}:#{port};DatabaseName=#{database}";
-
-
+    public static final String URL_WITHOUT_PORT = "jdbc:sqlserver://#{host};DatabaseName=#{database}";
     public static final String URL_WITH_INSTANCE = "jdbc:sqlserver://#{host}:#{port};DatabaseName=#{database};instanceName=#{instanceName}";
+    public static final String URL_WITH_INSTANCE_WITHOUT_PORT = "jdbc:sqlserver://#{host};DatabaseName=#{database};instanceName=#{instanceName}";
 
     String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-
     String instanceName = null;
 
     public MSSQLDataBaseConnProp(){
@@ -41,22 +40,26 @@ public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
      * @return
      */
     public MSSQLDataBaseConnProp(String host, String port, String database, String username, String password) {
+        this.setHost(host);
+//        this.port = port == null ? "1433" : port;
+        this.port = port;
+        this.database = database;
+        this.username = username;
+        this.password = password;
+        this.catalog = database;
+    }
 
+    public void setHost(String host){
         if(host.indexOf("\\") > -1 ){
             String[] hostArr = host.split("\\\\");
             if(hostArr.length > 2){
                 throw new RuntimeException("host不合法：" + host);
             }
-            host = hostArr[0];
+            this.host = hostArr[0];
             this.instanceName = hostArr[1];
+        }else{
+            this.host = host;
         }
-
-        this.host = host;
-        this.port = port == null ? "1433" : port;
-        this.database = database;
-        this.username = username;
-        this.password = password;
-        this.catalog = database;
     }
 
     public MSSQLDataBaseConnProp(String host, String port, String database, String username, String password, String schema) {
@@ -88,15 +91,22 @@ public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
     }
 
     public String getUrl(){
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("instanceName", instanceName);
         if(instanceName != null){
-            Map<String, Object> paramsMap = new HashMap<>();
-            paramsMap.put("instanceName", instanceName);
-            return getURL(URL_WITH_INSTANCE, paramsMap);
+            if(port != null){
+                return getURL(URL_WITH_INSTANCE, paramsMap);
+            }else{
+                return getURL(URL_WITH_INSTANCE_WITHOUT_PORT, paramsMap);
+            }
         }else{
-            return getURL(URL, null);
+            if(port != null){
+                return getURL(URL, null);
+            }else{
+                return getURL(URL_WITHOUT_PORT, null);
+            }
         }
     }
-
 
     /**
      * sqlserver 如果当前登录用户为Sue，且不指定scheme，执行 "select * from table_test"
