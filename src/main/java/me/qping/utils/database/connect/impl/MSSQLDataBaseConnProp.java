@@ -42,7 +42,7 @@ public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
     public MSSQLDataBaseConnProp(String host, String port, String database, String username, String password) {
         this.setHost(host);
 //        this.port = port == null ? "1433" : port;
-        this.port = port;
+        this.setPort(port);
         this.database = database;
         this.username = username;
         this.password = password;
@@ -62,6 +62,14 @@ public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
         }
     }
 
+    public void setPort(String port){
+        if("null".equals(port)){
+            this.port = null;
+        }else{
+            this.port = port;
+        }
+    }
+
     public MSSQLDataBaseConnProp(String host, String port, String database, String username, String password, String schema) {
         this(host, port, database, username, password);
         this.schema = schema;
@@ -71,7 +79,6 @@ public class MSSQLDataBaseConnProp extends DataBaseConnAdapter {
         this.url = url;
         this.username = username;
         this.password = password;
-
         this.catalog = this.database = getCatalogByUrl(url);
     }
 

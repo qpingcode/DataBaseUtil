@@ -21,6 +21,9 @@ public class TestMSSQLDatabaseConnProp {
 
         sqlserver.setPort(null);
         Assert.assertEquals("jdbc:sqlserver://localhost;DatabaseName=test;instanceName=ris", sqlserver.getUrl());
+
+        sqlserver.setPort("null");
+        Assert.assertEquals("jdbc:sqlserver://localhost;DatabaseName=test;instanceName=ris", sqlserver.getUrl());
     }
 
     public void TestGetDataBaseType(){
