@@ -54,6 +54,15 @@ public class CrudUtil {
 
     public Connection getConnection(Properties properties) throws SQLException {
         Connection connection = null;
+
+        if(dataBaseConnectProperties.getDataBaseType() == DataBaseType.SQLSERVER2000){
+            try {
+                Class.forName(dataBaseConnectProperties.getDriver());
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         if(dataSource != null){
             connection = dataSource.getConnection();
         }else{
